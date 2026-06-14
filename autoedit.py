@@ -702,8 +702,12 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
         "Effect, Text\n"
     )
 
-    # bounce-in: start 125% and ease to 100% over 150ms (no reflow at rest)
-    POP = "\\fscx125\\fscy125\\t(0,150,\\fscx100\\fscy100)"
+    # oneword: quick pop-in that settles to base size (single word, no neighbors
+    # to push around, so settling looks like a clean "appear")
+    POP_IN = "\\fscx120\\fscy120\\t(0,150,\\fscx100\\fscy100)"
+    # pop style: grow over 120ms and HOLD enlarged for the word's whole active
+    # span — it only returns to normal once the NEXT word takes over.
+    POP_HOLD = "\\fscx100\\fscy100\\t(0,120,\\fscx122\\fscy122)"
 
     dialogues = []
     if style == "oneword":
@@ -715,7 +719,7 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
             tok = _ass_escape(w["word"])
             if not tok:
                 continue
-            text = f"{{\\c{highlight}{POP}}}{tok}"
+            text = f"{{\\c{highlight}{POP_IN}}}{tok}"
             dialogues.append(
                 f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{text}")
     else:
@@ -732,7 +736,7 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
                     if not tok:
                         continue
                     if j == i and style == "pop":
-                        parts.append(f"{{\\c{highlight}{POP}}}{tok}{{\\r}}")
+                        parts.append(f"{{\\c{highlight}{POP_HOLD}}}{tok}{{\\r}}")
                     elif j == i:  # highlight
                         parts.append(f"{{\\c{highlight}}}{tok}{{\\c{BASE_COLOR}}}")
                     else:
