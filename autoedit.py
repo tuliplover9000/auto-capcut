@@ -333,21 +333,19 @@ def decide_zooms_with_claude(cutlist, all_words, model="sonnet", extra=""):
     extra_block = f"\nCreator's guidance (PRIORITY): {extra}\n" if extra else ""
     prompt = f'''You are a video editor choosing CAMERA ZOOMS for a vertical talking-head edit. Below (on stdin) are the kept segments in order, one per line: [index] duration: text. Choose a zoom PER segment.
 
-Zoom types:
-- "none": medium/wide 1.0x (the resting frame)
-- "in": static close punch-in held for the segment (level ~1.12-1.18)
-- "push": slow continuous zoom IN across the segment, intensify (level ~1.08-1.12; needs >=1.2s)
-- "pullout": slow zoom OUT, reveal/release (level ~1.10-1.14; needs >=1.2s)
-- "snap": fast punchy zoom, JOKES/BEATS/PUNCHLINES ONLY (level ~1.18-1.25; needs >=0.4s)
+Zoom types (PREFER the ANIMATED ones — the camera should MOVE during a clip, not just sit at a bigger/smaller static size):
+- "push": continuous zoom IN across the whole segment (the main tool — animated, intensifies). level ~1.10-1.18
+- "pullout": continuous zoom OUT across the segment (animated, reveal/release). level ~1.10-1.18
+- "snap": fast punchy zoom, JOKES/BEATS/PUNCHLINES ONLY. level ~1.18-1.25
+- "none": no movement, resting frame (use for ~1 in 3 segments so the motion has contrast)
+- "in": static close framing held, NO movement — use rarely (only when a steady tight shot is wanted)
 
 RULES (follow strictly):
-- BACKBONE = two-framing: alternate "none" (~1.0x) and "in" (~1.15x) so the frame keeps changing. Most segments are none or in.
-- Zoom IN on: the hook/first segment, emphasis lines, new points, stakes-raising beats.
-- "push" for emotional/building beats; "pullout" for reveals ("let me show you"). Sparingly.
+- DEFAULT to ANIMATED motion: most zoomed segments should be "push" or "pullout" so the frame is actively moving during the clip. ALTERNATE push and pullout segment-to-segment so it breathes in and out (don't push every single one).
+- Leave roughly 1 in 3 segments as "none" (no motion) so the pushes have contrast — constant motion on every clip is nauseating.
+- Bigger/longer moves on hooks, emphasis, and stakes-raising beats; gentler on calm/explanatory lines (small level, or "none").
 - "snap" ONLY for clear jokes/punchlines/beats. NEVER two snaps in a row. If unsure, don't snap.
-- Do NOT zoom every segment tight — CONTRAST makes zooms land. Calm/serious/long-explanation segments = "none" or a gentle move.
-- Don't put the same tight level on two adjacent segments; alternate so cutting reads as movement.
-- Tasteful: this is advice/commentary, not a music video. ~1 deliberate zoom per 3-4 seconds.
+- Prefer "push"/"pullout" over the static "in" — the creator wants visible animated zooming, not just a bigger static crop.
 {extra_block}
 Return ONLY JSON: {{"zooms":[{{"i":0,"type":"in","level":1.15}}, ...]}} — one entry per segment index 0..{len(cutlist)-1}. "level" optional.
 
@@ -372,7 +370,9 @@ The segments follow on stdin.'''
     prev = None
     for i, (s, e) in enumerate(cutlist):
         dur = e - s; z = plan[i]
-        if z["type"] in ("push", "pullout") and dur < 1.2: z["type"] = "in"
+        # Too short to animate a move -> rest (NOT a static "in"; the creator
+        # wants motion, and a static crop on a sub-half-second clip is pointless).
+        if z["type"] in ("push", "pullout") and dur < 0.5: z["type"] = "none"
         if z["type"] == "snap" and dur < 0.4: z["type"] = "in"
         if z["type"] == "snap" and prev == "snap": z["type"] = "in"
         prev = z["type"]
@@ -775,7 +775,7 @@ CAPTION_STYLES = ("pop", "highlight", "oneword")
 
 # ── camera-zoom palette / constants ──────────────────────────────────────────
 ZOOM_BIAS = 0.40   # vertical centre of the zoom window (faces sit upper-centre in portrait)
-DEFAULT_ZOOM_LEVEL = {"in": 1.15, "push": 1.10, "pullout": 1.12, "snap": 1.22, "none": 1.0}
+DEFAULT_ZOOM_LEVEL = {"in": 1.15, "push": 1.16, "pullout": 1.16, "snap": 1.22, "none": 1.0}
 ZOOM_TYPES = ("none", "in", "push", "pullout", "snap")
 
 
@@ -953,21 +953,28 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
             toks = [_ass_escape(w["word"]) for w in line]
             widths, sw = _text_metrics(toks, font_file, fontsize)
             total = sum(widths) + sw * (len(toks) - 1)
-            ratio = min(1.0, max_w / total) if total > 0 else 1.0
-            cur = (out_w - total * ratio) / 2.0
+            # If the line is too wide, shrink the FONT (not just the gaps) so the
+            # glyphs and the spacing scale together — squeezing only the positions
+            # made wide lines (e.g. a long word like "productivity") overlap.
+            ls = min(1.0, max_w / total) if total > 0 else 1.0
+            fs = max(8, int(round(fontsize * ls)))
+            widths = [w * ls for w in widths]
+            sw = sw * ls
+            line_w = sum(widths) + sw * (len(toks) - 1)
+            cur = (out_w - line_w) / 2.0
             centers = []
             for wd in widths:
-                centers.append(cur + wd * ratio / 2.0)
-                cur += (wd + sw) * ratio
+                centers.append(cur + wd / 2.0)
+                cur += wd + sw
             line_start, line_end = line[0]["new_start"], line[-1]["new_end"]
             for j, tok in enumerate(toks):
                 if not tok:
                     continue
                 cx = f"{centers[j]:.0f}"
-                # base (rest) — whole line, white, normal size
+                # base (rest) — whole line, white, fit font size
                 dialogues.append(
                     f"Dialogue: 0,{_ass_ts(line_start)},{_ass_ts(line_end)},Default,,0,0,0,,"
-                    f"{{\\an5\\pos({cx},{y})\\c{BASE_COLOR}}}{tok}")
+                    f"{{\\an5\\pos({cx},{y})\\fs{fs}\\c{BASE_COLOR}}}{tok}")
                 # active overlay — this word's span, coloured + popped, on top
                 st = line[j]["new_start"]
                 en = line[j + 1]["new_start"] if j + 1 < len(line) else line[j]["new_end"]
@@ -975,7 +982,7 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
                     en = st + 0.05
                 dialogues.append(
                     f"Dialogue: 1,{_ass_ts(st)},{_ass_ts(en)},Default,,0,0,0,,"
-                    f"{{\\an5\\pos({cx},{y}){POP_HOLD}\\c{highlight}}}{tok}")
+                    f"{{\\an5\\pos({cx},{y})\\fs{fs}{POP_HOLD}\\c{highlight}}}{tok}")
 
     else:  # highlight — colour change only (no size change, so no reflow)
         for line in _group_caption_lines(kept):
