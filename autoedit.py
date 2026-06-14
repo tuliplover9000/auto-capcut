@@ -489,12 +489,16 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir):
 # ── R9: write_srt ────────────────────────────────────────────────────────────
 
 def _srt_ts(seconds):
-    """Convert seconds to SRT timestamp: HH:MM:SS,mmm"""
-    seconds = max(0.0, seconds)
-    h = int(seconds // 3600)
-    m = int((seconds % 3600) // 60)
-    s = int(seconds % 60)
-    ms = int(round((seconds % 1) * 1000))
+    """Convert seconds to SRT timestamp: HH:MM:SS,mmm
+
+    Work in integer milliseconds so rounding (e.g. 22.9996s) carries into the
+    seconds field instead of producing an invalid '22,1000'.
+    """
+    total_ms = int(round(max(0.0, seconds) * 1000))
+    h = total_ms // 3_600_000
+    m = (total_ms % 3_600_000) // 60_000
+    s = (total_ms % 60_000) // 1000
+    ms = total_ms % 1000
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
