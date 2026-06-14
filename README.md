@@ -7,8 +7,12 @@ bad takes removed — plus word-accurate captions.
 **Output:** `out/roughcut.mp4` + `out/captions.srt`  
 Import both into CapCut and refine from there.
 
-There's also a simple **localhost web UI** — run `python app.py`, open
-http://127.0.0.1:5000, drag a clip in, and download the results in the browser.
+There's also a **localhost web UI with a chat editor** — run `python app.py`,
+open http://127.0.0.1:5000, drag a clip in, and edit it. A preview plays on the
+left and a chat panel sits on the right: type instructions before editing, then
+keep chatting to revise — "keep the intro", "cut the first 5 seconds", "make the
+captions Bebas Neue", "one word at a time". The transcript is cached per job, so
+re-cuts only re-render and caption tweaks are near-instant.
 
 ## Install note
 

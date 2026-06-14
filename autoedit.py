@@ -172,11 +172,75 @@ def build_transcript_text(segments):
     return "\n".join(lines)
 
 
-# ── R6: decide_cuts_with_claude ──────────────────────────────────────────────
+# ── R6: Claude (headless CLI) ────────────────────────────────────────────────
 
-def decide_cuts_with_claude(transcript_text, total_duration, aggressiveness="medium", model="sonnet"):
+def _claude_cli(prompt, stdin_text, model="sonnet"):
+    """
+    Run the `claude` CLI headless (Max subscription, NOT the API key) and return
+    the inner result string (envelope unwrapped, code fences stripped).
+    Raises RuntimeError on launch failure / non-zero exit / empty output.
+    """
+    claude_exe = shutil.which("claude") or "claude"
+    # --bare is intentionally OMITTED: it forces API-key-only auth and breaks the
+    # Max-subscription OAuth login we rely on for billing.
+    cmd = [claude_exe, "-p", prompt, "--output-format", "json",
+           "--max-turns", "1", "--model", model]
+    env = dict(os.environ)
+    env.pop("ANTHROPIC_API_KEY", None)  # force Max-plan billing, not the API
+
+    def _spawn(command, shell):
+        return subprocess.run(command, input=stdin_text, capture_output=True,
+                              text=True, encoding="utf-8", errors="replace",
+                              timeout=300, env=env, shell=shell)
+    try:
+        r = _spawn(cmd, False)
+    except FileNotFoundError:
+        cmd_str = " ".join(f'"{c}"' if " " in c else c for c in cmd)
+        try:
+            r = _spawn(cmd_str, True)
+        except Exception as e2:
+            raise RuntimeError(
+                f"Claude CLI could not be launched: {e2}\n"
+                "Make sure `claude` is on PATH and logged in (run it interactively once).")
+
+    if r.returncode != 0:
+        raise RuntimeError(
+            f"Claude CLI returned exit code {r.returncode}. "
+            "Are you logged in, with plan quota left?\n"
+            f"stderr: {(r.stderr or '')[-800:]}")
+    stdout = (r.stdout or "").strip()
+    if not stdout:
+        raise RuntimeError(f"Claude CLI returned empty output.\n"
+                           f"stderr: {(r.stderr or '')[-800:]}")
+
+    try:
+        result_str = json.loads(stdout).get("result", stdout)
+    except json.JSONDecodeError:
+        result_str = stdout
+    if not isinstance(result_str, str):
+        result_str = json.dumps(result_str)
+    result_str = result_str.strip()
+    result_str = re.sub(r"^```(?:json)?\s*", "", result_str)
+    result_str = re.sub(r"\s*```$", "", result_str)
+    return result_str.strip()
+
+
+def _extract_json(s):
+    """Parse JSON, tolerating stray prose around it (grab first {...} block)."""
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        m = re.search(r"\{.*\}", s, re.DOTALL)
+        if not m:
+            raise
+        return json.loads(m.group(0))
+
+
+def decide_cuts_with_claude(transcript_text, total_duration, aggressiveness="medium",
+                            model="sonnet", extra=""):
     """
     Send the transcript to Claude via the `claude` CLI (headless, Max subscription).
+    `extra` is free-form creator guidance folded into the prompt.
     Returns a list of (start, end) float tuples to KEEP.
     Raises RuntimeError if Claude is unreachable or returns no usable spans.
     """
@@ -186,13 +250,16 @@ def decide_cuts_with_claude(transcript_text, total_duration, aggressiveness="med
         "heavy":  "Aggressively cut all filler, hesitations, repeated ideas, tangents, and any silence >0.8s. Keep only the tightest version of each idea.",
     }
 
+    extra_block = (f"\nCreator's extra instructions (these take PRIORITY over the "
+                   f"defaults above):\n{extra}\n" if extra else "")
+
     prompt = f"""You are an AI video editor assistant. Your task is to decide which portions of a talking-head video recording to KEEP in the rough cut.
 
 The timestamped transcript of the recording is provided on stdin. Each line is one speech segment: [index] start_seconds-end_seconds: text
 
 Aggressiveness level: {aggressiveness}
 Instruction: {aggr_desc.get(aggressiveness, aggr_desc['medium'])}
-
+{extra_block}
 Rules:
 - Return ONLY valid JSON with a single key "keep": a list of objects, each with "start" and "end" (seconds, floats).
 - The keep list must be in ascending time order, non-overlapping.
@@ -205,110 +272,13 @@ Example output format:
 
 The transcript follows on stdin."""
 
-    # Resolve the claude CLI executable (handle .cmd on Windows)
-    claude_exe = shutil.which("claude") or "claude"
-
-    # NOTE: --bare is intentionally OMITTED here.
-    # --bare forces strict API-key-only auth (no OAuth/keychain), which breaks
-    # Max subscription login.  We want OAuth to be used so the call bills the
-    # Max plan instead of a per-token API key.
-    cmd = [
-        claude_exe,
-        "-p", prompt,
-        "--output-format", "json",
-        "--max-turns", "1",
-        "--model", model,
-    ]
-
-    # Build env WITHOUT ANTHROPIC_API_KEY so billing goes to Max subscription
-    env = dict(os.environ)
-    env.pop("ANTHROPIC_API_KEY", None)
-
-    # First try as a list; on Windows claude may need shell=True
-    r = None
+    result_str = _claude_cli(prompt, transcript_text, model)
     try:
-        r = subprocess.run(
-            cmd,
-            input=transcript_text,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=300,
-            env=env,
-        )
-    except FileNotFoundError:
-        # Retry with shell=True (claude is a .cmd on Windows)
-        cmd_str = " ".join(
-            f'"{c}"' if " " in c else c
-            for c in cmd
-        )
-        try:
-            r = subprocess.run(
-                cmd_str,
-                input=transcript_text,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=300,
-                env=env,
-                shell=True,
-            )
-        except Exception as e2:
-            raise RuntimeError(
-                f"Claude CLI could not be launched even with shell=True: {e2}\n"
-                "Make sure `claude` is on PATH and you have run `claude` interactively at least once."
-            )
-
-    if r is None or r.returncode != 0:
-        stderr_snippet = (r.stderr if r else "")[-800:]
+        data = _extract_json(result_str)
+    except (json.JSONDecodeError, ValueError):
         raise RuntimeError(
-            f"Claude (claude CLI) returned non-zero exit code {r.returncode if r else '?'}.\n"
-            f"Make sure you're logged in (`claude` interactive at least once) and have remaining plan quota.\n"
-            f"stderr: {stderr_snippet}"
-        )
-
-    stdout = (r.stdout or "").strip()
-    if not stdout:
-        raise RuntimeError(
-            "Claude (claude CLI) returned empty stdout.\n"
-            f"stderr: {(r.stderr or '')[-800:]}"
-        )
-
-    # Parse the outer JSON envelope {"result": "<string>"}
-    try:
-        outer = json.loads(stdout)
-        result_str = outer.get("result", stdout)
-    except json.JSONDecodeError:
-        result_str = stdout
-
-    # The result field is normally a JSON *string*; if Claude already returned a
-    # structured object, coerce it back to text so the parsing below is uniform.
-    if not isinstance(result_str, str):
-        result_str = json.dumps(result_str)
-
-    # Strip optional ```json ... ``` fences
-    result_str = result_str.strip()
-    result_str = re.sub(r"^```(?:json)?\s*", "", result_str)
-    result_str = re.sub(r"\s*```$", "", result_str)
-    result_str = result_str.strip()
-
-    try:
-        data = json.loads(result_str)
-    except json.JSONDecodeError:
-        # Harden against stray prose ("Sure! Here's the JSON ...") — extract the
-        # first balanced {...} block and retry before giving up.
-        m = re.search(r"\{.*\}", result_str, re.DOTALL)
-        try:
-            if not m:
-                raise json.JSONDecodeError("no JSON object found", result_str, 0)
-            data = json.loads(m.group(0))
-        except json.JSONDecodeError as e:
-            raise RuntimeError(
-                f"Could not parse Claude's response as JSON: {e}\n"
-                f"Raw result string (first 500 chars): {result_str[:500]}"
-            )
+            "Could not parse Claude's response as JSON.\n"
+            f"Raw result (first 500 chars): {result_str[:500]}")
 
     # Be defensive about the shape Claude returned.
     if isinstance(data, dict):
@@ -335,6 +305,74 @@ The transcript follows on stdin."""
         )
 
     return spans
+
+
+def revise_with_claude(transcript_text, total_duration, current_keep,
+                       caption_settings, chat_history, user_msg, model="sonnet"):
+    """
+    Conversational revision. Given the cached transcript, the current kept spans,
+    the current caption settings, and the chat so far, ask Claude how to revise
+    the edit per the creator's latest message.
+    Returns a dict: {"reply": str, "keep": [[s,e],...] or None,
+                     "captions": {..changed fields..} or None}.
+    """
+    keep_txt = json.dumps([[round(s, 2), round(e, 2)] for s, e in current_keep])
+    history_txt = "\n".join(f"{m.get('role','?')}: {m.get('text','')}"
+                            for m in chat_history[-12:]) or "(none)"
+
+    prompt = f"""You are an AI video editor in a conversation with a creator about THEIR talking-head video. The full timestamped transcript is on stdin (each line: [i] start-end: text).
+
+Total duration: {total_duration:.2f}s
+CURRENT kept segments (seconds) — the edit as it stands: {keep_txt}
+CURRENT caption settings: {json.dumps(caption_settings)}
+
+Conversation so far:
+{history_txt}
+
+The creator's new message: "{user_msg}"
+
+Decide how to revise. Respond with ONLY a JSON object:
+{{
+  "reply": "<friendly 1-2 sentence reply describing what you changed (or why you can't)>",
+  "keep": [[start,end], ...],
+  "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}}
+}}
+Rules:
+- Include "keep" ONLY if the creator wants to change which parts are kept/removed. It must be the FULL new ordered, non-overlapping list within [0,{total_duration:.2f}]. Omit it entirely if the cut is unchanged.
+- Include "captions" ONLY with the fields that change (e.g. just {{"font":"Bebas Neue"}}). Omit it if the look is unchanged. Set "burn":true if they want captions added.
+- If they ask for something not supported yet (camera zooms, b-roll, music, sound effects), explain that in "reply" and omit "keep"/"captions".
+- "reply" is always required. Output JSON only — no markdown, no prose outside the JSON."""
+
+    result_str = _claude_cli(prompt, transcript_text, model)
+    try:
+        data = _extract_json(result_str)
+    except (json.JSONDecodeError, ValueError):
+        return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
+                "keep": None, "captions": None}
+    if not isinstance(data, dict):
+        return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
+                "keep": None, "captions": None}
+
+    reply = str(data.get("reply") or "Done.")
+    # Normalize keep -> list of (s,e) tuples or None
+    keep = None
+    raw = data.get("keep")
+    if isinstance(raw, list) and raw:
+        keep = []
+        for it in raw:
+            try:
+                if isinstance(it, dict):
+                    s, e = float(it["start"]), float(it["end"])
+                else:
+                    s, e = float(it[0]), float(it[1])
+                if s < e:
+                    keep.append((s, e))
+            except (KeyError, ValueError, TypeError, IndexError):
+                continue
+        if not keep:
+            keep = None
+    caps = data.get("captions") if isinstance(data.get("captions"), dict) else None
+    return {"reply": reply, "keep": keep, "captions": caps}
 
 
 # ── R7: snap_and_clean ───────────────────────────────────────────────────────
