@@ -36,3 +36,6 @@ webjobs/
 Thumbs.db
 .idea/
 .vscode/
+
+# stray font copies at repo root (burn_captions copies next to the .ass during tests)
+/*.ttf
