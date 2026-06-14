@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Secrets / config
+.env
+*.key
+config.local.*
+
+# Whisper / model caches
+models/
+*.bin
+*.pt
+
+# Media (don't commit footage or renders)
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.wav
+*.mp3
+*.m4a
+*.srt
+*.fcpxml
+input/
+output/
+tmp/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
