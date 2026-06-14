@@ -427,13 +427,15 @@ Decide how to revise. Respond with ONLY a JSON object:
   "reply": "<friendly 1-2 sentence reply describing what you changed (or why you can't)>",
   "keep": [[start,end], ...],
   "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
-  "zoom": {{"enabled": true, "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}}
+  "zoom": {{"enabled": true, "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}},
+  "effects": {{"vignette": true, "grain": true, "flash": true}}
 }}
 Rules:
 - Include "keep" ONLY if the creator wants to change which parts are kept/removed. It must be the FULL new ordered, non-overlapping list within [0,{total_duration:.2f}]. Omit it entirely if the cut is unchanged.
 - Include "captions" ONLY with the fields that change (e.g. just {{"font":"Bebas Neue"}}). Omit it if the look is unchanged. Set "burn":true if they want captions added.
 - Include "zoom" ONLY if the creator wants to change camera zooms (e.g. "more punch-ins", "no zoom on the intro", "calmer"). Omit otherwise. Set "enabled":false to turn zooms off.
-- If they ask for something not supported yet (b-roll, music, sound effects), explain that in "reply" and omit the unsupported directives.
+- Include "effects" ONLY with the toggles that change. Available: "vignette" (darkened edges), "grain" (film grain), "flash" (white flash on cuts). e.g. {{"vignette":true}} or {{"grain":false}}. Omit if no effect changes.
+- If they ask for something not supported yet (b-roll, music, sound effects, camera shake), explain that in "reply" and omit the unsupported directives.
 - "reply" is always required. Output JSON only — no markdown, no prose outside the JSON."""
 
     result_str = _claude_cli(prompt, transcript_text, model)
@@ -441,10 +443,10 @@ Rules:
         data = _extract_json(result_str)
     except (json.JSONDecodeError, ValueError):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None, "zoom": None}
+                "keep": None, "captions": None, "zoom": None, "effects": None}
     if not isinstance(data, dict):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None, "zoom": None}
+                "keep": None, "captions": None, "zoom": None, "effects": None}
 
     reply = str(data.get("reply") or "Done.")
     # Normalize keep -> list of (s,e) tuples or None
@@ -466,7 +468,8 @@ Rules:
             keep = None
     caps = data.get("captions") if isinstance(data.get("captions"), dict) else None
     zoom = data.get("zoom") if isinstance(data.get("zoom"), dict) else None
-    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom}
+    fx = data.get("effects") if isinstance(data.get("effects"), dict) else None
+    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom, "effects": fx}
 
 
 # ── R7: snap_and_clean ───────────────────────────────────────────────────────
@@ -696,6 +699,60 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             f"ffmpeg stderr: {r.stderr[-600:]}"
         )
     print(f"  output: {out_mp4}  ({os.path.getsize(out_mp4)//1024} KiB)")
+
+
+# ── R8b: effects grade (vignette / film grain / flash on cut) ────────────────
+
+def cut_offsets(cutlist):
+    """Output-timeline boundaries between segments (start of seg 1..n-1)."""
+    offs, acc = [], 0.0
+    for s, e in cutlist:
+        acc += (e - s)
+        offs.append(acc)
+    return offs[:-1]  # drop the final end; these are the internal cut points
+
+
+def _effects_vf(effects, boundaries, fps, color):
+    """Build the grade filter chain (or '' if nothing enabled)."""
+    filters = []
+    if effects.get("grain"):
+        filters.append("noise=alls=10:allf=t")     # subtle moving film grain
+    if effects.get("vignette"):
+        filters.append("vignette=PI/4.2")           # gentle darkened corners
+    if effects.get("flash") and boundaries:
+        # White flash on cuts, gated to >=1.5s apart so fast edits don't strobe.
+        times, last = [], -99.0
+        for t in boundaries:
+            if t - last >= 1.5:
+                times.append(t); last = t
+        if times:
+            d = 2.0 / max(1.0, fps)                 # ~2 frames
+            cond = "+".join(f"between(t\\,{t:.3f}\\,{t + d:.3f})" for t in times)
+            filters.append(
+                f"drawbox=x=0:y=0:w=iw:h=ih:t=fill:color=white@0.7:enable='{cond}'")
+    chain = ",".join(filters)
+    if not chain:
+        return ""
+    return chain + _setparams_suffix(color)         # re-stamp HLG/HDR colour tags
+
+
+def grade_video(in_mp4, out_mp4, effects, boundaries, fps, color, tmpdir):
+    """
+    Apply the global effects grade (vignette/grain/flash) to in_mp4 -> out_mp4.
+    If no effect is enabled, the input is stream-copied through unchanged.
+    """
+    ff = ff_exe()
+    vf = _effects_vf(effects or {}, boundaries or [], float(fps or 30.0), color)
+    if not vf:
+        cmd = [ff, "-y", "-i", os.path.abspath(in_mp4), "-c", "copy",
+               "-movflags", "+faststart", os.path.abspath(out_mp4)]
+    else:
+        cmd = [ff, "-y", "-i", os.path.abspath(in_mp4), "-vf", vf,
+               "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "copy",
+               "-movflags", "+faststart", os.path.abspath(out_mp4)]
+    r = run(cmd, timeout=900)
+    if not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
+        raise RuntimeError(f"Effects grade failed.\nffmpeg stderr: {r.stderr[-500:]}")
 
 
 # ── R9: write_srt ────────────────────────────────────────────────────────────
@@ -1184,6 +1241,12 @@ def main():
                     help="Burned caption position for pop/highlight (default: lower third)")
     ap.add_argument("--zoom", action="store_true",
                     help="Auto camera zooms (Claude-decided punch-ins/pushes)")
+    ap.add_argument("--vignette", action="store_true",
+                    help="Effect: subtle darkened edges")
+    ap.add_argument("--grain", action="store_true",
+                    help="Effect: light film grain texture")
+    ap.add_argument("--flash", action="store_true",
+                    help="Effect: quick white flash on cuts (gated >=1.5s apart)")
     ap.add_argument("--selftest", action="store_true",
                     help="Check dependencies and exit")
     args = ap.parse_args()
@@ -1279,9 +1342,17 @@ def main():
             from collections import Counter
             print("  " + ", ".join(f"{k}:{v}" for k, v in Counter(z["type"] for z in zoomplan).items()))
 
-        # ── Stage 7: render ───────────────────────────────────────────────────
+        # ── Stage 7: render (cut+zoom -> base), then effects grade -> roughcut ──
         section("7a/7  RENDER")
-        render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=zoomplan)
+        effects = {"vignette": args.vignette, "grain": args.grain, "flash": args.flash}
+        if any(effects.values()):
+            base_mp4 = os.path.join(tmpdir, "roughcut_base.mp4")
+            render_video(input_path, cutlist, spec, base_mp4, tmpdir, zoomplan=zoomplan)
+            print("  effects: " + ", ".join(k for k, v in effects.items() if v))
+            grade_video(base_mp4, out_mp4, effects, cut_offsets(cutlist),
+                        spec["fps"], spec.get("color"), tmpdir)
+        else:
+            render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=zoomplan)
 
         # ── Stage 7b: captions ────────────────────────────────────────────────
         section("7b/7  CAPTIONS")

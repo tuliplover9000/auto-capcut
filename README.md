@@ -74,6 +74,23 @@ default). The zooms are **chat-adjustable** — after the first edit, tell the
 editor things like "more punch-ins", "no zoom on the intro", "calmer", or "turn
 off the zooms" and it re-plans and re-renders.
 
+### Effects (optional)
+
+A global "grade" pass with three toggles, applied over the cut+zoom video
+(before captions, so text stays sharp):
+
+```bash
+python autoedit.py myclip.mp4 --vignette --grain --flash
+```
+
+- `--vignette` — subtle darkened edges (focus + mood)
+- `--grain` — light film grain so it looks less digitally flat
+- `--flash` — quick white flash on cuts (gated to ≥1.5s apart so fast edits don't strobe)
+
+Each is a checkbox in the web UI and **chat-adjustable** ("add a vignette",
+"turn off the grain", "put a flash on the cuts"). Effect toggles re-grade
+cheaply without re-cutting.
+
 ## Max plan / no API key
 
 This tool uses the `claude` CLI in headless mode — it bills your **Claude Max

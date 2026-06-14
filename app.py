@@ -81,17 +81,52 @@ def _burn(job, src_mp4, out_cap, tmp):
         autoedit.burn_captions(src_mp4, ass, out_cap, font_file=fp)
 
 
+def _effects(job):
+    s = job["settings"]
+    return {"vignette": s.get("vignette"), "grain": s.get("grain"), "flash": s.get("flash")}
+
+
+def _grade_to_roughcut(job, base, out_mp4, tmp):
+    """Apply the effects grade (or copy) from the cut+zoom base to roughcut.mp4."""
+    autoedit.grade_video(base, out_mp4, _effects(job),
+                         autoedit.cut_offsets(job["cutlist"]),
+                         job["spec"]["fps"], job["spec"].get("color"), tmp)
+
+
 def _render_outputs(job):
-    """Full render: cut -> roughcut.mp4 + captions.srt + (optional) captioned."""
+    """Full render: cut+zoom -> base -> effects grade -> roughcut.mp4 + srt + cap."""
     outdir = job["outdir"]
+    base = os.path.join(outdir, "roughcut_base.mp4")  # internal, ungraded (cheap re-grade)
     out_mp4 = os.path.join(outdir, "roughcut.mp4")
     out_srt = os.path.join(outdir, "captions.srt")
     out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
     tmp = tempfile.mkdtemp(prefix="ae_render_")
     try:
-        autoedit.render_video(job["input_path"], job["cutlist"], job["spec"], out_mp4, tmp,
+        autoedit.render_video(job["input_path"], job["cutlist"], job["spec"], base, tmp,
                               zoomplan=job.get("zoomplan"))
+        _grade_to_roughcut(job, base, out_mp4, tmp)
         autoedit.write_srt(job["cutlist"], job["all_words"], out_srt)
+        if job["settings"]["burn"]:
+            _burn(job, out_mp4, out_cap, tmp)
+        elif os.path.exists(out_cap):
+            os.remove(out_cap)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    _bump(job)
+
+
+def _regrade_only(job):
+    """Effect-only change: re-grade the existing base -> roughcut (+reburn). No re-cut."""
+    outdir = job["outdir"]
+    base = os.path.join(outdir, "roughcut_base.mp4")
+    if not os.path.exists(base):
+        _render_outputs(job)
+        return
+    out_mp4 = os.path.join(outdir, "roughcut.mp4")
+    out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
+    tmp = tempfile.mkdtemp(prefix="ae_grade_")
+    try:
+        _grade_to_roughcut(job, base, out_mp4, tmp)
         if job["settings"]["burn"]:
             _burn(job, out_mp4, out_cap, tmp)
         elif os.path.exists(out_cap):
@@ -229,6 +264,18 @@ def revise_job(job_id, msg):
                 job["zoom_instruction"] = str(zdir["instruction"])
             need_full = True
 
+        # Effects directive (vignette/grain/flash) — only needs a cheap re-grade,
+        # not a re-cut, unless a cut/zoom change is already forcing a full render.
+        changed_fx = False
+        fxdir = action.get("effects")
+        if isinstance(fxdir, dict):
+            for k in ("vignette", "grain", "flash"):
+                if k in fxdir:
+                    b = bool(fxdir[k])
+                    if job["settings"].get(k) != b:
+                        job["settings"][k] = b
+                        changed_fx = True
+
         if need_full:
             if job["settings"].get("zoom"):
                 _stage(job_id, stage="Deciding zooms")
@@ -239,6 +286,9 @@ def revise_job(job_id, msg):
                 job["zoomplan"] = None
             _stage(job_id, stage="Re-rendering")
             _render_outputs(job)
+        elif changed_fx:
+            _stage(job_id, stage="Applying effects")
+            _regrade_only(job)
         elif changed_caps:
             _stage(job_id, stage="Updating captions")
             _reburn_only(job)
@@ -280,6 +330,9 @@ def run():
         "highlight": pick("highlight", COLORS, "yellow"),
         "pos": "lower",
         "zoom": request.form.get("zoom", "") in ("1", "true", "on", "yes"),
+        "vignette": request.form.get("vignette", "") in ("1", "true", "on", "yes"),
+        "grain": request.form.get("grain", "") in ("1", "true", "on", "yes"),
+        "flash": request.form.get("flash", "") in ("1", "true", "on", "yes"),
     }
     instructions = (request.form.get("instructions") or "").strip()
 
@@ -460,6 +513,9 @@ PAGE = r"""<!doctype html>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="zoom" checked>
         <span>Camera zooms (auto punch-ins) <span class="note">(Claude-decided; adjust in chat — "more zooms", "no zoom on the intro")</span></span></label>
+      <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
+      <label class="chk"><input type="checkbox" id="grain"> <span>Film grain <span class="note">(light texture)</span></span></label>
+      <label class="chk"><input type="checkbox" id="flash"> <span>Flash on cut <span class="note">(quick white flash on cuts)</span></span></label>
     </div>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="burn">
@@ -528,6 +584,9 @@ $("#go").onclick=async()=>{
   fd.append("whisper_model",$("#whisper").value);
   fd.append("instructions",$("#instructions").value);
   fd.append("zoom",$("#zoom").checked?"1":"0");
+  fd.append("vignette",$("#vignette").checked?"1":"0");
+  fd.append("grain",$("#grain").checked?"1":"0");
+  fd.append("flash",$("#flash").checked?"1":"0");
   fd.append("burn",$("#burn").checked?"1":"0");
   fd.append("style",$("#style").value);
   fd.append("font",$("#font").value);
