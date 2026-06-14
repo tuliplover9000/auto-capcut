@@ -501,13 +501,17 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir):
             fwd = p.replace("\\", "/").replace("'", "'\\''")
             f.write(f"file '{fwd}'\n")
 
-    # Concatenate with stream copy (all segs share the same spec)
+    # Concatenate with stream copy (all segs share the same spec).
+    # +faststart relocates the moov atom to the FRONT so a browser <video> can
+    # read the duration and stream/seek immediately (otherwise it shows 0:00/0:00
+    # and won't update until the whole file downloads).
     cmd = [
         ff, "-y",
         "-f", "concat",
         "-safe", "0",
         "-i", list_path,
         "-c", "copy",
+        "-movflags", "+faststart",
         out_mp4,
     ]
     r = run(cmd, timeout=600)
