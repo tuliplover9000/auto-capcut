@@ -29,6 +29,7 @@ models/
 input/
 output/
 tmp/
+webjobs/
 
 # OS / editor
 .DS_Store
