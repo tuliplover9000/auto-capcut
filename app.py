@@ -52,7 +52,8 @@ def _append_log(job_id, line):
                 JOBS[job_id]["step"] = n
 
 
-def run_job(job_id, input_path, outdir, aggressiveness, model, whisper_model):
+def run_job(job_id, input_path, outdir, aggressiveness, model, whisper_model,
+            burn=False, highlight="yellow"):
     """Run autoedit.py as a subprocess, streaming its stdout into the job log."""
     cmd = [
         sys.executable, AUTOEDIT, input_path,
@@ -61,6 +62,8 @@ def run_job(job_id, input_path, outdir, aggressiveness, model, whisper_model):
         "--model", model,
         "--whisper-model", whisper_model,
     ]
+    if burn:
+        cmd += ["--burn-captions", "--caption-highlight", highlight]
     _set(job_id, state="running")
     try:
         proc = subprocess.Popen(
@@ -107,6 +110,10 @@ def run():
         aggressiveness = "medium"
     model = request.form.get("model", "sonnet").strip() or "sonnet"
     whisper_model = request.form.get("whisper_model", "base").strip() or "base"
+    burn = request.form.get("burn", "") in ("1", "true", "on", "yes")
+    highlight = request.form.get("highlight", "yellow").strip() or "yellow"
+    if highlight not in {"yellow", "green", "cyan", "red", "white"}:
+        highlight = "yellow"
 
     job_id = uuid.uuid4().hex[:12]
     jobdir = os.path.join(JOBS_DIR, job_id)
@@ -120,7 +127,8 @@ def run():
                         "error": "", "outdir": outdir, "name": f.filename}
 
     t = threading.Thread(target=run_job, args=(
-        job_id, input_path, outdir, aggressiveness, model, whisper_model), daemon=True)
+        job_id, input_path, outdir, aggressiveness, model, whisper_model,
+        burn, highlight), daemon=True)
     t.start()
     return jsonify(job_id=job_id)
 
@@ -137,6 +145,7 @@ def status(job_id):
             log="\n".join(j["log"]),
             has_mp4=os.path.exists(os.path.join(outdir, "roughcut.mp4")),
             has_srt=os.path.exists(os.path.join(outdir, "captions.srt")),
+            has_cap=os.path.exists(os.path.join(outdir, "roughcut_captioned.mp4")),
         )
 
 
@@ -146,7 +155,8 @@ def download(job_id, which):
         j = JOBS.get(job_id)
     if not j:
         abort(404)
-    fname = {"mp4": "roughcut.mp4", "srt": "captions.srt"}.get(which)
+    fname = {"mp4": "roughcut.mp4", "srt": "captions.srt",
+             "cap": "roughcut_captioned.mp4"}.get(which)
     if not fname:
         abort(404)
     path = os.path.join(j["outdir"], fname)
@@ -196,6 +206,11 @@ PAGE = r"""<!doctype html>
   .err { color:var(--err); font-weight:600; margin-top:6px; }
   .hide { display:none; }
   .note { color:var(--muted); font-size:13px; margin-top:12px; }
+  .caps { margin-top:16px; padding-top:14px; border-top:1px solid var(--line); }
+  .chk { display:flex; gap:10px; align-items:flex-start; cursor:pointer; color:var(--fg); }
+  .chk input { margin-top:3px; }
+  .chk small { color:var(--muted); }
+  .cwrap { max-width:200px; margin-top:12px; }
 </style></head>
 <body><div class="wrap">
   <h1>🎬 CapCut Auto-Edit</h1>
@@ -229,6 +244,17 @@ PAGE = r"""<!doctype html>
           <option value="medium">Medium (slow)</option>
         </select></div>
     </div>
+    <div class="caps">
+      <label class="chk"><input type="checkbox" id="burn">
+        <span>Burn animated captions onto the video <small>(word-by-word highlight; not editable in CapCut after)</small></span></label>
+      <div class="field cwrap hide" id="cwrap"><label>Highlight color</label>
+        <select id="hl">
+          <option value="yellow" selected>Yellow</option>
+          <option value="green">Green</option>
+          <option value="cyan">Cyan</option>
+          <option value="red">Red</option>
+        </select></div>
+    </div>
     <button class="start" id="go" disabled>Start auto-edit</button>
     <p class="note">Uses your Claude Max plan — no API key, no per-token bill.</p>
   </div>
@@ -238,6 +264,7 @@ PAGE = r"""<!doctype html>
     <div id="stage" style="margin-bottom:10px;color:var(--muted)">Starting…</div>
     <pre id="log"></pre>
     <div class="dl hide" id="dl">
+      <a id="dlcap" class="hide" href="#">⬇ Captioned video (.mp4)</a>
       <a id="dlmp4" href="#">⬇ Rough cut (.mp4)</a>
       <a id="dlsrt" href="#">⬇ Captions (.srt)</a>
     </div>
@@ -263,6 +290,8 @@ drop.addEventListener("drop", ev => { if (ev.dataTransfer.files[0]) pick(ev.data
 file.onchange = () => { if (file.files[0]) pick(file.files[0]); };
 function pick(f){ chosen = f; $("#fname").textContent = "✓ " + f.name; $("#go").disabled = false; }
 
+$("#burn").onchange = () => $("#cwrap").classList.toggle("hide", !$("#burn").checked);
+
 $("#go").onclick = async () => {
   if (!chosen) return;
   $("#go").disabled = true;
@@ -271,6 +300,8 @@ $("#go").onclick = async () => {
   fd.append("aggressiveness", $("#aggr").value);
   fd.append("model", $("#model").value);
   fd.append("whisper_model", $("#whisper").value);
+  fd.append("burn", $("#burn").checked ? "1" : "0");
+  fd.append("highlight", $("#hl").value);
   $("#setup").classList.add("hide");
   $("#progress").classList.remove("hide");
   renderSteps(0);
@@ -297,6 +328,10 @@ async function check(id){
     $("#again").classList.remove("hide");
     $("#dlmp4").href = "/download/" + id + "/mp4";
     $("#dlsrt").href = "/download/" + id + "/srt";
+    if (s.has_cap){
+      $("#dlcap").href = "/download/" + id + "/cap";
+      $("#dlcap").classList.remove("hide");
+    }
     $("#stage").textContent = "✅ Done";
     renderSteps(7, true);
   } else if (s.state === "error"){

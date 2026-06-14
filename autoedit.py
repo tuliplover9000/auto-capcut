@@ -33,7 +33,7 @@ def section(t):
     print(f"\n{'='*60}\n{t}\n{'='*60}")
 
 
-def run(cmd, timeout=300, input=None, env=None):
+def run(cmd, timeout=300, input=None, env=None, cwd=None):
     """
     Subprocess wrapper that never raises on timeout.
     Returns a CompletedProcess-like object with .returncode/.stdout/.stderr.
@@ -50,6 +50,7 @@ def run(cmd, timeout=300, input=None, env=None):
             timeout=timeout,
             input=input,
             env=env,
+            cwd=cwd,
             shell=use_shell,
         )
     except subprocess.TimeoutExpired as e:
@@ -497,6 +498,28 @@ def _srt_ts(seconds):
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
+def _kept_words(cutlist, all_words):
+    """
+    Map the words that survive the cut onto the OUTPUT (post-cut) timeline.
+    Returns list of {"new_start", "new_end", "word"} in output time order.
+    Shared by both the SRT writer and the burned-in ASS captions.
+    """
+    words_sorted = sorted(all_words, key=lambda w: w["start"])
+    kept = []
+    offset = 0.0
+    for (span_start, span_end) in cutlist:
+        span_dur = span_end - span_start
+        for w in words_sorted:
+            if w["start"] >= span_start and w["end"] <= span_end:
+                kept.append({
+                    "new_start": offset + (w["start"] - span_start),
+                    "new_end": offset + (w["end"] - span_start),
+                    "word": w["word"],
+                })
+        offset += span_dur
+    return kept
+
+
 def write_srt(cutlist, all_words, out_srt):
     """
     Build SRT captions aligned to the output (post-cut) timeline.
@@ -505,20 +528,7 @@ def write_srt(cutlist, all_words, out_srt):
     MAX_WORDS_PER_LINE = 7
     GAP_BREAK = 0.6  # seconds
 
-    # Sort words by start
-    words_sorted = sorted(all_words, key=lambda w: w["start"])
-
-    # Collect kept words with their new output timestamps
-    kept = []  # list of {"new_start","new_end","word"}
-    offset = 0.0
-    for (span_start, span_end) in cutlist:
-        span_dur = span_end - span_start
-        for w in words_sorted:
-            if w["start"] >= span_start and w["end"] <= span_end:
-                new_start = offset + (w["start"] - span_start)
-                new_end = offset + (w["end"] - span_start)
-                kept.append({"new_start": new_start, "new_end": new_end, "word": w["word"]})
-        offset += span_dur
+    kept = _kept_words(cutlist, all_words)
 
     if not kept:
         print("  WARNING: no words fell within keep spans — SRT will be empty")
@@ -570,6 +580,159 @@ def write_srt(cutlist, all_words, out_srt):
             f.write(f"{text}\n\n")
 
     print(f"  {len(lines)} caption lines -> {out_srt}")
+
+
+# ── R9b: burned-in animated captions (ASS karaoke) ───────────────────────────
+
+# Highlight colors in ASS &HBBGGRR& (opaque). Friendly name -> ASS value.
+CAPTION_COLORS = {
+    "yellow": "&H0000FFFF",
+    "green":  "&H0000FF00",
+    "cyan":   "&H00FFFF00",
+    "red":    "&H000000FF",
+    "white":  "&H00FFFFFF",
+}
+BASE_COLOR = "&H00FFFFFF"  # inactive words: white
+
+
+def _ass_ts(seconds):
+    """Seconds -> ASS timestamp H:MM:SS.cs (centiseconds)."""
+    cs = int(round(max(0.0, seconds) * 100))
+    h = cs // 360000
+    m = (cs % 360000) // 6000
+    s = (cs % 6000) // 100
+    c = cs % 100
+    return f"{h:d}:{m:02d}:{s:02d}.{c:02d}"
+
+
+def _ass_escape(text):
+    """Make a word safe inside an ASS dialogue field, and tidy stray commas.
+
+    Strips surrounding whitespace and leading/trailing commas (Whisper often
+    attaches a comma to the next word, giving an ugly ',word' at a line start).
+    Sentence-ending . ? ! are kept.
+    """
+    t = (text.replace("\\", "")  # drop stray backslashes (would start an override)
+             .replace("{", "(").replace("}", ")")
+             .replace("\n", " ").strip())
+    return t.strip(",").strip()
+
+
+def _group_caption_lines(kept, max_words=4, gap_break=0.6):
+    """Group kept words into short caption lines (portrait-friendly)."""
+    lines, cur = [], []
+    for w in kept:
+        if cur:
+            prev = cur[-1]
+            if (len(cur) >= max_words
+                    or (w["new_start"] - prev["new_end"]) > gap_break
+                    or re.search(r"[.?!,]$", prev["word"].strip())):
+                lines.append(cur)
+                cur = []
+        cur.append(w)
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def write_ass(cutlist, all_words, out_w, out_h, ass_path,
+              font="Arial Black", highlight="&H0000FFFF", pos="lower"):
+    """
+    Write an ASS subtitle file with word-by-word highlighting, sized to the
+    OUTPUT video dimensions (out_w x out_h — the upright rough cut).
+    Each word gets its own dialogue event so the active word pops to `highlight`
+    while the rest of the line stays white; the line stays on screen across its
+    words. Returns the number of lines written.
+    """
+    kept = _kept_words(cutlist, all_words)
+    if not kept:
+        return 0
+
+    out_w = int(out_w) if out_w and out_w > 0 else 1080
+    out_h = int(out_h) if out_h and out_h > 0 else 1920
+
+    fontsize = max(24, round(out_h * 0.052))
+    outline = max(2, round(fontsize * 0.07))
+    shadow = max(0, round(fontsize * 0.03))
+    margin_lr = round(out_w * 0.07)
+    if pos == "center":
+        align, margin_v = 5, 0
+    else:  # lower third
+        align, margin_v = 2, round(out_h * 0.16)
+
+    header = (
+        "[Script Info]\n"
+        "ScriptType: v4.00+\n"
+        "WrapStyle: 0\n"
+        "ScaledBorderAndShadow: yes\n"
+        f"PlayResX: {out_w}\n"
+        f"PlayResY: {out_h}\n\n"
+        "[V4+ Styles]\n"
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, "
+        "OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, "
+        "ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, "
+        "MarginL, MarginR, MarginV, Encoding\n"
+        f"Style: Default,{font},{fontsize},{BASE_COLOR},&H000000FF,&H00000000,"
+        f"&H64000000,-1,0,0,0,100,100,0,0,1,{outline},{shadow},{align},"
+        f"{margin_lr},{margin_lr},{margin_v},1\n\n"
+        "[Events]\n"
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, "
+        "Effect, Text\n"
+    )
+
+    dialogues = []
+    for line in _group_caption_lines(kept):
+        n = len(line)
+        for i in range(n):
+            start = line[i]["new_start"]
+            end = line[i + 1]["new_start"] if i + 1 < n else line[i]["new_end"]
+            if end <= start:
+                end = start + 0.05
+            parts = []
+            for j, ww in enumerate(line):
+                tok = _ass_escape(ww["word"])
+                if not tok:
+                    continue
+                if j == i:
+                    parts.append(f"{{\\c{highlight}}}{tok}{{\\c{BASE_COLOR}}}")
+                else:
+                    parts.append(tok)
+            text = " ".join(parts)
+            dialogues.append(
+                f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{text}")
+
+    with open(ass_path, "w", encoding="utf-8") as f:
+        f.write(header)
+        f.write("\n".join(dialogues) + "\n")
+
+    return len(dialogues)
+
+
+def burn_captions(in_mp4, ass_path, out_mp4):
+    """
+    Burn the ASS captions onto in_mp4 -> out_mp4 (re-encode video, copy audio).
+    Runs ffmpeg with cwd = the ass file's dir and references it by basename, so
+    Windows drive-letter paths never hit the fragile -vf path parser.
+    """
+    ff = ff_exe()
+    workdir = os.path.dirname(os.path.abspath(ass_path))
+    ass_name = os.path.basename(ass_path)
+    cmd = [
+        ff, "-y",
+        "-i", os.path.abspath(in_mp4),
+        "-vf", f"ass={ass_name}",
+        "-c:v", "libx264",
+        "-pix_fmt", "yuv420p",
+        "-c:a", "copy",
+        "-movflags", "+faststart",
+        os.path.abspath(out_mp4),
+    ]
+    r = run(cmd, timeout=900, cwd=workdir)
+    if not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
+        raise RuntimeError(
+            f"Caption burn-in failed — output missing or empty.\n"
+            f"ffmpeg stderr: {r.stderr[-600:]}"
+        )
 
 
 # ── R10: selftest ────────────────────────────────────────────────────────────
@@ -639,6 +802,15 @@ def main():
                     help="Cut aggressiveness (default: medium)")
     ap.add_argument("--keep-temp", action="store_true",
                     help="Keep temporary working files after completion")
+    ap.add_argument("--burn-captions", action="store_true",
+                    help="Also output roughcut_captioned.mp4 with word-by-word "
+                         "animated captions burned in (not editable afterward)")
+    ap.add_argument("--caption-font", default="Arial Black",
+                    help="Font for burned captions (default: Arial Black)")
+    ap.add_argument("--caption-highlight", choices=sorted(CAPTION_COLORS), default="yellow",
+                    help="Active-word highlight color (default: yellow)")
+    ap.add_argument("--caption-pos", choices=["lower", "center"], default="lower",
+                    help="Burned caption position (default: lower third)")
     ap.add_argument("--selftest", action="store_true",
                     help="Check dependencies and exit")
     args = ap.parse_args()
@@ -734,9 +906,33 @@ def main():
         section("7b/7  CAPTIONS")
         write_srt(cutlist, all_words, out_srt)
 
+        # ── Stage 7c: burn-in animated captions (optional) ────────────────────
+        out_cap = None
+        if args.burn_captions:
+            section("7c/7  BURN ANIMATED CAPTIONS")
+            cap_spec = probe(out_mp4)  # true upright dims of the rendered cut
+            ass_path = os.path.join(tmpdir, "captions.ass")
+            n_ass = write_ass(
+                cutlist, all_words, cap_spec["width"], cap_spec["height"], ass_path,
+                font=args.caption_font,
+                highlight=CAPTION_COLORS[args.caption_highlight],
+                pos=args.caption_pos,
+            )
+            if n_ass == 0:
+                print("  (no words to caption — skipped)")
+            else:
+                out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
+                print(f"  {n_ass} word events, {args.caption_highlight} highlight, "
+                      f"{args.caption_pos} — burning ...")
+                burn_captions(out_mp4, ass_path, out_cap)
+                print(f"  captioned video: {out_cap} "
+                      f"({os.path.getsize(out_cap)//1024} KiB)")
+
         # ── Done ──────────────────────────────────────────────────────────────
         section("DONE")
         print(f"  Rough cut   : {out_mp4}")
+        if out_cap:
+            print(f"  Captioned   : {out_cap}")
         print(f"  Captions    : {out_srt}")
         print(f"  Segments    : {len(cutlist)}")
         print(f"  Original    : {spec['duration']:.2f}s")
