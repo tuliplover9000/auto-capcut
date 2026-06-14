@@ -415,15 +415,12 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir):
     spec: dict with "width", "height", "fps" keys.
     """
     ff = ff_exe()
-    W, H = int(spec["width"]), int(spec["height"])
-    fps = float(spec["fps"])
-
-    # Default to sane values if probe failed
-    if W <= 0 or H <= 0:
-        W, H = 1280, 720
-    if fps <= 0:
-        fps = 30.0
-
+    # Single-clip Tier 1: do NOT force -s/-r. Phone videos are often stored
+    # landscape (e.g. 1920x1080) with a 90° displaymatrix rotation flag; forcing
+    # a fixed WxH ignores that flag and stretches the portrait content. Letting
+    # ffmpeg re-encode natively bakes the rotation in upright and keeps the true
+    # aspect ratio + fps. All segments share the source spec, so concat still
+    # stream-copies cleanly. (Per-clip normalization belongs to multi-clip Tier 2.)
     seg_paths = []
     for idx, (start, end) in enumerate(cutlist):
         seg_path = os.path.join(tmpdir, f"seg_{idx:04d}.mp4")
@@ -435,8 +432,6 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir):
             "-t", f"{duration:.6f}",
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
-            "-r", str(fps),
-            "-s", f"{W}x{H}",
             "-c:a", "aac",
             "-ar", "48000",
             "-movflags", "+faststart",
