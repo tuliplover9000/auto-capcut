@@ -33,7 +33,7 @@ JOBS_DIR = os.path.join(HERE, "webjobs")
 os.makedirs(JOBS_DIR, exist_ok=True)
 
 ALLOWED_EXT = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v"}
-STYLES = {"pop", "highlight", "oneword"}
+STYLES = {"clean", "pop", "highlight", "oneword"}
 COLORS = {"yellow", "green", "cyan", "red", "white"}
 POSES = {"lower", "center"}
 FONTS = set(autoedit.CAPTION_FONTS)
@@ -329,8 +329,8 @@ def run():
         "model": (request.form.get("model") or "sonnet").strip() or "sonnet",
         "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
         "burn": request.form.get("burn", "") in ("1", "true", "on", "yes"),
-        "style": pick("style", STYLES, "pop"),
-        "font": pick("font", FONTS, "Anton"),
+        "style": pick("style", STYLES, "clean"),
+        "font": pick("font", FONTS, "Montserrat"),
         "highlight": pick("highlight", COLORS, "yellow"),
         "pos": "lower",
         "zoom": request.form.get("zoom", "") in ("1", "true", "on", "yes"),
@@ -527,12 +527,14 @@ PAGE = r"""<!doctype html>
         <span>Burn animated captions onto the video <span class="note">(word-by-word; not editable in CapCut after)</span></span></label>
       <div class="row cwrap hide mt" id="cwrap">
         <div class="field"><label>Style</label><select id="style">
-          <option value="pop" selected>Word pop / bounce</option>
+          <option value="clean" selected>Clean (minimal phrases)</option>
+          <option value="pop">Word pop / bounce</option>
           <option value="oneword">One word at a time</option>
           <option value="highlight">Highlight only</option></select></div>
         <div class="field"><label>Font</label><select id="font">
-          <option value="Anton" selected>Anton</option><option value="Bebas Neue">Bebas Neue</option>
-          <option value="Montserrat">Montserrat</option><option value="Arial Black">Arial Black</option>
+          <option value="Montserrat" selected>Montserrat</option>
+          <option value="Anton">Anton</option><option value="Bebas Neue">Bebas Neue</option>
+          <option value="Arial Black">Arial Black</option>
           <option value="Impact">Impact</option></select></div>
         <div class="field"><label>Highlight color</label><select id="hl">
           <option value="yellow" selected>Yellow</option><option value="green">Green</option>

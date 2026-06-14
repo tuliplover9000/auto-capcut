@@ -46,10 +46,13 @@ python autoedit.py myclip.mp4 --burn-captions --caption-style pop --caption-high
 ```
 
 Options:
-- `--caption-style {pop,highlight,oneword}` — pop = active word bounces in;
-  highlight = active word changes color; oneword = one big centered word at a time.
-- `--caption-font {Anton,Bebas Neue,Montserrat,Arial Black,Impact}` — the first
-  three are bundled in `fonts/` (OFL); the last two come from the OS.
+- `--caption-style {clean,pop,highlight,oneword}` — **clean** (default) = minimal
+  static phrases (white, soft shadow, no outline) like a pro talking-head edit;
+  pop = active word bounces in; highlight = active word changes color; oneword =
+  one big centered word at a time.
+- `--caption-font {Montserrat,Anton,Bebas Neue,Arial Black,Impact}` — default
+  **Montserrat** (clean body look); Anton/Bebas suit the punchy styles. First
+  three are bundled in `fonts/` (OFL); last two come from the OS.
 - `--caption-highlight {yellow,green,cyan,red,white}`
 - `--caption-pos {lower,center}` (for pop/highlight)
 

@@ -900,7 +900,7 @@ CAPTION_FONTS = {
     "Bebas Neue":  ("Bebas Neue", "BebasNeue-Regular.ttf"),
     "Montserrat":  ("Montserrat", "Montserrat-Variable.ttf"),
 }
-CAPTION_STYLES = ("pop", "highlight", "oneword")
+CAPTION_STYLES = ("clean", "pop", "highlight", "oneword")
 
 # ── camera-zoom palette / constants ──────────────────────────────────────────
 ZOOM_BIAS = 0.40   # vertical centre of the zoom window (faces sit upper-centre in portrait)
@@ -1005,6 +1005,12 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
       pop       — like highlight + active word bounces in (scale 125->100)
       oneword   — one big screen-centered word at a time (Hormozi style)
     `font` is the ASS family name. Returns the number of dialogue events.
+    Styles:
+      clean     — minimal static phrase captions: white, soft shadow, NO outline,
+                  3-6 word phrases, no animation (the default; matches pro reels)
+      highlight — active word changes color, the line stays on screen
+      pop       — like highlight + active word bounces in (scale 125->100)
+      oneword   — one big screen-centered word at a time (Hormozi style)
     """
     kept = _kept_words(cutlist, all_words)
     if not kept:
@@ -1024,8 +1030,13 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
             align, margin_v = 5, 0
         else:                              # lower third
             align, margin_v = 2, round(out_h * 0.16)
-    outline = max(2, round(fontsize * 0.07))
-    shadow = max(0, round(fontsize * 0.03))
+    if style == "clean":
+        # clean: no hard outline, a soft drop shadow only (the reels' look)
+        outline = 0
+        shadow = max(3, round(fontsize * 0.06))
+    else:
+        outline = max(2, round(fontsize * 0.07))
+        shadow = max(0, round(fontsize * 0.03))
 
     header = (
         "[Script Info]\n"
@@ -1057,7 +1068,21 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
     POP_HOLD = "\\fscx100\\fscy100\\t(0,120,\\fscx122\\fscy122)"
 
     dialogues = []
-    if style == "oneword":
+    if style == "clean":
+        # Minimal static phrase captions: white, soft shadow, no per-word
+        # animation, no highlight. One event per ~5-6 word phrase, held for its
+        # span. Matches the reference reels' body-caption look.
+        for line in _group_caption_lines(kept, max_words=6):
+            text = " ".join(_ass_escape(w["word"]) for w in line).strip()
+            if not text:
+                continue
+            st, en = line[0]["new_start"], line[-1]["new_end"]
+            if en <= st:
+                en = st + 0.05
+            dialogues.append(
+                f"Dialogue: 0,{_ass_ts(st)},{_ass_ts(en)},Default,,0,0,0,,{text}")
+
+    elif style == "oneword":
         for i, w in enumerate(kept):
             start = w["new_start"]
             end = kept[i + 1]["new_start"] if i + 1 < len(kept) else w["new_end"]
@@ -1252,10 +1277,10 @@ def main():
     ap.add_argument("--burn-captions", action="store_true",
                     help="Also output roughcut_captioned.mp4 with word-by-word "
                          "animated captions burned in (not editable afterward)")
-    ap.add_argument("--caption-style", choices=CAPTION_STYLES, default="pop",
-                    help="Animation style: pop | highlight | oneword (default: pop)")
-    ap.add_argument("--caption-font", choices=sorted(CAPTION_FONTS), default="Anton",
-                    help="Font for burned captions (default: Anton)")
+    ap.add_argument("--caption-style", choices=CAPTION_STYLES, default="clean",
+                    help="Caption style: clean | pop | highlight | oneword (default: clean)")
+    ap.add_argument("--caption-font", choices=sorted(CAPTION_FONTS), default="Montserrat",
+                    help="Font for burned captions (default: Montserrat)")
     ap.add_argument("--caption-highlight", choices=sorted(CAPTION_COLORS), default="yellow",
                     help="Active-word highlight color (default: yellow)")
     ap.add_argument("--caption-pos", choices=["lower", "center"], default="lower",
