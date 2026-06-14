@@ -18,7 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 try:
-    from autoedit import probe, render_video, write_srt, ff_exe, run
+    from autoedit import probe, render_video, write_srt, write_ass, ff_exe, run
 except ImportError as e:
     print(f"FATAL: cannot import autoedit: {e}")
     sys.exit(1)
@@ -140,6 +140,23 @@ def main():
             print(f"  SRT content preview:\n    " +
                   "\n    ".join(content.strip().splitlines()[:8]))
     check("SRT format well-formed (has timestamp lines)", srt_valid)
+
+    # ── 5. write_ass(): Events Format must have MarginV (10 fields) ───────────
+    # Regression guard: a missing MarginV makes libass prepend a stray ',' to
+    # every burned caption line.
+    print("\n[5] write_ass() Events Format + clean text")
+    ass_path = os.path.join(tmpdir, "t.ass") if os.path.isdir(tmpdir) else os.path.join(HERE, "t.ass")
+    os.makedirs(os.path.dirname(ass_path), exist_ok=True)
+    n = write_ass(fake_cutlist, fake_words, 1080, 1920, ass_path, style="pop")
+    ass = open(ass_path, encoding="utf-8").read() if os.path.exists(ass_path) else ""
+    fmt = next((l for l in ass.splitlines() if l.startswith("Format:") and "Start" in l
+                and "Text" in l and "MarginR" in l), "")
+    check("write_ass produced events", n > 0, f"{n} events")
+    check("Events Format includes MarginV", "MarginV" in fmt, fmt[:60])
+    # Every Dialogue's text field must not begin with a comma
+    bad = [l for l in ass.splitlines() if l.startswith("Dialogue:")
+           and l.split(",", 9)[-1].lstrip().startswith(",")]
+    check("no Dialogue text starts with ','", len(bad) == 0, f"{len(bad)} bad")
 
     # ── cleanup ──────────────────────────────────────────────────────────────
     shutil.rmtree(tmpdir, ignore_errors=True)

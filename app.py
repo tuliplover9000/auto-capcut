@@ -53,7 +53,7 @@ def _append_log(job_id, line):
 
 
 def run_job(job_id, input_path, outdir, aggressiveness, model, whisper_model,
-            burn=False, highlight="yellow"):
+            burn=False, highlight="yellow", style="pop", font="Anton"):
     """Run autoedit.py as a subprocess, streaming its stdout into the job log."""
     cmd = [
         sys.executable, AUTOEDIT, input_path,
@@ -63,7 +63,8 @@ def run_job(job_id, input_path, outdir, aggressiveness, model, whisper_model,
         "--whisper-model", whisper_model,
     ]
     if burn:
-        cmd += ["--burn-captions", "--caption-highlight", highlight]
+        cmd += ["--burn-captions", "--caption-highlight", highlight,
+                "--caption-style", style, "--caption-font", font]
     _set(job_id, state="running")
     try:
         proc = subprocess.Popen(
@@ -114,6 +115,12 @@ def run():
     highlight = request.form.get("highlight", "yellow").strip() or "yellow"
     if highlight not in {"yellow", "green", "cyan", "red", "white"}:
         highlight = "yellow"
+    style = request.form.get("style", "pop").strip() or "pop"
+    if style not in {"pop", "oneword", "highlight"}:
+        style = "pop"
+    font = request.form.get("font", "Anton").strip() or "Anton"
+    if font not in {"Anton", "Bebas Neue", "Montserrat", "Arial Black", "Impact"}:
+        font = "Anton"
 
     job_id = uuid.uuid4().hex[:12]
     jobdir = os.path.join(JOBS_DIR, job_id)
@@ -128,7 +135,7 @@ def run():
 
     t = threading.Thread(target=run_job, args=(
         job_id, input_path, outdir, aggressiveness, model, whisper_model,
-        burn, highlight), daemon=True)
+        burn, highlight, style, font), daemon=True)
     t.start()
     return jsonify(job_id=job_id)
 
@@ -247,13 +254,29 @@ PAGE = r"""<!doctype html>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="burn">
         <span>Burn animated captions onto the video <small>(word-by-word highlight; not editable in CapCut after)</small></span></label>
-      <div class="field cwrap hide" id="cwrap"><label>Highlight color</label>
-        <select id="hl">
-          <option value="yellow" selected>Yellow</option>
-          <option value="green">Green</option>
-          <option value="cyan">Cyan</option>
-          <option value="red">Red</option>
-        </select></div>
+      <div class="row cwrap hide" id="cwrap">
+        <div class="field"><label>Style</label>
+          <select id="style">
+            <option value="pop" selected>Word pop / bounce</option>
+            <option value="oneword">One word at a time</option>
+            <option value="highlight">Highlight only</option>
+          </select></div>
+        <div class="field"><label>Font</label>
+          <select id="font">
+            <option value="Anton" selected>Anton</option>
+            <option value="Bebas Neue">Bebas Neue</option>
+            <option value="Montserrat">Montserrat</option>
+            <option value="Arial Black">Arial Black</option>
+            <option value="Impact">Impact</option>
+          </select></div>
+        <div class="field"><label>Highlight color</label>
+          <select id="hl">
+            <option value="yellow" selected>Yellow</option>
+            <option value="green">Green</option>
+            <option value="cyan">Cyan</option>
+            <option value="red">Red</option>
+          </select></div>
+      </div>
     </div>
     <button class="start" id="go" disabled>Start auto-edit</button>
     <p class="note">Uses your Claude Max plan — no API key, no per-token bill.</p>
@@ -302,6 +325,8 @@ $("#go").onclick = async () => {
   fd.append("whisper_model", $("#whisper").value);
   fd.append("burn", $("#burn").checked ? "1" : "0");
   fd.append("highlight", $("#hl").value);
+  fd.append("style", $("#style").value);
+  fd.append("font", $("#font").value);
   $("#setup").classList.add("hide");
   $("#progress").classList.remove("hide");
   renderSteps(0);

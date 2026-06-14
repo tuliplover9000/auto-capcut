@@ -594,6 +594,20 @@ CAPTION_COLORS = {
 }
 BASE_COLOR = "&H00FFFFFF"  # inactive words: white
 
+# Friendly font key -> (ASS family name, bundled .ttf filename or None for a
+# system font). Bundled fonts live in ./fonts and are copied next to the .ass
+# at burn time so libass finds them without OS install.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+FONTS_DIR = os.path.join(_HERE, "fonts")
+CAPTION_FONTS = {
+    "Arial Black": ("Arial Black", None),
+    "Impact":      ("Impact", None),
+    "Anton":       ("Anton", "Anton-Regular.ttf"),
+    "Bebas Neue":  ("Bebas Neue", "BebasNeue-Regular.ttf"),
+    "Montserrat":  ("Montserrat", "Montserrat-Variable.ttf"),
+}
+CAPTION_STYLES = ("pop", "highlight", "oneword")
+
 
 def _ass_ts(seconds):
     """Seconds -> ASS timestamp H:MM:SS.cs (centiseconds)."""
@@ -636,13 +650,14 @@ def _group_caption_lines(kept, max_words=4, gap_break=0.6):
 
 
 def write_ass(cutlist, all_words, out_w, out_h, ass_path,
-              font="Arial Black", highlight="&H0000FFFF", pos="lower"):
+              font="Anton", highlight="&H0000FFFF", pos="lower", style="pop"):
     """
-    Write an ASS subtitle file with word-by-word highlighting, sized to the
-    OUTPUT video dimensions (out_w x out_h — the upright rough cut).
-    Each word gets its own dialogue event so the active word pops to `highlight`
-    while the rest of the line stays white; the line stays on screen across its
-    words. Returns the number of lines written.
+    Write an ASS subtitle file sized to the OUTPUT video dimensions
+    (out_w x out_h — the upright rough cut). Styles:
+      highlight — active word changes color, the line stays on screen
+      pop       — like highlight + active word bounces in (scale 125->100)
+      oneword   — one big screen-centered word at a time (Hormozi style)
+    `font` is the ASS family name. Returns the number of dialogue events.
     """
     kept = _kept_words(cutlist, all_words)
     if not kept:
@@ -651,14 +666,19 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
     out_w = int(out_w) if out_w and out_w > 0 else 1080
     out_h = int(out_h) if out_h and out_h > 0 else 1920
 
-    fontsize = max(24, round(out_h * 0.052))
+    if style == "oneword":
+        fontsize = max(40, round(out_h * 0.075))
+        align, margin_v = 5, 0             # big, screen-centered
+        margin_lr = round(out_w * 0.05)
+    else:
+        fontsize = max(24, round(out_h * 0.052))
+        margin_lr = round(out_w * 0.07)
+        if pos == "center":
+            align, margin_v = 5, 0
+        else:                              # lower third
+            align, margin_v = 2, round(out_h * 0.16)
     outline = max(2, round(fontsize * 0.07))
     shadow = max(0, round(fontsize * 0.03))
-    margin_lr = round(out_w * 0.07)
-    if pos == "center":
-        align, margin_v = 5, 0
-    else:  # lower third
-        align, margin_v = 2, round(out_h * 0.16)
 
     header = (
         "[Script Info]\n"
@@ -676,30 +696,50 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
         f"&H64000000,-1,0,0,0,100,100,0,0,1,{outline},{shadow},{align},"
         f"{margin_lr},{margin_lr},{margin_v},1\n\n"
         "[Events]\n"
-        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, "
+        # MarginV MUST be here: each Dialogue has 10 fields. Omitting it makes
+        # libass parse Text one field early and prepend a stray ',' to every line.
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, "
         "Effect, Text\n"
     )
 
+    # bounce-in: start 125% and ease to 100% over 150ms (no reflow at rest)
+    POP = "\\fscx125\\fscy125\\t(0,150,\\fscx100\\fscy100)"
+
     dialogues = []
-    for line in _group_caption_lines(kept):
-        n = len(line)
-        for i in range(n):
-            start = line[i]["new_start"]
-            end = line[i + 1]["new_start"] if i + 1 < n else line[i]["new_end"]
+    if style == "oneword":
+        for i, w in enumerate(kept):
+            start = w["new_start"]
+            end = kept[i + 1]["new_start"] if i + 1 < len(kept) else w["new_end"]
             if end <= start:
                 end = start + 0.05
-            parts = []
-            for j, ww in enumerate(line):
-                tok = _ass_escape(ww["word"])
-                if not tok:
-                    continue
-                if j == i:
-                    parts.append(f"{{\\c{highlight}}}{tok}{{\\c{BASE_COLOR}}}")
-                else:
-                    parts.append(tok)
-            text = " ".join(parts)
+            tok = _ass_escape(w["word"])
+            if not tok:
+                continue
+            text = f"{{\\c{highlight}{POP}}}{tok}"
             dialogues.append(
                 f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{text}")
+    else:
+        for line in _group_caption_lines(kept):
+            n = len(line)
+            for i in range(n):
+                start = line[i]["new_start"]
+                end = line[i + 1]["new_start"] if i + 1 < n else line[i]["new_end"]
+                if end <= start:
+                    end = start + 0.05
+                parts = []
+                for j, ww in enumerate(line):
+                    tok = _ass_escape(ww["word"])
+                    if not tok:
+                        continue
+                    if j == i and style == "pop":
+                        parts.append(f"{{\\c{highlight}{POP}}}{tok}{{\\r}}")
+                    elif j == i:  # highlight
+                        parts.append(f"{{\\c{highlight}}}{tok}{{\\c{BASE_COLOR}}}")
+                    else:
+                        parts.append(tok)
+                text = " ".join(parts)
+                dialogues.append(
+                    f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{text}")
 
     with open(ass_path, "w", encoding="utf-8") as f:
         f.write(header)
@@ -708,19 +748,28 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
     return len(dialogues)
 
 
-def burn_captions(in_mp4, ass_path, out_mp4):
+def burn_captions(in_mp4, ass_path, out_mp4, font_file=None):
     """
     Burn the ASS captions onto in_mp4 -> out_mp4 (re-encode video, copy audio).
-    Runs ffmpeg with cwd = the ass file's dir and references it by basename, so
-    Windows drive-letter paths never hit the fragile -vf path parser.
+    Runs ffmpeg with cwd = the ass file's dir and references everything by
+    basename, so Windows drive-letter paths never hit the fragile -vf parser.
+    If font_file is given (a bundled .ttf), it's copied next to the .ass and
+    libass is pointed at the cwd via fontsdir=.
     """
     ff = ff_exe()
     workdir = os.path.dirname(os.path.abspath(ass_path))
     ass_name = os.path.basename(ass_path)
+    vf = f"ass={ass_name}"
+    if font_file and os.path.exists(font_file):
+        try:
+            shutil.copy(font_file, os.path.join(workdir, os.path.basename(font_file)))
+            vf = f"ass={ass_name}:fontsdir=."
+        except Exception:
+            pass  # fall back to system font lookup
     cmd = [
         ff, "-y",
         "-i", os.path.abspath(in_mp4),
-        "-vf", f"ass={ass_name}",
+        "-vf", vf,
         "-c:v", "libx264",
         "-pix_fmt", "yuv420p",
         "-c:a", "copy",
@@ -805,12 +854,14 @@ def main():
     ap.add_argument("--burn-captions", action="store_true",
                     help="Also output roughcut_captioned.mp4 with word-by-word "
                          "animated captions burned in (not editable afterward)")
-    ap.add_argument("--caption-font", default="Arial Black",
-                    help="Font for burned captions (default: Arial Black)")
+    ap.add_argument("--caption-style", choices=CAPTION_STYLES, default="pop",
+                    help="Animation style: pop | highlight | oneword (default: pop)")
+    ap.add_argument("--caption-font", choices=sorted(CAPTION_FONTS), default="Anton",
+                    help="Font for burned captions (default: Anton)")
     ap.add_argument("--caption-highlight", choices=sorted(CAPTION_COLORS), default="yellow",
                     help="Active-word highlight color (default: yellow)")
     ap.add_argument("--caption-pos", choices=["lower", "center"], default="lower",
-                    help="Burned caption position (default: lower third)")
+                    help="Burned caption position for pop/highlight (default: lower third)")
     ap.add_argument("--selftest", action="store_true",
                     help="Check dependencies and exit")
     args = ap.parse_args()
@@ -912,19 +963,22 @@ def main():
             section("7c/7  BURN ANIMATED CAPTIONS")
             cap_spec = probe(out_mp4)  # true upright dims of the rendered cut
             ass_path = os.path.join(tmpdir, "captions.ass")
+            fam, font_file = CAPTION_FONTS.get(args.caption_font, ("Arial Black", None))
             n_ass = write_ass(
                 cutlist, all_words, cap_spec["width"], cap_spec["height"], ass_path,
-                font=args.caption_font,
+                font=fam,
                 highlight=CAPTION_COLORS[args.caption_highlight],
                 pos=args.caption_pos,
+                style=args.caption_style,
             )
             if n_ass == 0:
                 print("  (no words to caption — skipped)")
             else:
                 out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
-                print(f"  {n_ass} word events, {args.caption_highlight} highlight, "
-                      f"{args.caption_pos} — burning ...")
-                burn_captions(out_mp4, ass_path, out_cap)
+                font_path = os.path.join(FONTS_DIR, font_file) if font_file else None
+                print(f"  style={args.caption_style} font={args.caption_font} "
+                      f"highlight={args.caption_highlight} — {n_ass} events, burning ...")
+                burn_captions(out_mp4, ass_path, out_cap, font_file=font_path)
                 print(f"  captioned video: {out_cap} "
                       f"({os.path.getsize(out_cap)//1024} KiB)")
 

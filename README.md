@@ -35,11 +35,19 @@ a color). Ready to post as-is, but **not editable in CapCut afterward**.
 
 ```bash
 python autoedit.py myclip.mp4 --burn-captions
-python autoedit.py myclip.mp4 --burn-captions --caption-highlight green --caption-pos center
+python autoedit.py myclip.mp4 --burn-captions --caption-style oneword --caption-font "Bebas Neue"
+python autoedit.py myclip.mp4 --burn-captions --caption-style pop --caption-highlight green
 ```
 
-Options: `--caption-highlight {yellow,green,cyan,red,white}`,
-`--caption-pos {lower,center}`, `--caption-font "Arial Black"`.
+Options:
+- `--caption-style {pop,highlight,oneword}` — pop = active word bounces in;
+  highlight = active word changes color; oneword = one big centered word at a time.
+- `--caption-font {Anton,Bebas Neue,Montserrat,Arial Black,Impact}` — the first
+  three are bundled in `fonts/` (OFL); the last two come from the OS.
+- `--caption-highlight {yellow,green,cyan,red,white}`
+- `--caption-pos {lower,center}` (for pop/highlight)
+
+All of these are also exposed in the web UI when "Burn animated captions" is checked.
 
 ## Max plan / no API key
 
