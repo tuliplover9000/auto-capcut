@@ -57,22 +57,24 @@ All of these are also exposed in the web UI when "Burn animated captions" is che
 
 ### Camera zooms (optional)
 
-Add `--zoom` to let Claude add tasteful camera zooms (punch-ins, slow pushes,
-pull-outs, and the occasional snap on a punchline) to the rough cut. The zoom
-choices are **decided by Claude per segment** — it alternates a resting wide
-frame with punch-ins so the framing keeps moving, zooms in on hooks/emphasis,
-and reserves snaps for jokes/beats. When zoom is off the render is byte-for-byte
-unchanged from the no-zoom pipeline.
+Add `--zoom` to let Claude add tasteful camera zooms, decided **per segment**.
+Two modes (`--zoom-mode`):
+
+- **`static`** (default) — matches the reference-reel look: a hard cut to a
+  held, slightly closer framing ("two-framing"), used sparingly on hooks/
+  emphasis. No movement within a clip. Subtle (~1.10–1.14).
+- **`animated`** — continuous push-in / pull-out *during* the clip (more
+  energetic). On request only.
 
 ```bash
-python autoedit.py myclip.mp4 --zoom
-python autoedit.py myclip.mp4 --zoom --burn-captions
+python autoedit.py myclip.mp4 --zoom                      # static (default)
+python autoedit.py myclip.mp4 --zoom --zoom-mode animated # moving zooms
 ```
 
-In the **web UI** there's a "Camera zooms (auto punch-ins)" checkbox (on by
-default). The zooms are **chat-adjustable** — after the first edit, tell the
-editor things like "more punch-ins", "no zoom on the intro", "calmer", or "turn
-off the zooms" and it re-plans and re-renders.
+When zoom is off the render is byte-for-byte unchanged from the no-zoom pipeline.
+In the **web UI** there's a "Camera zooms" checkbox (on by default). It's
+**chat-adjustable** — "more punch-ins", "no zoom on the intro", "make the zooms
+animated", "calmer", or "turn off the zooms" and it re-plans and re-renders.
 
 ### Effects (optional)
 

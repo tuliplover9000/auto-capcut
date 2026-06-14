@@ -338,11 +338,15 @@ The transcript follows on stdin."""
     return spans
 
 
-def decide_zooms_with_claude(cutlist, all_words, model="sonnet", extra=""):
+def decide_zooms_with_claude(cutlist, all_words, model="sonnet", extra="", mode="static"):
     """
     Ask Claude to choose a camera zoom PER kept segment. Returns a list aligned
     1:1 with cutlist of {"type","level"} dicts, defaulting to none and enforcing
-    duration/no-double-snap guardrails. Never raises — falls back to all-none.
+    guardrails. Never raises — falls back to all-none.
+
+    mode="static" (default): the reference-reel look — a STATIC framing jump (hard
+      cut to a held closer crop), two-framing, sparse. Only none/in.
+    mode="animated": continuous push/pull movement within clips (energetic option).
     """
     segs = []
     for i, (s, e) in enumerate(cutlist):
@@ -350,23 +354,36 @@ def decide_zooms_with_claude(cutlist, all_words, model="sonnet", extra=""):
         segs.append(f"[{i}] {e-s:.2f}s: {txt[:200]}")
     payload = "\n".join(segs)
     extra_block = f"\nCreator's guidance (PRIORITY): {extra}\n" if extra else ""
-    prompt = f'''You are a video editor choosing CAMERA ZOOMS for a vertical talking-head edit. Below (on stdin) are the kept segments in order, one per line: [index] duration: text. Choose a zoom PER segment.
 
-Zoom types (PREFER the ANIMATED ones — the camera should MOVE during a clip, not just sit at a bigger/smaller static size):
-- "push": continuous zoom IN across the whole segment (the main tool — animated, intensifies). level ~1.10-1.18
-- "pullout": continuous zoom OUT across the segment (animated, reveal/release). level ~1.10-1.18
-- "snap": fast punchy zoom, JOKES/BEATS/PUNCHLINES ONLY. level ~1.18-1.25
-- "none": no movement, resting frame (use for ~1 in 3 segments so the motion has contrast)
-- "in": static close framing held, NO movement — use rarely (only when a steady tight shot is wanted)
+    if mode == "animated":
+        body = '''Zoom types (this is the ANIMATED mode — the camera MOVES during a clip):
+- "push": continuous zoom IN across the segment (main tool, intensify). level ~1.10-1.18
+- "pullout": continuous zoom OUT across the segment (reveal/release). level ~1.10-1.18
+- "snap": fast punchy zoom, JOKES/BEATS ONLY. level ~1.18-1.25
+- "none": no movement (use ~1 in 3 segments for contrast)
+- "in": static held crop (use rarely)
+
+RULES:
+- Most zoomed segments are "push" or "pullout"; ALTERNATE them so it breathes in/out.
+- ~1 in 3 segments "none" for contrast. Bigger moves on hooks/emphasis, gentle on calm lines.
+- "snap" only for clear jokes/beats, never two in a row.'''
+    else:  # static (default) — matches the reference reels
+        body = '''Zoom types (STATIC mode — NO animated movement; this matches a clean pro talking-head edit):
+- "none": wide/resting framing 1.0x (the DEFAULT for most segments)
+- "in": a STATIC closer framing, held still for the whole segment (a punch-in). level ~1.10-1.14
+Do NOT use push/pullout/snap in this mode.
 
 RULES (follow strictly):
-- DEFAULT to ANIMATED motion: most zoomed segments should be "push" or "pullout" so the frame is actively moving during the clip. ALTERNATE push and pullout segment-to-segment so it breathes in and out (don't push every single one).
-- Leave roughly 1 in 3 segments as "none" (no motion) so the pushes have contrast — constant motion on every clip is nauseating.
-- Bigger/longer moves on hooks, emphasis, and stakes-raising beats; gentler on calm/explanatory lines (small level, or "none").
-- "snap" ONLY for clear jokes/punchlines/beats. NEVER two snaps in a row. If unsure, don't snap.
-- Prefer "push"/"pullout" over the static "in" — the creator wants visible animated zooming, not just a bigger static crop.
+- This is "two-framing": the frame is either wide ("none") or punched-in ("in"), and it CUTS between them — it never moves within a clip.
+- Be SPARSE: MOST segments are "none". Use "in" only on hooks, emphasis, new points / topic shifts — roughly 1 in 3-4 segments, not every clip.
+- Don't put "in" on many segments in a row; alternate with "none" so the punch-in reads as a deliberate change.
+- Keep levels subtle (~1.10-1.14). The effect is the JUMP at the cut, not a big crop.'''
+
+    prompt = f'''You are a video editor choosing CAMERA ZOOMS for a vertical talking-head edit. Below (on stdin) are the kept segments in order, one per line: [index] duration: text. Choose a zoom PER segment.
+
+{body}
 {extra_block}
-Return ONLY JSON: {{"zooms":[{{"i":0,"type":"in","level":1.15}}, ...]}} — one entry per segment index 0..{len(cutlist)-1}. "level" optional.
+Return ONLY JSON: {{"zooms":[{{"i":0,"type":"in","level":1.12}}, ...]}} — one entry per segment index 0..{len(cutlist)-1}. "level" optional.
 
 The segments follow on stdin.'''
     try:
@@ -389,11 +406,15 @@ The segments follow on stdin.'''
     prev = None
     for i, (s, e) in enumerate(cutlist):
         dur = e - s; z = plan[i]
-        # Too short to animate a move -> rest (NOT a static "in"; the creator
-        # wants motion, and a static crop on a sub-half-second clip is pointless).
-        if z["type"] in ("push", "pullout") and dur < 0.5: z["type"] = "none"
-        if z["type"] == "snap" and dur < 0.4: z["type"] = "in"
-        if z["type"] == "snap" and prev == "snap": z["type"] = "in"
+        if mode != "animated":
+            # static mode: collapse any motion type to a held static punch-in
+            if z["type"] in ("push", "pullout", "snap"):
+                z["type"] = "in"
+        else:
+            # animated: too short to move -> rest; snap guardrails
+            if z["type"] in ("push", "pullout") and dur < 0.5: z["type"] = "none"
+            if z["type"] == "snap" and dur < 0.4: z["type"] = "in"
+            if z["type"] == "snap" and prev == "snap": z["type"] = "in"
         prev = z["type"]
     return plan
 
@@ -427,13 +448,13 @@ Decide how to revise. Respond with ONLY a JSON object:
   "reply": "<friendly 1-2 sentence reply describing what you changed (or why you can't)>",
   "keep": [[start,end], ...],
   "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
-  "zoom": {{"enabled": true, "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}},
+  "zoom": {{"enabled": true, "mode": "static|animated", "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}},
   "effects": {{"vignette": true, "grain": true, "flash": true}}
 }}
 Rules:
 - Include "keep" ONLY if the creator wants to change which parts are kept/removed. It must be the FULL new ordered, non-overlapping list within [0,{total_duration:.2f}]. Omit it entirely if the cut is unchanged.
 - Include "captions" ONLY with the fields that change (e.g. just {{"font":"Bebas Neue"}}). Omit it if the look is unchanged. Set "burn":true if they want captions added.
-- Include "zoom" ONLY if the creator wants to change camera zooms (e.g. "more punch-ins", "no zoom on the intro", "calmer"). Omit otherwise. Set "enabled":false to turn zooms off.
+- Include "zoom" ONLY if the creator wants to change camera zooms. Omit otherwise. Set "enabled":false to turn zooms off. Set "mode":"animated" if they want moving/animated zooms, "static" if they want still punch-ins (the default look).
 - Include "effects" ONLY with the toggles that change. Available: "vignette" (darkened edges), "grain" (film grain), "flash" (white flash on cuts). e.g. {{"vignette":true}} or {{"grain":false}}. Omit if no effect changes.
 - If they ask for something not supported yet (b-roll, music, sound effects, camera shake), explain that in "reply" and omit the unsupported directives.
 - "reply" is always required. Output JSON only — no markdown, no prose outside the JSON."""
@@ -883,7 +904,7 @@ CAPTION_STYLES = ("pop", "highlight", "oneword")
 
 # ── camera-zoom palette / constants ──────────────────────────────────────────
 ZOOM_BIAS = 0.40   # vertical centre of the zoom window (faces sit upper-centre in portrait)
-DEFAULT_ZOOM_LEVEL = {"in": 1.15, "push": 1.16, "pullout": 1.16, "snap": 1.22, "none": 1.0}
+DEFAULT_ZOOM_LEVEL = {"in": 1.12, "push": 1.16, "pullout": 1.16, "snap": 1.22, "none": 1.0}
 ZOOM_TYPES = ("none", "in", "push", "pullout", "snap")
 
 
@@ -1240,7 +1261,9 @@ def main():
     ap.add_argument("--caption-pos", choices=["lower", "center"], default="lower",
                     help="Burned caption position for pop/highlight (default: lower third)")
     ap.add_argument("--zoom", action="store_true",
-                    help="Auto camera zooms (Claude-decided punch-ins/pushes)")
+                    help="Auto camera zooms (Claude-decided)")
+    ap.add_argument("--zoom-mode", choices=["static", "animated"], default="static",
+                    help="static = punch-in framing jumps (matches reels); animated = push/pull motion")
     ap.add_argument("--vignette", action="store_true",
                     help="Effect: subtle darkened edges")
     ap.add_argument("--grain", action="store_true",
@@ -1338,7 +1361,7 @@ def main():
         zoomplan = None
         if args.zoom:
             section("6b/7  ZOOM DECISIONS")
-            zoomplan = decide_zooms_with_claude(cutlist, all_words, model=args.model)
+            zoomplan = decide_zooms_with_claude(cutlist, all_words, model=args.model, mode=args.zoom_mode)
             from collections import Counter
             print("  " + ", ".join(f"{k}:{v}" for k, v in Counter(z["type"] for z in zoomplan).items()))
 

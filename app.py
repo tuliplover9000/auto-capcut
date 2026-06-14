@@ -218,7 +218,8 @@ def run_job(job_id, instructions):
         if job["settings"].get("zoom"):
             _stage(job_id, stage="Deciding zooms")
             job["zoomplan"] = autoedit.decide_zooms_with_claude(
-                job["cutlist"], job["all_words"], job["settings"]["model"])
+                job["cutlist"], job["all_words"], job["settings"]["model"],
+                mode=job["settings"].get("zoom_mode", "static"))
 
         _stage(job_id, step=7, stage="Rendering")
         _render_outputs(job)
@@ -262,6 +263,8 @@ def revise_job(job_id, msg):
             job["settings"]["zoom"] = bool(zdir.get("enabled", job["settings"].get("zoom", True)))
             if zdir.get("instruction"):
                 job["zoom_instruction"] = str(zdir["instruction"])
+            if zdir.get("mode") in ("static", "animated"):
+                job["settings"]["zoom_mode"] = zdir["mode"]
             need_full = True
 
         # Effects directive (vignette/grain/flash) — only needs a cheap re-grade,
@@ -281,7 +284,8 @@ def revise_job(job_id, msg):
                 _stage(job_id, stage="Deciding zooms")
                 job["zoomplan"] = autoedit.decide_zooms_with_claude(
                     job["cutlist"], job["all_words"], job["settings"]["model"],
-                    extra=job.get("zoom_instruction", ""))
+                    extra=job.get("zoom_instruction", ""),
+                    mode=job["settings"].get("zoom_mode", "static"))
             else:
                 job["zoomplan"] = None
             _stage(job_id, stage="Re-rendering")
@@ -330,6 +334,7 @@ def run():
         "highlight": pick("highlight", COLORS, "yellow"),
         "pos": "lower",
         "zoom": request.form.get("zoom", "") in ("1", "true", "on", "yes"),
+        "zoom_mode": "static",
         "vignette": request.form.get("vignette", "") in ("1", "true", "on", "yes"),
         "grain": request.form.get("grain", "") in ("1", "true", "on", "yes"),
         "flash": request.form.get("flash", "") in ("1", "true", "on", "yes"),
