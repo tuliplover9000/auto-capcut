@@ -96,6 +96,19 @@ Each is a checkbox in the web UI and **chat-adjustable** ("add a vignette",
 "turn off the grain", "put a flash on the cuts"). Effect toggles re-grade
 cheaply without re-cutting.
 
+### Editorial titles (optional)
+
+Add `--titles` for big yellow hook/section title cards (condensed Anton + thick
+black outline, top of frame), Claude-decided and sparse — a hook over the
+opening plus a couple of section headers. Separate layer from the body captions,
+so it works with any caption style (or on its own). Checkbox in the UI;
+chat-adjustable ("add the big titles", "turn off titles").
+
+```bash
+python autoedit.py myclip.mp4 --titles
+python autoedit.py myclip.mp4 --burn-captions --titles
+```
+
 ## Max plan / no API key
 
 This tool uses the `claude` CLI in headless mode — it bills your **Claude Max

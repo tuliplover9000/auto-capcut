@@ -419,6 +419,54 @@ The segments follow on stdin.'''
     return plan
 
 
+def decide_titles_with_claude(cutlist, all_words, model="sonnet", extra=""):
+    """
+    Ask Claude for a few EDITORIAL TITLE cards (big yellow hook/section text) —
+    sparse: a hook for the opening + a couple of section headers. Returns a list
+    of {"start","end","text"} on the OUTPUT timeline. Never raises -> falls back
+    to no titles ([]).
+    """
+    # per-segment output-timeline start/end
+    outs, acc = [], 0.0
+    for s, e in cutlist:
+        outs.append((acc, acc + (e - s)))
+        acc += (e - s)
+    segs = []
+    for i, (s, e) in enumerate(cutlist):
+        txt = " ".join(w["word"].strip() for w in all_words if s <= w["start"] < e).strip()
+        segs.append(f"[{i}] {e-s:.2f}s: {txt[:200]}")
+    payload = "\n".join(segs)
+    extra_block = f"\nCreator's guidance (PRIORITY): {extra}\n" if extra else ""
+    prompt = f'''You are a short-form video editor adding a few big EDITORIAL TITLE cards to a talking-head edit (like the bold yellow hook/section text creators use). The kept segments are on stdin: [index] duration: text.
+
+Pick a SMALL number of punchy titles:
+- ONE hook title over the opening (segment 0) — the scroll-stopper, max ~5 words.
+- 0-3 SECTION titles at clear topic shifts / big claims / list numbers.
+Titles are SHORT (1-5 words), punchy, drawn from what's said (you may compress/rephrase to a punchy version). They are NOT a transcript. Be sparse and tasteful — most segments get NO title.
+{extra_block}
+Return ONLY JSON: {{"titles":[{{"i":0,"text":"WATCH THIS"}}, ...]}} — "i" is a segment index 0..{len(cutlist)-1}.
+
+The segments follow on stdin.'''
+    try:
+        data = _extract_json(_claude_cli(prompt, payload, model))
+    except Exception:
+        return []
+    raw = data.get("titles") if isinstance(data, dict) else (data if isinstance(data, list) else [])
+    titles = []
+    for item in (raw or []):
+        try:
+            i = int(item["i"]); text = str(item.get("text", "")).strip()
+            if 0 <= i < len(cutlist) and text:
+                st, en = outs[i]
+                en = min(en, st + 2.5)          # hold ~2.5s max
+                if en - st < 0.6:               # ensure visible on short segments
+                    en = min(outs[i][1], st + 0.8)
+                titles.append({"start": st, "end": en, "text": text[:40]})
+        except (KeyError, ValueError, TypeError):
+            continue
+    return titles
+
+
 def revise_with_claude(transcript_text, total_duration, current_keep,
                        caption_settings, chat_history, user_msg, model="sonnet"):
     """
@@ -449,13 +497,15 @@ Decide how to revise. Respond with ONLY a JSON object:
   "keep": [[start,end], ...],
   "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
   "zoom": {{"enabled": true, "mode": "static|animated", "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}},
-  "effects": {{"vignette": true, "grain": true, "flash": true}}
+  "effects": {{"vignette": true, "grain": true, "flash": true}},
+  "titles": {{"enabled": true}}
 }}
 Rules:
 - Include "keep" ONLY if the creator wants to change which parts are kept/removed. It must be the FULL new ordered, non-overlapping list within [0,{total_duration:.2f}]. Omit it entirely if the cut is unchanged.
 - Include "captions" ONLY with the fields that change (e.g. just {{"font":"Bebas Neue"}}). Omit it if the look is unchanged. Set "burn":true if they want captions added.
 - Include "zoom" ONLY if the creator wants to change camera zooms. Omit otherwise. Set "enabled":false to turn zooms off. Set "mode":"animated" if they want moving/animated zooms, "static" if they want still punch-ins (the default look).
 - Include "effects" ONLY with the toggles that change. Available: "vignette" (darkened edges), "grain" (film grain), "flash" (white flash on cuts). e.g. {{"vignette":true}} or {{"grain":false}}. Omit if no effect changes.
+- Include "titles" ONLY if the creator wants the big editorial title cards (hook/section text) turned on/off. e.g. {{"enabled":true}}. Omit otherwise.
 - If they ask for something not supported yet (b-roll, music, sound effects, camera shake), explain that in "reply" and omit the unsupported directives.
 - "reply" is always required. Output JSON only — no markdown, no prose outside the JSON."""
 
@@ -464,10 +514,10 @@ Rules:
         data = _extract_json(result_str)
     except (json.JSONDecodeError, ValueError):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None, "zoom": None, "effects": None}
+                "keep": None, "captions": None, "zoom": None, "effects": None, "titles": None}
     if not isinstance(data, dict):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None, "zoom": None, "effects": None}
+                "keep": None, "captions": None, "zoom": None, "effects": None, "titles": None}
 
     reply = str(data.get("reply") or "Done.")
     # Normalize keep -> list of (s,e) tuples or None
@@ -490,7 +540,8 @@ Rules:
     caps = data.get("captions") if isinstance(data.get("captions"), dict) else None
     zoom = data.get("zoom") if isinstance(data.get("zoom"), dict) else None
     fx = data.get("effects") if isinstance(data.get("effects"), dict) else None
-    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom, "effects": fx}
+    ti = data.get("titles") if isinstance(data.get("titles"), dict) else None
+    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom, "effects": fx, "titles": ti}
 
 
 # ── R7: snap_and_clean ───────────────────────────────────────────────────────
@@ -997,7 +1048,7 @@ def _group_caption_lines(kept, max_words=4, gap_break=0.6):
 
 def write_ass(cutlist, all_words, out_w, out_h, ass_path,
               font="Anton", highlight="&H0000FFFF", pos="lower", style="pop",
-              font_file=None):
+              font_file=None, titles=None, captions=True):
     """
     Write an ASS subtitle file sized to the OUTPUT video dimensions
     (out_w x out_h — the upright rough cut). Styles:
@@ -1052,7 +1103,11 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
         "MarginL, MarginR, MarginV, Encoding\n"
         f"Style: Default,{font},{fontsize},{BASE_COLOR},&H000000FF,&H00000000,"
         f"&H64000000,-1,0,0,0,100,100,0,0,1,{outline},{shadow},{align},"
-        f"{margin_lr},{margin_lr},{margin_v},1\n\n"
+        f"{margin_lr},{margin_lr},{margin_v},1\n"
+        # Editorial title layer: big condensed yellow + thick black outline, top.
+        f"Style: Title,Anton,{round(out_h*0.072)},&H0000FFFF&,&H000000FF,&H00000000,"
+        f"&H00000000,-1,0,0,0,100,100,0,0,1,{max(4,round(out_h*0.072*0.10))},2,8,"
+        f"{round(out_w*0.06)},{round(out_w*0.06)},{round(out_h*0.10)},1\n\n"
         "[Events]\n"
         # MarginV MUST be here: each Dialogue has 10 fields. Omitting it makes
         # libass parse Text one field early and prepend a stray ',' to every line.
@@ -1068,11 +1123,12 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
     POP_HOLD = "\\fscx100\\fscy100\\t(0,120,\\fscx122\\fscy122)"
 
     dialogues = []
+    src = kept if captions else []   # captions=False -> titles-only ASS
     if style == "clean":
         # Minimal static phrase captions: white, soft shadow, no per-word
         # animation, no highlight. One event per ~5-6 word phrase, held for its
         # span. Matches the reference reels' body-caption look.
-        for line in _group_caption_lines(kept, max_words=6):
+        for line in _group_caption_lines(src, max_words=6):
             text = " ".join(_ass_escape(w["word"]) for w in line).strip()
             if not text:
                 continue
@@ -1083,9 +1139,9 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
                 f"Dialogue: 0,{_ass_ts(st)},{_ass_ts(en)},Default,,0,0,0,,{text}")
 
     elif style == "oneword":
-        for i, w in enumerate(kept):
+        for i, w in enumerate(src):
             start = w["new_start"]
-            end = kept[i + 1]["new_start"] if i + 1 < len(kept) else w["new_end"]
+            end = src[i + 1]["new_start"] if i + 1 < len(src) else w["new_end"]
             if end <= start:
                 end = start + 0.05
             tok = _ass_escape(w["word"])
@@ -1103,7 +1159,7 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
         y = round(out_h * 0.50) if pos == "center" else round(out_h * 0.82)
         mlr = round(out_w * 0.06)
         max_w = max(1, out_w - 2 * mlr)
-        for line in _group_caption_lines(kept):
+        for line in _group_caption_lines(src):
             toks = [_ass_escape(w["word"]) for w in line]
             widths, sw = _text_metrics(toks, font_file, fontsize)
             total = sum(widths) + sw * (len(toks) - 1)
@@ -1139,7 +1195,7 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
                     f"{{\\an5\\pos({cx},{y})\\fs{fs}{POP_HOLD}\\c{highlight}}}{tok}")
 
     else:  # highlight — colour change only (no size change, so no reflow)
-        for line in _group_caption_lines(kept):
+        for line in _group_caption_lines(src):
             n = len(line)
             for i in range(n):
                 start = line[i]["new_start"]
@@ -1158,6 +1214,18 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
                 dialogues.append(
                     f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{' '.join(parts)}")
 
+    # Editorial title cards (big yellow hook/section text, top of frame).
+    for t in (titles or []):
+        txt = _ass_escape(str(t.get("text", ""))).upper()
+        if not txt:
+            continue
+        st = float(t.get("start", 0.0))
+        en = float(t.get("end", st + 1.5))
+        if en <= st:
+            en = st + 0.5
+        dialogues.append(
+            f"Dialogue: 0,{_ass_ts(st)},{_ass_ts(en)},Title,,0,0,0,,{{\\fad(120,120)}}{txt}")
+
     with open(ass_path, "w", encoding="utf-8") as f:
         f.write(header)
         f.write("\n".join(dialogues) + "\n")
@@ -1170,19 +1238,26 @@ def burn_captions(in_mp4, ass_path, out_mp4, font_file=None):
     Burn the ASS captions onto in_mp4 -> out_mp4 (re-encode video, copy audio).
     Runs ffmpeg with cwd = the ass file's dir and references everything by
     basename, so Windows drive-letter paths never hit the fragile -vf parser.
-    If font_file is given (a bundled .ttf), it's copied next to the .ass and
-    libass is pointed at the cwd via fontsdir=.
+    All bundled fonts are copied next to the .ass and libass is pointed at the
+    cwd via fontsdir= — so both the body font AND the Title style's font (Anton)
+    resolve, regardless of which body font was chosen. (font_file kept for
+    backwards-compat; ignored — we copy the whole bundled set.)
     """
     ff = ff_exe()
     workdir = os.path.dirname(os.path.abspath(ass_path))
     ass_name = os.path.basename(ass_path)
     vf = f"ass={ass_name}"
-    if font_file and os.path.exists(font_file):
-        try:
-            shutil.copy(font_file, os.path.join(workdir, os.path.basename(font_file)))
+    try:
+        copied = False
+        if os.path.isdir(FONTS_DIR):
+            for fn in os.listdir(FONTS_DIR):
+                if fn.lower().endswith((".ttf", ".otf")):
+                    shutil.copy(os.path.join(FONTS_DIR, fn), os.path.join(workdir, fn))
+                    copied = True
+        if copied:
             vf = f"ass={ass_name}:fontsdir=."
-        except Exception:
-            pass  # fall back to system font lookup
+    except Exception:
+        pass  # fall back to system font lookup
     # Insurance: re-stamp source colour so the captioned output can't read as
     # washed-out SDR if the filter chain ever drops HLG/HDR tags.
     try:
@@ -1285,6 +1360,8 @@ def main():
                     help="Active-word highlight color (default: yellow)")
     ap.add_argument("--caption-pos", choices=["lower", "center"], default="lower",
                     help="Burned caption position for pop/highlight (default: lower third)")
+    ap.add_argument("--titles", action="store_true",
+                    help="Editorial title cards (big yellow hook/section text, Claude-decided)")
     ap.add_argument("--zoom", action="store_true",
                     help="Auto camera zooms (Claude-decided)")
     ap.add_argument("--zoom-mode", choices=["static", "animated"], default="static",
@@ -1406,10 +1483,14 @@ def main():
         section("7b/7  CAPTIONS")
         write_srt(cutlist, all_words, out_srt)
 
-        # ── Stage 7c: burn-in animated captions (optional) ────────────────────
+        # ── Stage 7c: burn-in captions and/or editorial titles (optional) ─────
         out_cap = None
-        if args.burn_captions:
-            section("7c/7  BURN ANIMATED CAPTIONS")
+        if args.burn_captions or args.titles:
+            section("7c/7  BURN CAPTIONS / TITLES")
+            titles = []
+            if args.titles:
+                titles = decide_titles_with_claude(cutlist, all_words, model=args.model)
+                print(f"  {len(titles)} title card(s)")
             cap_spec = probe(out_mp4)  # true upright dims of the rendered cut
             ass_path = os.path.join(tmpdir, "captions.ass")
             fam, bundled = CAPTION_FONTS.get(args.caption_font, ("Arial Black", None))
@@ -1420,15 +1501,16 @@ def main():
                 pos=args.caption_pos,
                 style=args.caption_style,
                 font_file=_font_file_path(args.caption_font),
+                titles=titles,
+                captions=args.burn_captions,
             )
             if n_ass == 0:
-                print("  (no words to caption — skipped)")
+                print("  (nothing to burn — skipped)")
             else:
                 out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
-                font_path = os.path.join(FONTS_DIR, bundled) if bundled else None
-                print(f"  style={args.caption_style} font={args.caption_font} "
-                      f"highlight={args.caption_highlight} — {n_ass} events, burning ...")
-                burn_captions(out_mp4, ass_path, out_cap, font_file=font_path)
+                print(f"  captions={args.burn_captions} titles={len(titles)} "
+                      f"style={args.caption_style} — {n_ass} events, burning ...")
+                burn_captions(out_mp4, ass_path, out_cap)
                 print(f"  captioned video: {out_cap} "
                       f"({os.path.getsize(out_cap)//1024} KiB)")
 

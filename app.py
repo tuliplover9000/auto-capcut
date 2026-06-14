@@ -66,6 +66,11 @@ def _chat(job_id, role, text):
 
 # ── rendering (shared by initial edit + revisions) ───────────────────────────
 
+def _wants_caption_layer(job):
+    s = job["settings"]
+    return bool(s.get("burn") or s.get("titles"))
+
+
 def _burn(job, src_mp4, out_cap, tmp):
     s = job["settings"]
     cap_spec = autoedit.probe(src_mp4)
@@ -75,10 +80,11 @@ def _burn(job, src_mp4, out_cap, tmp):
                            cap_spec["width"], cap_spec["height"], ass,
                            font=fam, highlight=autoedit.CAPTION_COLORS[s["highlight"]],
                            pos=s["pos"], style=s["style"],
-                           font_file=autoedit._font_file_path(s["font"]))
+                           font_file=autoedit._font_file_path(s["font"]),
+                           titles=job.get("titles") if s.get("titles") else None,
+                           captions=bool(s.get("burn")))
     if n > 0:
-        fp = os.path.join(autoedit.FONTS_DIR, ff) if ff else None
-        autoedit.burn_captions(src_mp4, ass, out_cap, font_file=fp)
+        autoedit.burn_captions(src_mp4, ass, out_cap)
 
 
 def _effects(job):
@@ -106,7 +112,7 @@ def _render_outputs(job):
                               zoomplan=job.get("zoomplan"))
         _grade_to_roughcut(job, base, out_mp4, tmp)
         autoedit.write_srt(job["cutlist"], job["all_words"], out_srt)
-        if job["settings"]["burn"]:
+        if _wants_caption_layer(job):
             _burn(job, out_mp4, out_cap, tmp)
         elif os.path.exists(out_cap):
             os.remove(out_cap)
@@ -127,7 +133,7 @@ def _regrade_only(job):
     tmp = tempfile.mkdtemp(prefix="ae_grade_")
     try:
         _grade_to_roughcut(job, base, out_mp4, tmp)
-        if job["settings"]["burn"]:
+        if _wants_caption_layer(job):
             _burn(job, out_mp4, out_cap, tmp)
         elif os.path.exists(out_cap):
             os.remove(out_cap)
@@ -137,11 +143,11 @@ def _regrade_only(job):
 
 
 def _reburn_only(job):
-    """Re-burn captions onto the existing roughcut without re-cutting/rendering."""
+    """Re-burn captions/titles onto the existing roughcut without re-cutting."""
     outdir = job["outdir"]
     out_mp4 = os.path.join(outdir, "roughcut.mp4")
     out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
-    if not job["settings"]["burn"]:
+    if not _wants_caption_layer(job):
         if os.path.exists(out_cap):
             os.remove(out_cap)
         _bump(job)
@@ -159,7 +165,7 @@ def _reburn_only(job):
 
 def _video_path(job):
     cap = os.path.join(job["outdir"], "roughcut_captioned.mp4")
-    if job["settings"]["burn"] and os.path.exists(cap):
+    if _wants_caption_layer(job) and os.path.exists(cap):
         return cap
     return os.path.join(job["outdir"], "roughcut.mp4")
 
@@ -221,6 +227,11 @@ def run_job(job_id, instructions):
                 job["cutlist"], job["all_words"], job["settings"]["model"],
                 mode=job["settings"].get("zoom_mode", "static"))
 
+        if job["settings"].get("titles"):
+            _stage(job_id, stage="Deciding titles")
+            job["titles"] = autoedit.decide_titles_with_claude(
+                job["cutlist"], job["all_words"], job["settings"]["model"])
+
         _stage(job_id, step=7, stage="Rendering")
         _render_outputs(job)
 
@@ -279,6 +290,15 @@ def revise_job(job_id, msg):
                         job["settings"][k] = b
                         changed_fx = True
 
+        # Titles directive — toggle the editorial title layer (cheap reburn).
+        changed_titles = False
+        tdir = action.get("titles")
+        if isinstance(tdir, dict) and "enabled" in tdir:
+            b = bool(tdir["enabled"])
+            if job["settings"].get("titles") != b:
+                job["settings"]["titles"] = b
+                changed_titles = True
+
         if need_full:
             if job["settings"].get("zoom"):
                 _stage(job_id, stage="Deciding zooms")
@@ -288,8 +308,19 @@ def revise_job(job_id, msg):
                     mode=job["settings"].get("zoom_mode", "static"))
             else:
                 job["zoomplan"] = None
+            if job["settings"].get("titles"):
+                _stage(job_id, stage="Deciding titles")
+                job["titles"] = autoedit.decide_titles_with_claude(
+                    job["cutlist"], job["all_words"], job["settings"]["model"])
             _stage(job_id, stage="Re-rendering")
             _render_outputs(job)
+        elif changed_titles:
+            if job["settings"].get("titles") and not job.get("titles"):
+                _stage(job_id, stage="Deciding titles")
+                job["titles"] = autoedit.decide_titles_with_claude(
+                    job["cutlist"], job["all_words"], job["settings"]["model"])
+            _stage(job_id, stage="Updating titles")
+            _reburn_only(job)
         elif changed_fx:
             _stage(job_id, stage="Applying effects")
             _regrade_only(job)
@@ -335,6 +366,7 @@ def run():
         "pos": "lower",
         "zoom": request.form.get("zoom", "") in ("1", "true", "on", "yes"),
         "zoom_mode": "static",
+        "titles": request.form.get("titles", "") in ("1", "true", "on", "yes"),
         "vignette": request.form.get("vignette", "") in ("1", "true", "on", "yes"),
         "grain": request.form.get("grain", "") in ("1", "true", "on", "yes"),
         "flash": request.form.get("flash", "") in ("1", "true", "on", "yes"),
@@ -360,7 +392,7 @@ def run():
             "name": f.filename, "settings": settings, "chat": chat,
             "state": "queued", "step": 0, "stage": "Starting…", "error": "",
             "version": 0, "spec": None, "all_words": [], "cutlist": [],
-            "zoomplan": None, "zoom_instruction": "",
+            "zoomplan": None, "zoom_instruction": "", "titles": [],
         }
 
     threading.Thread(target=run_job, args=(job_id, instructions), daemon=True).start()
@@ -518,6 +550,7 @@ PAGE = r"""<!doctype html>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="zoom" checked>
         <span>Camera zooms (auto punch-ins) <span class="note">(Claude-decided; adjust in chat — "more zooms", "no zoom on the intro")</span></span></label>
+      <label class="chk mt"><input type="checkbox" id="titles"> <span>Editorial titles <span class="note">(big yellow hook/section text, Claude-decided)</span></span></label>
       <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
       <label class="chk"><input type="checkbox" id="grain"> <span>Film grain <span class="note">(light texture)</span></span></label>
       <label class="chk"><input type="checkbox" id="flash"> <span>Flash on cut <span class="note">(quick white flash on cuts)</span></span></label>
@@ -591,6 +624,7 @@ $("#go").onclick=async()=>{
   fd.append("whisper_model",$("#whisper").value);
   fd.append("instructions",$("#instructions").value);
   fd.append("zoom",$("#zoom").checked?"1":"0");
+  fd.append("titles",$("#titles").checked?"1":"0");
   fd.append("vignette",$("#vignette").checked?"1":"0");
   fd.append("grain",$("#grain").checked?"1":"0");
   fd.append("flash",$("#flash").checked?"1":"0");
