@@ -125,6 +125,25 @@ def probe(path):
     else:
         info["disp_width"], info["disp_height"] = info["width"], info["height"]
 
+    # Color metadata. Phone clips are often HLG/HDR (bt2020 / arib-std-b67); the
+    # zoompan filter DROPS color_primaries/color_trc, so the output reads as SDR
+    # and looks washed-out/white. We capture the source's color here and re-stamp
+    # it onto any filtered output (see _setparams_suffix). ffmpeg prints it as
+    # e.g. "yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67, progressive)".
+    info["color"] = {}
+    vline = next((ln for ln in stderr.splitlines() if "Video:" in ln), "")
+    cm = re.search(r"\((?:(tv|pc|full|limited),\s*)?([a-z0-9]+)/([a-z0-9-]+)/([a-z0-9-]+)", vline)
+    if cm:
+        rng, mat, pri, trc = cm.group(1), cm.group(2), cm.group(3), cm.group(4)
+        if rng:
+            info["color"]["range"] = "pc" if rng in ("pc", "full") else "tv"
+        if mat and mat != "unknown":
+            info["color"]["matrix"] = mat
+        if pri and pri != "unknown":
+            info["color"]["primaries"] = pri
+        if trc and trc != "unknown":
+            info["color"]["transfer"] = trc
+
     return info
 
 
@@ -557,6 +576,36 @@ def _zoom_vf(zspec, dw, dh, fps, dur):
     return f"scale={dw}:{dh},fps={f}"   # none, but zoom active -> uniform dims/fps
 
 
+# Whitelisted color values (these are ffmpeg's own display names == setparams
+# option values). Anything outside the whitelist is skipped so a stray token
+# can never break a render.
+_CM_MATRIX = {"bt709", "bt2020nc", "bt2020c", "smpte170m", "bt470bg", "smpte240m", "fcc", "ycgco", "gbr"}
+_CM_PRIM = {"bt709", "bt2020", "smpte170m", "bt470bg", "bt470m", "film", "smpte428", "smpte431", "smpte432"}
+_CM_TRC = {"bt709", "arib-std-b67", "smpte2084", "smpte170m", "gamma22", "gamma28",
+           "smpte240m", "linear", "iec61966-2-1", "bt2020-10", "bt2020-12"}
+
+
+def _setparams_suffix(color):
+    """
+    Build a ',setparams=...' suffix that re-stamps source color metadata onto a
+    filtered frame. zoompan drops color_primaries/color_trc, which makes HLG/HDR
+    footage read as SDR and look washed-out; re-stamping fixes it. Returns "" when
+    there's nothing to set (e.g. plain SDR with no tags).
+    """
+    if not color:
+        return ""
+    parts = []
+    if color.get("matrix") in _CM_MATRIX:
+        parts.append(f"colorspace={color['matrix']}")
+    if color.get("primaries") in _CM_PRIM:
+        parts.append(f"color_primaries={color['primaries']}")
+    if color.get("transfer") in _CM_TRC:
+        parts.append(f"color_trc={color['transfer']}")
+    if color.get("range") in ("tv", "pc"):
+        parts.append(f"range={color['range']}")
+    return (",setparams=" + ":".join(parts)) if parts else ""
+
+
 def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
     """
     Render each keep span as a normalized segment, then concatenate.
@@ -583,6 +632,8 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
         if zoomplan is not None and dw > 0 and dh > 0:
             z = zoomplan[idx] if idx < len(zoomplan) else None
             vf = _zoom_vf(z, dw, dh, fps, end - start)
+            # Re-stamp source colour (zoompan drops HLG/HDR primaries+transfer).
+            vf += _setparams_suffix(spec.get("color"))
         cmd = [
             ff, "-y",
             "-ss", f"{start:.6f}",
@@ -1029,6 +1080,12 @@ def burn_captions(in_mp4, ass_path, out_mp4, font_file=None):
             vf = f"ass={ass_name}:fontsdir=."
         except Exception:
             pass  # fall back to system font lookup
+    # Insurance: re-stamp source colour so the captioned output can't read as
+    # washed-out SDR if the filter chain ever drops HLG/HDR tags.
+    try:
+        vf += _setparams_suffix(probe(os.path.abspath(in_mp4)).get("color"))
+    except Exception:
+        pass
     cmd = [
         ff, "-y",
         "-i", os.path.abspath(in_mp4),
