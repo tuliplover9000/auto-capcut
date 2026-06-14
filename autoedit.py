@@ -113,6 +113,18 @@ def probe(path):
     else:
         print("WARNING: could not parse fps — defaulting to 30.0")
 
+    # Display dims: phone clips store landscape with a 90/270° rotation flag, so
+    # the DISPLAYED frame swaps W/H. ffmpeg auto-rotates on decode, so filters see
+    # upright frames at these display dims. Stored width/height keys are unchanged.
+    rot = 0
+    m = re.search(r"rotation of (-?\d+(?:\.\d+)?) degrees", stderr) or re.search(r"\brotate\s*:\s*(-?\d+)", stderr)
+    if m:
+        rot = abs(int(float(m.group(1)))) % 180
+    if rot == 90:
+        info["disp_width"], info["disp_height"] = info["height"], info["width"]
+    else:
+        info["disp_width"], info["disp_height"] = info["width"], info["height"]
+
     return info
 
 
@@ -307,6 +319,66 @@ The transcript follows on stdin."""
     return spans
 
 
+def decide_zooms_with_claude(cutlist, all_words, model="sonnet", extra=""):
+    """
+    Ask Claude to choose a camera zoom PER kept segment. Returns a list aligned
+    1:1 with cutlist of {"type","level"} dicts, defaulting to none and enforcing
+    duration/no-double-snap guardrails. Never raises — falls back to all-none.
+    """
+    segs = []
+    for i, (s, e) in enumerate(cutlist):
+        txt = " ".join(w["word"].strip() for w in all_words if s <= w["start"] < e).strip()
+        segs.append(f"[{i}] {e-s:.2f}s: {txt[:200]}")
+    payload = "\n".join(segs)
+    extra_block = f"\nCreator's guidance (PRIORITY): {extra}\n" if extra else ""
+    prompt = f'''You are a video editor choosing CAMERA ZOOMS for a vertical talking-head edit. Below (on stdin) are the kept segments in order, one per line: [index] duration: text. Choose a zoom PER segment.
+
+Zoom types:
+- "none": medium/wide 1.0x (the resting frame)
+- "in": static close punch-in held for the segment (level ~1.12-1.18)
+- "push": slow continuous zoom IN across the segment, intensify (level ~1.08-1.12; needs >=1.2s)
+- "pullout": slow zoom OUT, reveal/release (level ~1.10-1.14; needs >=1.2s)
+- "snap": fast punchy zoom, JOKES/BEATS/PUNCHLINES ONLY (level ~1.18-1.25; needs >=0.4s)
+
+RULES (follow strictly):
+- BACKBONE = two-framing: alternate "none" (~1.0x) and "in" (~1.15x) so the frame keeps changing. Most segments are none or in.
+- Zoom IN on: the hook/first segment, emphasis lines, new points, stakes-raising beats.
+- "push" for emotional/building beats; "pullout" for reveals ("let me show you"). Sparingly.
+- "snap" ONLY for clear jokes/punchlines/beats. NEVER two snaps in a row. If unsure, don't snap.
+- Do NOT zoom every segment tight — CONTRAST makes zooms land. Calm/serious/long-explanation segments = "none" or a gentle move.
+- Don't put the same tight level on two adjacent segments; alternate so cutting reads as movement.
+- Tasteful: this is advice/commentary, not a music video. ~1 deliberate zoom per 3-4 seconds.
+{extra_block}
+Return ONLY JSON: {{"zooms":[{{"i":0,"type":"in","level":1.15}}, ...]}} — one entry per segment index 0..{len(cutlist)-1}. "level" optional.
+
+The segments follow on stdin.'''
+    try:
+        data = _extract_json(_claude_cli(prompt, payload, model))
+    except Exception:
+        # Zooms are a nice-to-have; if Claude is unreachable/quota'd, fall back to
+        # no zoom (all-none) rather than failing the whole render.
+        data = {}
+    raw = data.get("zooms") if isinstance(data, dict) else (data if isinstance(data, list) else [])
+    plan = [{"type": "none", "level": 1.0} for _ in cutlist]
+    for item in (raw or []):
+        try:
+            i = int(item["i"]); t = str(item.get("type", "none"))
+            if 0 <= i < len(cutlist) and t in ZOOM_TYPES:
+                lvl = item.get("level")
+                lvl = float(lvl) if lvl is not None else DEFAULT_ZOOM_LEVEL.get(t, 1.0)
+                plan[i] = {"type": t, "level": max(1.0, min(1.35, lvl))}
+        except (KeyError, ValueError, TypeError):
+            continue
+    prev = None
+    for i, (s, e) in enumerate(cutlist):
+        dur = e - s; z = plan[i]
+        if z["type"] in ("push", "pullout") and dur < 1.2: z["type"] = "in"
+        if z["type"] == "snap" and dur < 0.4: z["type"] = "in"
+        if z["type"] == "snap" and prev == "snap": z["type"] = "in"
+        prev = z["type"]
+    return plan
+
+
 def revise_with_claude(transcript_text, total_duration, current_keep,
                        caption_settings, chat_history, user_msg, model="sonnet"):
     """
@@ -335,12 +407,14 @@ Decide how to revise. Respond with ONLY a JSON object:
 {{
   "reply": "<friendly 1-2 sentence reply describing what you changed (or why you can't)>",
   "keep": [[start,end], ...],
-  "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}}
+  "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
+  "zoom": {{"enabled": true, "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}}
 }}
 Rules:
 - Include "keep" ONLY if the creator wants to change which parts are kept/removed. It must be the FULL new ordered, non-overlapping list within [0,{total_duration:.2f}]. Omit it entirely if the cut is unchanged.
 - Include "captions" ONLY with the fields that change (e.g. just {{"font":"Bebas Neue"}}). Omit it if the look is unchanged. Set "burn":true if they want captions added.
-- If they ask for something not supported yet (camera zooms, b-roll, music, sound effects), explain that in "reply" and omit "keep"/"captions".
+- Include "zoom" ONLY if the creator wants to change camera zooms (e.g. "more punch-ins", "no zoom on the intro", "calmer"). Omit otherwise. Set "enabled":false to turn zooms off.
+- If they ask for something not supported yet (b-roll, music, sound effects), explain that in "reply" and omit the unsupported directives.
 - "reply" is always required. Output JSON only — no markdown, no prose outside the JSON."""
 
     result_str = _claude_cli(prompt, transcript_text, model)
@@ -348,10 +422,10 @@ Rules:
         data = _extract_json(result_str)
     except (json.JSONDecodeError, ValueError):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None}
+                "keep": None, "captions": None, "zoom": None}
     if not isinstance(data, dict):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None}
+                "keep": None, "captions": None, "zoom": None}
 
     reply = str(data.get("reply") or "Done.")
     # Normalize keep -> list of (s,e) tuples or None
@@ -372,7 +446,8 @@ Rules:
         if not keep:
             keep = None
     caps = data.get("captions") if isinstance(data.get("captions"), dict) else None
-    return {"reply": reply, "keep": keep, "captions": caps}
+    zoom = data.get("zoom") if isinstance(data.get("zoom"), dict) else None
+    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom}
 
 
 # ── R7: snap_and_clean ───────────────────────────────────────────────────────
@@ -448,7 +523,41 @@ def snap_and_clean(keep_spans, all_words, total_duration):
 
 # ── R8: render_video ─────────────────────────────────────────────────────────
 
-def render_video(input_path, cutlist, spec, out_mp4, tmpdir):
+def _zoom_vf(zspec, dw, dh, fps, dur):
+    r"""
+    Build a -vf filter string for one segment's camera zoom, scaled to the
+    DISPLAY dims (dw x dh) at `fps`. Returns a plain scale+fps for "none" (so
+    every segment ends at uniform dims/fps and the stream-copy concat works).
+    Note: the `\\,` in the source becomes a literal `\,` in the string — escaped
+    commas INSIDE zoompan expressions (e.g. min(a\,b)) so they don't split the
+    filtergraph.
+    """
+    t = (zspec or {}).get("type", "none")
+    L = float((zspec or {}).get("level") or DEFAULT_ZOOM_LEVEL.get(t, 1.0))
+    L = max(1.0, min(1.35, L))
+    B = ZOOM_BIAS
+    f = f"{fps:.4f}"
+    if t in ("in", "snap") and L > 1.0:
+        # Static punch-in held for the whole segment. "snap" is just a tighter
+        # hard punch (an animated zoompan snap would start at 1.0 and visibly pop
+        # OUT then in when it follows a tighter segment — a hard punch avoids that
+        # and reads cleaner). Crop window iw/L x ih/L anchored at bias B of the
+        # vertical slack, then scale back to display dims.
+        return (f"crop=iw/{L}:ih/{L}:(iw-iw/{L})/2:(ih-ih/{L})*{B},"
+                f"scale={dw}:{dh},fps={f}")
+    if t in ("push", "pullout") and L > 1.0:
+        N = max(2, round(dur * fps)); nm1 = N - 1
+        z = (f"min(1+({L}-1)*on/{nm1}\\,{L})" if t == "push"
+             else f"max({L}-({L}-1)*on/{nm1}\\,1)")
+        # y uses the SAME vertical-slack fraction as the static crop above:
+        # (ih-ih/zoom)*B stays within [0, slack] for every zoom>1, so the subject
+        # never gets clamped to the top of the frame (the bug for L<1.25).
+        return (f"zoompan=z='{z}':d=1:x='(iw-iw/zoom)/2':"
+                f"y='(ih-ih/zoom)*{B}':s={dw}x{dh}:fps={f}")
+    return f"scale={dw}:{dh},fps={f}"   # none, but zoom active -> uniform dims/fps
+
+
+def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
     """
     Render each keep span as a normalized segment, then concatenate.
     spec: dict with "width", "height", "fps" keys.
@@ -460,15 +569,29 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir):
     # ffmpeg re-encode natively bakes the rotation in upright and keeps the true
     # aspect ratio + fps. All segments share the source spec, so concat still
     # stream-copies cleanly. (Per-clip normalization belongs to multi-clip Tier 2.)
+    # When zoom is active, every segment must end at identical display dims + fps
+    # so the stream-copy concat works. Compute the display dims/fps once.
+    dw = int(spec.get("disp_width") or spec.get("width") or 0)
+    dh = int(spec.get("disp_height") or spec.get("height") or 0)
+    fps = float(spec.get("fps") or 30.0)
+
     seg_paths = []
     for idx, (start, end) in enumerate(cutlist):
         seg_path = os.path.join(tmpdir, f"seg_{idx:04d}.mp4")
         duration = end - start
+        vf = None
+        if zoomplan is not None and dw > 0 and dh > 0:
+            z = zoomplan[idx] if idx < len(zoomplan) else None
+            vf = _zoom_vf(z, dw, dh, fps, end - start)
         cmd = [
             ff, "-y",
             "-ss", f"{start:.6f}",
             "-i", input_path,
             "-t", f"{duration:.6f}",
+        ]
+        if vf:
+            cmd += ["-vf", vf]
+        cmd += [
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
             "-c:a", "aac",
@@ -649,6 +772,11 @@ CAPTION_FONTS = {
     "Montserrat":  ("Montserrat", "Montserrat-Variable.ttf"),
 }
 CAPTION_STYLES = ("pop", "highlight", "oneword")
+
+# ── camera-zoom palette / constants ──────────────────────────────────────────
+ZOOM_BIAS = 0.40   # vertical centre of the zoom window (faces sit upper-centre in portrait)
+DEFAULT_ZOOM_LEVEL = {"in": 1.15, "push": 1.10, "pullout": 1.12, "snap": 1.22, "none": 1.0}
+ZOOM_TYPES = ("none", "in", "push", "pullout", "snap")
 
 
 def _font_file_path(font_key):
@@ -990,6 +1118,8 @@ def main():
                     help="Active-word highlight color (default: yellow)")
     ap.add_argument("--caption-pos", choices=["lower", "center"], default="lower",
                     help="Burned caption position for pop/highlight (default: lower third)")
+    ap.add_argument("--zoom", action="store_true",
+                    help="Auto camera zooms (Claude-decided punch-ins/pushes)")
     ap.add_argument("--selftest", action="store_true",
                     help="Check dependencies and exit")
     args = ap.parse_args()
@@ -1077,9 +1207,17 @@ def main():
         print(f"  Original duration : {spec['duration']:.2f}s")
         print(f"  Kept duration     : {orig_kept:.2f}s  ({100*orig_kept/max(spec['duration'],0.001):.1f}%)")
 
+        # ── Stage 6b: zoom decisions (optional) ───────────────────────────────
+        zoomplan = None
+        if args.zoom:
+            section("6b/7  ZOOM DECISIONS")
+            zoomplan = decide_zooms_with_claude(cutlist, all_words, model=args.model)
+            from collections import Counter
+            print("  " + ", ".join(f"{k}:{v}" for k, v in Counter(z["type"] for z in zoomplan).items()))
+
         # ── Stage 7: render ───────────────────────────────────────────────────
         section("7a/7  RENDER")
-        render_video(input_path, cutlist, spec, out_mp4, tmpdir)
+        render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=zoomplan)
 
         # ── Stage 7b: captions ────────────────────────────────────────────────
         section("7b/7  CAPTIONS")

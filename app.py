@@ -89,7 +89,8 @@ def _render_outputs(job):
     out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
     tmp = tempfile.mkdtemp(prefix="ae_render_")
     try:
-        autoedit.render_video(job["input_path"], job["cutlist"], job["spec"], out_mp4, tmp)
+        autoedit.render_video(job["input_path"], job["cutlist"], job["spec"], out_mp4, tmp,
+                              zoomplan=job.get("zoomplan"))
         autoedit.write_srt(job["cutlist"], job["all_words"], out_srt)
         if job["settings"]["burn"]:
             _burn(job, out_mp4, out_cap, tmp)
@@ -179,6 +180,11 @@ def run_job(job_id, instructions):
         _stage(job_id, step=6, stage="Cleaning cut list")
         job["cutlist"] = autoedit.snap_and_clean(keep, job["all_words"], spec["duration"])
 
+        if job["settings"].get("zoom"):
+            _stage(job_id, stage="Deciding zooms")
+            job["zoomplan"] = autoedit.decide_zooms_with_claude(
+                job["cutlist"], job["all_words"], job["settings"]["model"])
+
         _stage(job_id, step=7, stage="Rendering")
         _render_outputs(job)
 
@@ -216,7 +222,21 @@ def revise_job(job_id, msg):
             except Exception as e:
                 reply += f"  (I couldn't apply that cut change: {e})"
 
+        zdir = action.get("zoom")
+        if zdir:
+            job["settings"]["zoom"] = bool(zdir.get("enabled", job["settings"].get("zoom", True)))
+            if zdir.get("instruction"):
+                job["zoom_instruction"] = str(zdir["instruction"])
+            need_full = True
+
         if need_full:
+            if job["settings"].get("zoom"):
+                _stage(job_id, stage="Deciding zooms")
+                job["zoomplan"] = autoedit.decide_zooms_with_claude(
+                    job["cutlist"], job["all_words"], job["settings"]["model"],
+                    extra=job.get("zoom_instruction", ""))
+            else:
+                job["zoomplan"] = None
             _stage(job_id, stage="Re-rendering")
             _render_outputs(job)
         elif changed_caps:
@@ -259,6 +279,7 @@ def run():
         "font": pick("font", FONTS, "Anton"),
         "highlight": pick("highlight", COLORS, "yellow"),
         "pos": "lower",
+        "zoom": request.form.get("zoom", "") in ("1", "true", "on", "yes"),
     }
     instructions = (request.form.get("instructions") or "").strip()
 
@@ -281,6 +302,7 @@ def run():
             "name": f.filename, "settings": settings, "chat": chat,
             "state": "queued", "step": 0, "stage": "Starting…", "error": "",
             "version": 0, "spec": None, "all_words": [], "cutlist": [],
+            "zoomplan": None, "zoom_instruction": "",
         }
 
     threading.Thread(target=run_job, args=(job_id, instructions), daemon=True).start()
@@ -436,6 +458,10 @@ PAGE = r"""<!doctype html>
     <div class="mt"><label>Instructions (optional) — tell the editor anything before it cuts</label>
       <textarea id="instructions" placeholder="e.g. keep the intro intact, cut hard everywhere else, don't remove the joke at the end"></textarea></div>
     <div class="caps">
+      <label class="chk"><input type="checkbox" id="zoom" checked>
+        <span>Camera zooms (auto punch-ins) <span class="note">(Claude-decided; adjust in chat — "more zooms", "no zoom on the intro")</span></span></label>
+    </div>
+    <div class="caps">
       <label class="chk"><input type="checkbox" id="burn">
         <span>Burn animated captions onto the video <span class="note">(word-by-word; not editable in CapCut after)</span></span></label>
       <div class="row cwrap hide mt" id="cwrap">
@@ -501,6 +527,7 @@ $("#go").onclick=async()=>{
   fd.append("model",$("#model").value);
   fd.append("whisper_model",$("#whisper").value);
   fd.append("instructions",$("#instructions").value);
+  fd.append("zoom",$("#zoom").checked?"1":"0");
   fd.append("burn",$("#burn").checked?"1":"0");
   fd.append("style",$("#style").value);
   fd.append("font",$("#font").value);

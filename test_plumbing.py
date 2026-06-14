@@ -158,6 +158,69 @@ def main():
            and l.split(",", 9)[-1].lstrip().startswith(",")]
     check("no Dialogue text starts with ','", len(bad) == 0, f"{len(bad)} bad")
 
+    # ── 6. render_video() with a zoomplan (all zoom types) ───────────────────
+    # Concat uniformity: every segment (incl "none") must end at identical dims
+    # + fps, so the stream-copy concat succeeds. Output duration must equal the
+    # sum of the kept segment durations.
+    print("\n[6] render_video() with a zoomplan covering all zoom types")
+    zclip = os.path.join(tmpdir, "zoom_clip.mp4")
+    rz = run([
+        ff, "-y",
+        "-f", "lavfi", "-i", "testsrc=duration=8:size=1080x1920:rate=30",
+        "-f", "lavfi", "-i", "sine=frequency=440:duration=8",
+        "-shortest",
+        "-c:v", "libx264", "-pix_fmt", "yuv420p",
+        "-c:a", "aac", "-ar", "48000",
+        zclip,
+    ], timeout=120)
+    check("portrait zoom clip created",
+          os.path.exists(zclip) and os.path.getsize(zclip) > 0,
+          f"{os.path.getsize(zclip)//1024 if os.path.exists(zclip) else 0} KiB")
+
+    if os.path.exists(zclip):
+        zspec = probe(zclip)
+        zcuts = [(0.5, 2.0), (2.5, 4.0), (4.5, 6.0), (6.5, 8.0)]
+        zoomplan = [
+            {"type": "in", "level": 1.15},
+            {"type": "push", "level": 1.10},
+            {"type": "snap", "level": 1.22},
+            {"type": "none", "level": 1.0},
+        ]
+        z_out = os.path.join(outdir, "roughcut_zoom.mp4")
+        if os.path.exists(z_out):
+            os.remove(z_out)
+        z_tmp = os.path.join(tmpdir, "zrender")
+        os.makedirs(z_tmp, exist_ok=True)
+        expect_dur = sum(e - s for s, e in zcuts)
+        try:
+            render_video(zclip, zcuts, zspec, z_out, z_tmp, zoomplan=zoomplan)
+            check("zoom roughcut exists + non-empty",
+                  os.path.exists(z_out) and os.path.getsize(z_out) > 0,
+                  f"{os.path.getsize(z_out)//1024 if os.path.exists(z_out) else 0} KiB")
+            zinfo = probe(z_out)
+            check("zoom output duration ≈ sum of segments",
+                  abs(zinfo["duration"] - expect_dur) <= 0.3,
+                  f"{zinfo['duration']:.2f}s vs {expect_dur:.2f}s")
+            check("zoom output dims preserved (1080x1920)",
+                  zinfo["width"] == 1080 and zinfo["height"] == 1920,
+                  f"{zinfo['width']}x{zinfo['height']}")
+        except Exception as e:
+            check("zoom render produced output", False, str(e))
+
+        # zoom OFF must still work (and be the today behavior — no -vf)
+        z_off = os.path.join(outdir, "roughcut_zoomoff.mp4")
+        if os.path.exists(z_off):
+            os.remove(z_off)
+        z_tmp2 = os.path.join(tmpdir, "zrender_off")
+        os.makedirs(z_tmp2, exist_ok=True)
+        try:
+            render_video(zclip, zcuts, zspec, z_off, z_tmp2, zoomplan=None)
+            check("zoom-OFF roughcut exists + non-empty",
+                  os.path.exists(z_off) and os.path.getsize(z_off) > 0,
+                  f"{os.path.getsize(z_off)//1024 if os.path.exists(z_off) else 0} KiB")
+        except Exception as e:
+            check("zoom-OFF render produced output", False, str(e))
+
     # ── cleanup ──────────────────────────────────────────────────────────────
     shutil.rmtree(tmpdir, ignore_errors=True)
 

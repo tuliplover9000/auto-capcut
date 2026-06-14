@@ -55,6 +55,25 @@ Options:
 
 All of these are also exposed in the web UI when "Burn animated captions" is checked.
 
+### Camera zooms (optional)
+
+Add `--zoom` to let Claude add tasteful camera zooms (punch-ins, slow pushes,
+pull-outs, and the occasional snap on a punchline) to the rough cut. The zoom
+choices are **decided by Claude per segment** — it alternates a resting wide
+frame with punch-ins so the framing keeps moving, zooms in on hooks/emphasis,
+and reserves snaps for jokes/beats. When zoom is off the render is byte-for-byte
+unchanged from the no-zoom pipeline.
+
+```bash
+python autoedit.py myclip.mp4 --zoom
+python autoedit.py myclip.mp4 --zoom --burn-captions
+```
+
+In the **web UI** there's a "Camera zooms (auto punch-ins)" checkbox (on by
+default). The zooms are **chat-adjustable** — after the first edit, tell the
+editor things like "more punch-ins", "no zoom on the intro", "calmer", or "turn
+off the zooms" and it re-plans and re-renders.
+
 ## Max plan / no API key
 
 This tool uses the `claude` CLI in headless mode — it bills your **Claude Max
