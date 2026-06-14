@@ -74,7 +74,8 @@ def _burn(job, src_mp4, out_cap, tmp):
     n = autoedit.write_ass(job["cutlist"], job["all_words"],
                            cap_spec["width"], cap_spec["height"], ass,
                            font=fam, highlight=autoedit.CAPTION_COLORS[s["highlight"]],
-                           pos=s["pos"], style=s["style"])
+                           pos=s["pos"], style=s["style"],
+                           font_file=autoedit._font_file_path(s["font"]))
     if n > 0:
         fp = os.path.join(autoedit.FONTS_DIR, ff) if ff else None
         autoedit.burn_captions(src_mp4, ass, out_cap, font_file=fp)

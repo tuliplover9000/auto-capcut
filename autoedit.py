@@ -651,6 +651,53 @@ CAPTION_FONTS = {
 CAPTION_STYLES = ("pop", "highlight", "oneword")
 
 
+def _font_file_path(font_key):
+    """Path to a .ttf for measuring text widths (bundled or system font)."""
+    fam, bundled = CAPTION_FONTS.get(font_key, ("Arial Black", None))
+    if bundled:
+        p = os.path.join(FONTS_DIR, bundled)
+        return p if os.path.exists(p) else None
+    sysmap = {"Arial Black": "ariblk.ttf", "Impact": "impact.ttf"}
+    fn = sysmap.get(font_key)
+    if fn:
+        win = os.environ.get("WINDIR", r"C:\Windows")
+        p = os.path.join(win, "Fonts", fn)
+        return p if os.path.exists(p) else None
+    return None
+
+
+def _text_metrics(tokens, font_file, fontsize):
+    """
+    Return (list of per-token pixel widths, space pixel width) at `fontsize`.
+    Uses fontTools advance widths when available; otherwise estimates. Either way
+    the caller lays words at FIXED positions, so the worst case is slightly uneven
+    spacing — never reflow.
+    """
+    try:
+        if not font_file:
+            raise RuntimeError("no font file")
+        from fontTools.ttLib import TTFont
+        f = TTFont(font_file, fontNumber=0, lazy=True)
+        upm = f["head"].unitsPerEm or 1000
+        cmap = f.getBestCmap()
+        hmtx = f["hmtx"]
+
+        def adv(ch):
+            g = cmap.get(ord(ch)) or cmap.get(ord("x"))
+            try:
+                a = hmtx[g][0]
+            except Exception:
+                a = upm * 0.5
+            return a / upm * fontsize
+
+        widths = [sum(adv(c) for c in t) for t in tokens]
+        sw = adv(" ") or fontsize * 0.3
+        f.close()
+        return widths, sw
+    except Exception:
+        return [max(1, len(t)) * fontsize * 0.5 for t in tokens], fontsize * 0.35
+
+
 def _ass_ts(seconds):
     """Seconds -> ASS timestamp H:MM:SS.cs (centiseconds)."""
     cs = int(round(max(0.0, seconds) * 100))
@@ -692,7 +739,8 @@ def _group_caption_lines(kept, max_words=4, gap_break=0.6):
 
 
 def write_ass(cutlist, all_words, out_w, out_h, ass_path,
-              font="Anton", highlight="&H0000FFFF", pos="lower", style="pop"):
+              font="Anton", highlight="&H0000FFFF", pos="lower", style="pop",
+              font_file=None):
     """
     Write an ASS subtitle file sized to the OUTPUT video dimensions
     (out_w x out_h — the upright rough cut). Styles:
@@ -764,7 +812,44 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
             text = f"{{\\c{highlight}{POP_IN}}}{tok}"
             dialogues.append(
                 f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{text}")
-    else:
+
+    elif style == "pop":
+        # STATIONARY layout: each word gets a fixed \pos and the active word
+        # scales about its own centre (\an5) so it grows in place WITHOUT pushing
+        # its neighbours. Base layer = the whole line at rest (white); overlay
+        # layer = the active word, enlarged + coloured, drawn on top.
+        y = round(out_h * 0.50) if pos == "center" else round(out_h * 0.82)
+        mlr = round(out_w * 0.06)
+        max_w = max(1, out_w - 2 * mlr)
+        for line in _group_caption_lines(kept):
+            toks = [_ass_escape(w["word"]) for w in line]
+            widths, sw = _text_metrics(toks, font_file, fontsize)
+            total = sum(widths) + sw * (len(toks) - 1)
+            ratio = min(1.0, max_w / total) if total > 0 else 1.0
+            cur = (out_w - total * ratio) / 2.0
+            centers = []
+            for wd in widths:
+                centers.append(cur + wd * ratio / 2.0)
+                cur += (wd + sw) * ratio
+            line_start, line_end = line[0]["new_start"], line[-1]["new_end"]
+            for j, tok in enumerate(toks):
+                if not tok:
+                    continue
+                cx = f"{centers[j]:.0f}"
+                # base (rest) — whole line, white, normal size
+                dialogues.append(
+                    f"Dialogue: 0,{_ass_ts(line_start)},{_ass_ts(line_end)},Default,,0,0,0,,"
+                    f"{{\\an5\\pos({cx},{y})\\c{BASE_COLOR}}}{tok}")
+                # active overlay — this word's span, coloured + popped, on top
+                st = line[j]["new_start"]
+                en = line[j + 1]["new_start"] if j + 1 < len(line) else line[j]["new_end"]
+                if en <= st:
+                    en = st + 0.05
+                dialogues.append(
+                    f"Dialogue: 1,{_ass_ts(st)},{_ass_ts(en)},Default,,0,0,0,,"
+                    f"{{\\an5\\pos({cx},{y}){POP_HOLD}\\c{highlight}}}{tok}")
+
+    else:  # highlight — colour change only (no size change, so no reflow)
         for line in _group_caption_lines(kept):
             n = len(line)
             for i in range(n):
@@ -777,15 +862,12 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
                     tok = _ass_escape(ww["word"])
                     if not tok:
                         continue
-                    if j == i and style == "pop":
-                        parts.append(f"{{\\c{highlight}{POP_HOLD}}}{tok}{{\\r}}")
-                    elif j == i:  # highlight
+                    if j == i:
                         parts.append(f"{{\\c{highlight}}}{tok}{{\\c{BASE_COLOR}}}")
                     else:
                         parts.append(tok)
-                text = " ".join(parts)
                 dialogues.append(
-                    f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{text}")
+                    f"Dialogue: 0,{_ass_ts(start)},{_ass_ts(end)},Default,,0,0,0,,{' '.join(parts)}")
 
     with open(ass_path, "w", encoding="utf-8") as f:
         f.write(header)
@@ -1009,19 +1091,20 @@ def main():
             section("7c/7  BURN ANIMATED CAPTIONS")
             cap_spec = probe(out_mp4)  # true upright dims of the rendered cut
             ass_path = os.path.join(tmpdir, "captions.ass")
-            fam, font_file = CAPTION_FONTS.get(args.caption_font, ("Arial Black", None))
+            fam, bundled = CAPTION_FONTS.get(args.caption_font, ("Arial Black", None))
             n_ass = write_ass(
                 cutlist, all_words, cap_spec["width"], cap_spec["height"], ass_path,
                 font=fam,
                 highlight=CAPTION_COLORS[args.caption_highlight],
                 pos=args.caption_pos,
                 style=args.caption_style,
+                font_file=_font_file_path(args.caption_font),
             )
             if n_ass == 0:
                 print("  (no words to caption — skipped)")
             else:
                 out_cap = os.path.join(outdir, "roughcut_captioned.mp4")
-                font_path = os.path.join(FONTS_DIR, font_file) if font_file else None
+                font_path = os.path.join(FONTS_DIR, bundled) if bundled else None
                 print(f"  style={args.caption_style} font={args.caption_font} "
                       f"highlight={args.caption_highlight} — {n_ass} events, burning ...")
                 burn_captions(out_mp4, ass_path, out_cap, font_file=font_path)

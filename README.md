@@ -21,6 +21,8 @@ Dependencies are assumed already installed globally:
 - `imageio-ffmpeg` — bundled ffmpeg (no separate ffmpeg install needed)
 - `faster-whisper` — speech-to-text with word timestamps
 - `claude` CLI — the Claude Code CLI (must be logged in with a Max subscription)
+- `fonttools` — used to measure word widths so the "pop" caption style places
+  words at fixed positions (no reflow). Optional: falls back to estimated widths.
 
 ## Usage
 
