@@ -552,7 +552,7 @@ Return ONLY JSON: {{"overlays":[{{...}}]}}. Transcript on stdin.'''
     return kept_overlays
 
 
-def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", style="auto"):
+def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", style="auto", extra=""):
     """Decide a B-roll plan AND fetch the assets -> composite-ready overlay list.
 
     Returns a list of {path,start,end,format,kenburns,fade} for overlays.composite.
@@ -561,7 +561,7 @@ def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", sty
     style: "auto" keeps each item's brain-chosen format; "stacked"/"cutaway" overrides.
     """
     import mediasource
-    plan = decide_overlays_with_claude(cutlist, all_words, model=model, density=density)
+    plan = decide_overlays_with_claude(cutlist, all_words, model=model, density=density, extra=extra)
     used, out = set(), []
     for item in plan:
         path = mediasource.search(item["query"], item.get("kind", "image"),
@@ -605,7 +605,8 @@ Decide how to revise. Respond with ONLY a JSON object:
   "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
   "zoom": {{"enabled": true, "mode": "static|animated", "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}},
   "effects": {{"vignette": true, "grain": true, "flash": true}},
-  "titles": {{"enabled": true}}
+  "titles": {{"enabled": true}},
+  "broll": {{"enabled": true, "density": "tasteful|more|less", "instruction": "<what to change, e.g. add a rocket when I say launch / fewer images / remove the map>"}}
 }}
 Rules:
 - Include "keep" ONLY if the creator wants to change which parts are kept/removed. It must be the FULL new ordered, non-overlapping list within [0,{total_duration:.2f}]. Omit it entirely if the cut is unchanged.
@@ -613,7 +614,8 @@ Rules:
 - Include "zoom" ONLY if the creator wants to change camera zooms. Omit otherwise. Set "enabled":false to turn zooms off. Set "mode":"animated" if they want moving/animated zooms, "static" if they want still punch-ins (the default look).
 - Include "effects" ONLY with the toggles that change. Available: "vignette" (darkened edges), "grain" (film grain), "flash" (white flash on cuts). e.g. {{"vignette":true}} or {{"grain":false}}. Omit if no effect changes.
 - Include "titles" ONLY if the creator wants the big editorial title cards (hook/section text) turned on/off. e.g. {{"enabled":true}}. Omit otherwise.
-- If they ask for something not supported yet (b-roll, music, sound effects, camera shake), explain that in "reply" and omit the unsupported directives.
+- Include "broll" ONLY if the creator wants to change the B-roll / overlay images/videos. Set "enabled":false to turn B-roll off, true to turn it on. Use "density" for "more"/"fewer" images. Put any content steering ("add a picture of X when I say Y", "remove the map", "use clips not photos") in "instruction". Omit "broll" entirely if unchanged.
+- If they ask for something not supported yet (music, sound effects, camera shake), explain that in "reply" and omit the unsupported directives.
 - "reply" is always required. Output JSON only — no markdown, no prose outside the JSON."""
 
     result_str = _claude_cli(prompt, transcript_text, model)
@@ -621,10 +623,10 @@ Rules:
         data = _extract_json(result_str)
     except (json.JSONDecodeError, ValueError):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None, "zoom": None, "effects": None, "titles": None}
+                "keep": None, "captions": None, "zoom": None, "effects": None, "titles": None, "broll": None}
     if not isinstance(data, dict):
         return {"reply": "Sorry — I couldn't parse that. Try rephrasing?",
-                "keep": None, "captions": None, "zoom": None, "effects": None, "titles": None}
+                "keep": None, "captions": None, "zoom": None, "effects": None, "titles": None, "broll": None}
 
     reply = str(data.get("reply") or "Done.")
     # Normalize keep -> list of (s,e) tuples or None
@@ -648,7 +650,8 @@ Rules:
     zoom = data.get("zoom") if isinstance(data.get("zoom"), dict) else None
     fx = data.get("effects") if isinstance(data.get("effects"), dict) else None
     ti = data.get("titles") if isinstance(data.get("titles"), dict) else None
-    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom, "effects": fx, "titles": ti}
+    br = data.get("broll") if isinstance(data.get("broll"), dict) else None
+    return {"reply": reply, "keep": keep, "captions": caps, "zoom": zoom, "effects": fx, "titles": ti, "broll": br}
 
 
 # ── R7: snap_and_clean ───────────────────────────────────────────────────────

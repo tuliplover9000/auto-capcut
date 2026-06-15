@@ -318,6 +318,25 @@ def revise_job(job_id, msg):
                 job["settings"]["titles"] = b
                 changed_titles = True
 
+        # B-roll directive — re-resolve the overlay plan then cheap re-composite
+        # from the persistent base (no re-cut), UNLESS a cut/zoom change already
+        # forces a full render (handled in the need_full block below).
+        changed_broll = False
+        bdir = action.get("broll")
+        if isinstance(bdir, dict):
+            if "enabled" in bdir:
+                b = bool(bdir["enabled"])
+                if job["settings"].get("broll") != b:
+                    job["settings"]["broll"] = b
+                    changed_broll = True
+            if bdir.get("density") in ("tasteful", "more", "less"):
+                if job["settings"].get("broll_density") != bdir["density"]:
+                    job["settings"]["broll_density"] = bdir["density"]
+                    changed_broll = True
+            if bdir.get("instruction"):
+                job["broll_instruction"] = str(bdir["instruction"])
+                changed_broll = True
+
         if need_full:
             if job["settings"].get("zoom"):
                 _stage(job_id, stage="Deciding zooms")
@@ -339,7 +358,10 @@ def revise_job(job_id, msg):
                 job["overlay_plan"] = autoedit.resolve_overlays(
                     job["cutlist"], job["all_words"], job["settings"]["model"],
                     density=job["settings"].get("broll_density", "tasteful"),
-                    style=job["settings"].get("broll_style", "auto"))
+                    style=job["settings"].get("broll_style", "auto"),
+                    extra=job.get("broll_instruction", ""))
+            else:
+                job["overlay_plan"] = []
             _stage(job_id, stage="Re-rendering")
             _render_outputs(job)
         elif changed_titles:
@@ -349,6 +371,21 @@ def revise_job(job_id, msg):
                     job["cutlist"], job["all_words"], job["settings"]["model"])
             _stage(job_id, stage="Updating titles")
             _reburn_only(job)
+        elif changed_broll:
+            if job["settings"].get("broll"):
+                _stage(job_id, stage="Finding B-roll")
+                job["overlay_plan"] = autoedit.resolve_overlays(
+                    job["cutlist"], job["all_words"], job["settings"]["model"],
+                    density=job["settings"].get("broll_density", "tasteful"),
+                    style=job["settings"].get("broll_style", "auto"),
+                    extra=job.get("broll_instruction", ""))
+                if not job["overlay_plan"]:
+                    reply += (" (Heads up: I couldn't fetch any matching B-roll — "
+                              "check that a PEXELS_API_KEY is set in .env.)")
+            else:
+                job["overlay_plan"] = []
+            _stage(job_id, stage="Re-rendering B-roll")
+            _regrade_only(job)
         elif changed_fx:
             _stage(job_id, stage="Applying effects")
             _regrade_only(job)
@@ -424,7 +461,7 @@ def run():
             "state": "queued", "step": 0, "stage": "Starting…", "error": "",
             "version": 0, "spec": None, "all_words": [], "cutlist": [],
             "zoomplan": None, "zoom_instruction": "", "titles": [],
-            "overlay_plan": [],
+            "overlay_plan": [], "broll_instruction": "",
         }
 
     threading.Thread(target=run_job, args=(job_id, instructions), daemon=True).start()
