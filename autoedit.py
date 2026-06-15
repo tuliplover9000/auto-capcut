@@ -850,6 +850,15 @@ def remove_dead_air(cutlist, all_words, max_gap=0.45, pad=0.10, fps=None, total_
             if total_duration is not None:
                 e = min(e, total_duration)
         out.append((s, e))
+
+    # Drop SHORT isolated blips at the very start/end: a stray sound, breath, or
+    # shuffling before the first real words (or after the last) gets transcribed
+    # as a lone "word" and otherwise survives as leading/trailing dead space.
+    LEAD_BLIP = 0.8
+    while len(out) > 1 and (out[0][1] - out[0][0]) < LEAD_BLIP:
+        out.pop(0)
+    while len(out) > 1 and (out[-1][1] - out[-1][0]) < LEAD_BLIP:
+        out.pop()
     return out or list(cutlist)
 
 
