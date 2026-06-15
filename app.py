@@ -716,6 +716,7 @@ PAGE = r"""<!doctype html>
         <a id="dlcap" class="cap hide" href="#">⬇ Captioned</a>
         <a id="dlmp4" href="#">⬇ Rough cut</a>
         <a id="dlsrt" href="#">⬇ .srt</a>
+        <a id="newvid" href="#">＋ Edit another</a>
       </div>
     </div>
     <div class="card chat">
@@ -860,6 +861,24 @@ async function send(){
 $("#csend").onclick=send;
 $("#cmsg").addEventListener("keydown",e=>{ if(e.key==="Enter") send(); });
 
+// "Edit another": reset back to the upload screen for a fresh video.
+function resetToUpload(){
+  if(poll){ clearInterval(poll); poll=null; }
+  try{ sessionStorage.removeItem("jobId"); }catch(e){}
+  jobId=null; working=false; lastVer=-1; window._csig=null; chosen=null;
+  const v=$("#vid"); v.pause&&v.pause(); v.removeAttribute("src"); v.load&&v.load();
+  v.classList.add("hide");
+  $("#dl").classList.add("hide");
+  $("#msgs").innerHTML="";
+  $("#cmsg").value=""; $("#cmsg").disabled=true; $("#csend").disabled=true;
+  $("#work").classList.add("hide");
+  $("#setup").classList.remove("hide");
+  $("#fname").textContent=""; $("#go").disabled=true;
+  try{ $("#file").value=""; }catch(e){}
+  window.scrollTo(0,0);
+}
+$("#newvid").onclick=(e)=>{ e.preventDefault(); resetToUpload(); };
+
 // Reconnect to an in-progress (or finished) job after a page refresh, so a long
 // render isn't abandoned. If the job is gone, tick() falls back to the upload view.
 (function reconnect(){
@@ -877,4 +896,10 @@ $("#cmsg").addEventListener("keydown",e=>{ if(e.key==="Enter") send(); });
 
 if __name__ == "__main__":
     print("CapCut Auto-Edit UI →  http://127.0.0.1:5000")
-    app.run(host="127.0.0.1", port=5000, threaded=True)
+    # use_reloader=True: auto-restart when a .py file changes, so code updates
+    # apply without manually stopping/starting the server (the recurring "it's
+    # the same / didn't pick up my change" gotcha). Reloader off only if the env
+    # var is set (e.g. while actively rendering a long job you don't want killed).
+    _reload = os.environ.get("AUTOEDIT_NO_RELOAD") != "1"
+    app.run(host="127.0.0.1", port=5000, threaded=True,
+            debug=_reload, use_reloader=_reload)
