@@ -440,7 +440,8 @@ def run():
         return jsonify(error="No file uploaded."), 400
     ext = os.path.splitext(f.filename)[1].lower()
     if ext not in ALLOWED_EXT:
-        return jsonify(error=f"Unsupported type '{ext}'. Use: " + ", ".join(sorted(ALLOWED_EXT))), 400
+        shown = ext or "(no extension)"   # a name like ".mp4" splits to an empty ext
+        return jsonify(error=f"Unsupported type '{shown}'. Use: " + ", ".join(sorted(ALLOWED_EXT))), 400
 
     def pick(name, allowed, default):
         v = (request.form.get(name) or "").strip()
