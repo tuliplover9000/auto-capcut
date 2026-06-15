@@ -133,11 +133,16 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
                 f"[{prev_label}][ov{N}]overlay=0:0:{gate}:eof_action=pass[{out_lbl}]")
             prev_label = out_lbl
         else:
-            # stacked: media in the top zone + the presenter cropped into the
-            # bottom band, both gated to the SAME window -> cut to the split look
-            # and back to full presenter. The band is the live presenter ([0:v]),
-            # so it stays in sync.
-            chains.append(f"[0:v]crop={DW}:{bandH}:0:{cropY},setsar=1[pb{N}]")
+            # stacked: media in the top zone + the presenter in the bottom band,
+            # both gated to the SAME window -> cut to the split and back. The band
+            # shows the WHOLE presenter frame (face AND body) scaled to FIT the band
+            # height and CENTERED, over a soft blurred fill of itself (so there are
+            # no black side bars) — not a tight crop of the top of the head.
+            chains.append(
+                f"[0:v]scale={DW}:{bandH}:force_original_aspect_ratio=increase,"
+                f"crop={DW}:{bandH},boxblur=18:2,eq=brightness=-0.25,setsar=1[pbg{N}]")
+            chains.append(f"[0:v]scale=-2:{bandH},setsar=1[pfg{N}]")
+            chains.append(f"[pbg{N}][pfg{N}]overlay=(W-w)/2:0,setsar=1[pb{N}]")
             mid, out_lbl = f"c{i}a", f"c{i}"
             chains.append(
                 f"[{prev_label}][ov{N}]overlay=0:0:{gate}:eof_action=pass[{mid}]")
