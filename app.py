@@ -72,6 +72,16 @@ def _wants_caption_layer(job):
     return bool(s.get("burn") or s.get("titles"))
 
 
+def _broll_note(job):
+    """Heads-up when B-roll was requested but nothing could be fetched (usually a
+    missing PEXELS_API_KEY) — so the feature never silently does nothing. Returns
+    the note string, or '' when B-roll is off or assets were found."""
+    if job["settings"].get("broll") and not job.get("overlay_plan"):
+        return ("Heads up: I couldn't fetch any B-roll — set a PEXELS_API_KEY "
+                "(or PIXABAY_API_KEY) in .env and ask me to add it again.")
+    return ""
+
+
 def _burn(job, src_mp4, out_cap, tmp):
     s = job["settings"]
     cap_spec = autoedit.probe(src_mp4)
@@ -265,6 +275,9 @@ def run_job(job_id, instructions):
               f"({len(job['cutlist'])} segments kept). Tell me what to tweak — e.g. "
               "“keep the intro”, “cut the first 5 seconds”, "
               "“make captions Bebas Neue”, “one word at a time”.")
+        bn = _broll_note(job)        # tell the user if B-roll was asked for but dropped
+        if bn:
+            _chat(job_id, "editor", bn)
         _stage(job_id, state="done", step=7, stage="Done")
     except Exception as e:
         _chat(job_id, "editor", f"⚠ {type(e).__name__}: {e}")
@@ -366,6 +379,8 @@ def revise_job(job_id, msg):
                     density=job["settings"].get("broll_density", "tasteful"),
                     style=job["settings"].get("broll_style", "auto"),
                     extra=job.get("broll_instruction", ""))
+                if _broll_note(job):
+                    reply += "  (" + _broll_note(job) + ")"
             else:
                 job["overlay_plan"] = []
             _stage(job_id, stage="Re-rendering")
@@ -385,9 +400,8 @@ def revise_job(job_id, msg):
                         density=job["settings"].get("broll_density", "tasteful"),
                         style=job["settings"].get("broll_style", "auto"),
                         extra=job.get("broll_instruction", ""))
-                    if not job["overlay_plan"]:
-                        reply += (" (Heads up: I couldn't fetch any matching B-roll — "
-                                  "check that a PEXELS_API_KEY is set in .env.)")
+                    if _broll_note(job):
+                        reply += "  (" + _broll_note(job) + ")"
                 else:
                     job["overlay_plan"] = []
             # Titles freshly toggled on must be generated before any burn/regrade.

@@ -199,6 +199,8 @@ def build_transcript_text(segments):
     """
     lines = []
     for i, seg in enumerate(segments):
+        if not isinstance(seg, dict):
+            continue
         text = (seg.get("text") or "").strip()   # a noise-only segment may lack "text"
         lines.append(f"[{i}] {seg.get('start', 0.0):.2f}-{seg.get('end', 0.0):.2f}: {text}")
     return "\n".join(lines)
@@ -760,7 +762,7 @@ def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
     # Frame-align each segment's duration so nominal output time == rendered time
     # (kills cumulative caption/overlay drift). Round UP so no trailing word is
     # clipped; clamp the end to the source duration (last segment only).
-    if fps and fps > 0:
+    if fps and math.isfinite(fps) and fps > 0:
         aligned = []
         for i, (s, e) in enumerate(result):
             n = max(1, math.ceil((e - s) * fps - 1e-6))
@@ -787,6 +789,12 @@ def _zoom_vf(zspec, dw, dh, fps, dur):
     commas INSIDE zoompan expressions (e.g. min(a\,b)) so they don't split the
     filtergraph.
     """
+    # Non-finite fps/dur would crash round()/produce an "inf" fps token; fall back
+    # to safe values (these come from probe/cutlist and are finite in practice).
+    if not (math.isfinite(fps) and fps > 0):
+        fps = 30.0
+    if not (math.isfinite(dur) and dur > 0):
+        dur = 1.0
     t = (zspec or {}).get("type", "none")
     L = float((zspec or {}).get("level") or DEFAULT_ZOOM_LEVEL.get(t, 1.0))
     L = max(1.0, min(1.35, L))
@@ -1117,7 +1125,10 @@ def _srt_ts(seconds):
     Work in integer milliseconds so rounding (e.g. 22.9996s) carries into the
     seconds field instead of producing an invalid '22,1000'.
     """
-    total_ms = int(round(max(0.0, seconds) * 1000))
+    # Clamp magnitude (not just isfinite): a finite-but-huge value like 1e308
+    # still overflows int() after *1000. 1e7s (~115 days) is well past any video.
+    seconds = min(max(0.0, seconds), 1e7) if math.isfinite(seconds) else 0.0
+    total_ms = int(round(seconds * 1000))
     h = total_ms // 3_600_000
     m = (total_ms % 3_600_000) // 60_000
     s = (total_ms % 60_000) // 1000
@@ -1293,7 +1304,8 @@ def _text_metrics(tokens, font_file, fontsize):
 
 def _ass_ts(seconds):
     """Seconds -> ASS timestamp H:MM:SS.cs (centiseconds)."""
-    cs = int(round(max(0.0, seconds) * 100))
+    seconds = min(max(0.0, seconds), 1e7) if math.isfinite(seconds) else 0.0  # never int(inf)
+    cs = int(round(seconds * 100))
     h = cs // 360000
     m = (cs % 360000) // 6000
     s = (cs % 6000) // 100
