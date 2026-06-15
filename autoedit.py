@@ -857,10 +857,13 @@ def _video_frame_count(path):
 
 
 def _has_audio(input_path):
-    """True if `input_path` has at least one audio stream (parses ffmpeg -i)."""
+    """True if `input_path` has at least one audio stream (parses ffmpeg -i).
+    Requires the 'Stream #...: Audio:' shape so an 'Audio:' substring in a
+    metadata/title line can't false-positive."""
     ff = ff_exe()
     r = run([ff, "-i", input_path], timeout=30)
-    return any("Audio:" in ln for ln in (r.stderr or "").splitlines())
+    return any("Audio:" in ln and "Stream #" in ln
+               for ln in (r.stderr or "").splitlines())
 
 
 def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
@@ -966,11 +969,19 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
     # Build the WHOLE audio in ONE pass (one priming, no per-join accumulation).
     audio_path = None
     if _has_audio(input_path):
-        # Pin audio to the MEASURED video length (a per-segment -ss/-t cut can drop
-        # a boundary frame, so real video is sometimes shorter than nominal); fall
-        # back to nominal sum if the frame count can't be parsed.
+        # Pin audio to the MEASURED video length so it can't drift. Prefer the
+        # concatenated video's actual container duration (correct for BOTH CFR and
+        # VFR — using the source's average fps for frame->seconds math is wrong
+        # when segments re-encode at a different rate than a VFR source's mean).
+        # Fall back to frame-count/fps, then to the nominal sum.
+        meas = (probe(video_only).get("duration") or 0.0)
         vframes = _video_frame_count(video_only)
-        total_v = (vframes / fps) if (vframes and fps > 0) else sum(e - s for s, e in cutlist)
+        if meas > 0:
+            total_v = meas
+        elif vframes and fps > 0:
+            total_v = vframes / fps
+        else:
+            total_v = sum(e - s for s, e in cutlist)
         parts = [f"[0:a]atrim=start={s:.6f}:end={e:.6f},asetpts=PTS-STARTPTS[a{i}]"
                  for i, (s, e) in enumerate(cutlist)]
         labels = "".join(f"[a{i}]" for i in range(len(cutlist)))
@@ -1039,7 +1050,7 @@ def _effects_filters(effects, boundaries, fps):
         # White flash on cuts, gated to >=1.5s apart so fast edits don't strobe.
         times, last = [], -99.0
         for t in boundaries:
-            if t - last >= 1.5:
+            if t > 0 and t - last >= 1.5:   # t>0: never flash the opening frames
                 times.append(t); last = t
         if times:
             d = 2.0 / max(1.0, fps)                 # ~2 frames
