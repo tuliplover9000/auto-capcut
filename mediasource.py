@@ -142,10 +142,33 @@ def _fresh(path):
     return st.st_size > 0 and (time.time() - st.st_mtime) < CACHE_TTL
 
 
+def _looks_like_media(data, ext):
+    """True if `data`'s magic bytes match the expected media type for `ext`.
+    Guards against a provider 200-ing with an HTML error/login page (or a
+    truncated body) that would otherwise be cached as a .jpg/.mp4 and fed to
+    ffmpeg on every run for the whole TTL."""
+    if not data or len(data) < 64:
+        return False
+    if ext == ".mp4":
+        return b"ftyp" in data[:16]            # ISO-BMFF box
+    if data.startswith((b"\xff\xd8\xff",        # jpeg
+                        b"\x89PNG\r\n",         # png
+                        b"GIF87a", b"GIF89a",   # gif
+                        b"BM")):                # bmp
+        return True
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return True
+    return False
+
+
 def _download(url, dest, headers):
     """Download url to dest (atomically via .part). Returns dest or raises."""
     _ensure_cache_dir()
     data = _get(url, headers, raw=True, timeout=60)
+    if not _looks_like_media(data, os.path.splitext(dest)[1].lower()):
+        raise RuntimeError(
+            f"downloaded content for {os.path.basename(dest)} is not valid media "
+            f"({len(data) if data else 0} bytes) — skipping")
     tmp = dest + ".part"
     with open(tmp, "wb") as f:
         f.write(data)
@@ -154,13 +177,17 @@ def _download(url, dest, headers):
 
 
 def _pick_random_top(candidates, used_ids):
-    """candidates: list of dicts with 'id'. Filter out used ids, pick randomly
-    among the top TOP_N. Returns chosen dict or None."""
+    """candidates: list of dicts with 'uid'. Filter out already-used ids, pick
+    randomly among the top TOP_N. Returns chosen dict or None.
+
+    When every candidate is already used, return None (skip this overlay) rather
+    than re-serving a duplicate — B-roll is best-effort, and a visible repeat of
+    the same clip in one video looks worse than that moment having no overlay.
+    """
     fresh = [c for c in candidates if c["uid"] not in (used_ids or set())]
-    pool = fresh if fresh else candidates
-    if not pool:
+    if not fresh:
         return None
-    top = pool[:TOP_N]
+    top = fresh[:TOP_N]
     return random.choice(top)
 
 
@@ -178,6 +205,9 @@ def _pexels_image(query, key, orientation, used_ids):
     data = _get(url, headers)
     cands = []
     for p in data.get("photos", []):
+        pid = p.get("id")
+        if pid is None:                 # skip one bad item, don't drop the page
+            continue
         w, h = p.get("width", 0), p.get("height", 0)
         if h < MIN_HEIGHT or w <= 0 or (h / w) < MIN_RATIO:
             continue
@@ -185,7 +215,7 @@ def _pexels_image(query, key, orientation, used_ids):
         link = src.get("large2x") or src.get("original") or src.get("large")
         if not link:
             continue
-        cands.append({"uid": f"pexels:{p['id']}", "id": p["id"],
+        cands.append({"uid": f"pexels:{pid}", "id": pid,
                       "link": link, "w": w, "h": h})
     chosen = _pick_random_top(cands, used_ids)
     if not chosen:
@@ -206,6 +236,9 @@ def _pexels_video(query, key, orientation, used_ids):
     data = _get(url, headers)
     cands = []
     for v in data.get("videos", []):
+        vid = v.get("id")
+        if vid is None:                 # skip one bad item, don't drop the page
+            continue
         vw, vh = v.get("width", 0), v.get("height", 0)
         # prefer best mp4 portrait file within this video
         best = None
@@ -234,7 +267,7 @@ def _pexels_video(query, key, orientation, used_ids):
                     best = cand_file
         if best is None:
             continue
-        cands.append({"uid": f"pexels:{v['id']}", "id": v["id"],
+        cands.append({"uid": f"pexels:{vid}", "id": vid,
                       "link": best["link"], "w": best["w"], "h": best["h"],
                       "duration": v.get("duration")})
     chosen = _pick_random_top(cands, used_ids)
@@ -262,13 +295,16 @@ def _pixabay_image(query, key, orientation, used_ids):
     data = _get(url, headers)
     cands = []
     for hit in data.get("hits", []):
+        hid = hit.get("id")
+        if hid is None:                 # skip one bad item, don't drop the page
+            continue
         w, h = hit.get("imageWidth", 0), hit.get("imageHeight", 0)
         if h < MIN_HEIGHT or w <= 0 or (h / w) < MIN_RATIO:
             continue
         link = hit.get("largeImageURL")
         if not link:
             continue
-        cands.append({"uid": f"pixabay:{hit['id']}", "id": hit["id"],
+        cands.append({"uid": f"pixabay:{hid}", "id": hid,
                       "link": link, "w": w, "h": h})
     chosen = _pick_random_top(cands, used_ids)
     if not chosen:
@@ -289,6 +325,9 @@ def _pixabay_video(query, key, orientation, used_ids):
     data = _get(url, headers)
     cands = []
     for hit in data.get("hits", []):
+        hid = hit.get("id")
+        if hid is None:                 # skip one bad item, don't drop the page
+            continue
         vids = hit.get("videos", {})
         best = None
         for qual in ("large", "medium", "small", "tiny"):
@@ -308,7 +347,7 @@ def _pixabay_video(query, key, orientation, used_ids):
                 best = cand_file
         if best is None:
             continue
-        cands.append({"uid": f"pixabay:{hit['id']}", "id": hit["id"],
+        cands.append({"uid": f"pixabay:{hid}", "id": hid,
                       "link": best["link"], "w": best["w"], "h": best["h"],
                       "duration": hit.get("duration")})
     chosen = _pick_random_top(cands, used_ids)

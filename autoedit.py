@@ -229,10 +229,18 @@ def _claude_cli(prompt, stdin_text, model="sonnet"):
         cmd_str = " ".join(f'"{c}"' if " " in c else c for c in cmd)
         try:
             r = _spawn(cmd_str, True)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(
+                "Claude CLI timed out after 300s with no response. "
+                "Try again, or use a shorter clip.")
         except Exception as e2:
             raise RuntimeError(
                 f"Claude CLI could not be launched: {e2}\n"
                 "Make sure `claude` is on PATH and logged in (run it interactively once).")
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(
+            "Claude CLI timed out after 300s with no response. "
+            "Try again, or use a shorter clip.")
 
     if r.returncode != 0:
         raise RuntimeError(
@@ -257,14 +265,28 @@ def _claude_cli(prompt, stdin_text, model="sonnet"):
 
 
 def _extract_json(s):
-    """Parse JSON, tolerating stray prose around it (grab first {...} block)."""
+    """Parse JSON, tolerating code fences, surrounding prose, and trailing extra
+    blocks (e.g. a stray second JSON object after the answer). Raises ValueError
+    when there's no parseable JSON (callers treat that as a safe failure)."""
+    if not s or not s.strip():
+        raise ValueError("empty JSON string")
+    s = s.strip()
     try:
-        return json.loads(s)
+        return json.loads(s)                       # clean object/array
     except json.JSONDecodeError:
-        m = re.search(r"\{.*\}", s, re.DOTALL)
-        if not m:
-            raise
-        return json.loads(m.group(0))
+        pass
+    # Decode the FIRST complete JSON value, skipping any leading prose and
+    # ignoring any trailing data. raw_decode stops at the end of the first value,
+    # so two concatenated objects no longer defeat a greedy `{.*}` regex.
+    dec = json.JSONDecoder()
+    for i, ch in enumerate(s):
+        if ch in "{[":
+            try:
+                obj, _ = dec.raw_decode(s, i)
+                return obj
+            except json.JSONDecodeError:
+                continue
+    raise ValueError("no JSON object found")
 
 
 def decide_cuts_with_claude(transcript_text, total_duration, aggressiveness="medium",
