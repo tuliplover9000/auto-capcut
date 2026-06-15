@@ -924,6 +924,14 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             seg_path,
         ]
         r = run(cmd, timeout=600)
+        if r.returncode == 124:
+            # Timeout leaves a partial file with nonzero size that would pass the
+            # size check below and ship a truncated video. Fail loudly instead.
+            raise RuntimeError(
+                f"Segment {idx:04d} ({start:.2f}s–{end:.2f}s) timed out after 600s — "
+                f"try a shorter clip or disable animated zoom.\n"
+                f"ffmpeg stderr: {r.stderr[-400:]}"
+            )
         if os.path.exists(seg_path) and os.path.getsize(seg_path) > 0:
             seg_paths.append(seg_path)
             print(f"  segment {idx:04d}: {start:.2f}s → {end:.2f}s ({duration:.2f}s)")
@@ -960,9 +968,10 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
         "-movflags", "+faststart",
         video_only,
     ], timeout=600)
-    if not (os.path.exists(video_only) and os.path.getsize(video_only) > 0):
+    if r.returncode == 124 or not (os.path.exists(video_only) and os.path.getsize(video_only) > 0):
         raise RuntimeError(
-            f"Video concatenation failed — output file missing or empty.\n"
+            f"Video concatenation failed{' (timed out)' if r.returncode == 124 else ''} — "
+            f"output file missing or empty.\n"
             f"ffmpeg stderr: {r.stderr[-600:]}"
         )
 
@@ -999,8 +1008,9 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             "-movflags", "+faststart",
             audio_path,
         ], timeout=600)
-        if not (os.path.exists(audio_path) and os.path.getsize(audio_path) > 0):
-            # Unexpected audio failure -> degrade to a silent video, never abort.
+        if ra.returncode == 124 or not (os.path.exists(audio_path) and os.path.getsize(audio_path) > 0):
+            # Audio failure/timeout -> degrade to a silent video, never ship a
+            # truncated audio track or abort the whole render.
             print(f"  WARNING: single-pass audio build failed; shipping silent video.\n"
                   f"  ffmpeg stderr: {(ra.stderr or '')[-400:]}")
             audio_path = None
@@ -1016,9 +1026,10 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
         cmd = [ff, "-y", "-i", video_only, "-c", "copy",
                "-movflags", "+faststart", out_mp4]
     r = run(cmd, timeout=600)
-    if not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
+    if r.returncode == 124 or not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
         raise RuntimeError(
-            f"Final mux failed — output file missing or empty.\n"
+            f"Final mux failed{' (timed out)' if r.returncode == 124 else ''} — "
+            f"output file missing or empty.\n"
             f"ffmpeg stderr: {(r.stderr or '')[-600:]}"
         )
     print(f"  output: {out_mp4}  ({os.path.getsize(out_mp4)//1024} KiB)")
@@ -1084,8 +1095,10 @@ def grade_video(in_mp4, out_mp4, effects, boundaries, fps, color, tmpdir):
                "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "copy",
                "-movflags", "+faststart", os.path.abspath(out_mp4)]
     r = run(cmd, timeout=900)
-    if not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
-        raise RuntimeError(f"Effects grade failed.\nffmpeg stderr: {r.stderr[-500:]}")
+    if r.returncode == 124 or not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
+        raise RuntimeError(
+            f"Effects grade failed{' (timed out)' if r.returncode == 124 else ''}.\n"
+            f"ffmpeg stderr: {r.stderr[-500:]}")
 
 
 # ── R9: write_srt ────────────────────────────────────────────────────────────

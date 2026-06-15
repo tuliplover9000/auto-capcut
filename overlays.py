@@ -49,11 +49,18 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
     fps = float(spec.get("fps") or 30.0)
     if DW <= 0 or DH <= 0:
         raise RuntimeError(f"Cannot lay out overlays: invalid base dims {DW}x{DH}.")
+    # Even W/H — libx264 yuv420p needs it, and render_video already corrects an
+    # odd source to even (trunc/2*2). Match that here so the base file's dims and
+    # the composite's target dims agree (else scale/crop hits an odd dim -> abort).
+    DW -= DW % 2
+    DH -= DH % 2
 
     bandH = round(BAND_RATIO * DH)
+    bandH -= bandH % 2                # keep the band (and thus topH) even too
     topH = DH - bandH
     bandY = DH - bandH
     cropY = round(CROP_BIAS * DH)
+    cropY -= cropY % 2                # even crop offset (avoid chroma-shift warning)
 
     base_abs = os.path.abspath(base_mp4)
     out_abs = os.path.abspath(out_mp4)
@@ -165,9 +172,10 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
     ]
 
     r = run(cmd, timeout=900)
-    if not (os.path.exists(out_abs) and os.path.getsize(out_abs) > 0):
+    if r.returncode == 124 or not (os.path.exists(out_abs) and os.path.getsize(out_abs) > 0):
         raise RuntimeError(
-            f"Overlay composite failed — output missing or empty.\n"
+            f"Overlay composite failed{' (timed out)' if r.returncode == 124 else ''} — "
+            f"output missing or empty.\n"
             f"ffmpeg stderr: {(r.stderr or '')[-800:]}")
 
 
