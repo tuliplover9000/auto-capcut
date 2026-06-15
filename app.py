@@ -86,6 +86,10 @@ def _burn(job, src_mp4, out_cap, tmp):
                            captions=bool(s.get("burn")))
     if n > 0:
         autoedit.burn_captions(src_mp4, ass, out_cap)
+    elif os.path.exists(out_cap):
+        # No caption/title events this render — drop any stale captioned file so
+        # _video_path can't serve a previous version whose timing no longer matches.
+        os.remove(out_cap)
 
 
 def _effects(job):
@@ -364,40 +368,46 @@ def revise_job(job_id, msg):
                 job["overlay_plan"] = []
             _stage(job_id, stage="Re-rendering")
             _render_outputs(job)
-        elif changed_titles:
-            if job["settings"].get("titles") and not job.get("titles"):
+        else:
+            # Cheap paths COMPOSE — pick the minimum render tier that covers every
+            # dirty flag at once (the old elif chain silently dropped a second
+            # directive, e.g. "turn on titles AND add film grain"). A re-grade
+            # (_regrade_only) re-composites B-roll + effects AND reburns
+            # captions/titles, so it subsumes caption/title changes; a re-burn
+            # only repaints the caption/title layer.
+            if changed_broll:
+                if job["settings"].get("broll"):
+                    _stage(job_id, stage="Finding B-roll")
+                    job["overlay_plan"] = autoedit.resolve_overlays(
+                        job["cutlist"], job["all_words"], job["settings"]["model"],
+                        density=job["settings"].get("broll_density", "tasteful"),
+                        style=job["settings"].get("broll_style", "auto"),
+                        extra=job.get("broll_instruction", ""))
+                    if not job["overlay_plan"]:
+                        reply += (" (Heads up: I couldn't fetch any matching B-roll — "
+                                  "check that a PEXELS_API_KEY is set in .env.)")
+                else:
+                    job["overlay_plan"] = []
+            # Titles freshly toggled on must be generated before any burn/regrade.
+            if changed_titles and job["settings"].get("titles") and not job.get("titles"):
                 _stage(job_id, stage="Deciding titles")
                 job["titles"] = autoedit.decide_titles_with_claude(
                     job["cutlist"], job["all_words"], job["settings"]["model"])
-            _stage(job_id, stage="Updating titles")
-            _reburn_only(job)
-        elif changed_broll:
-            if job["settings"].get("broll"):
-                _stage(job_id, stage="Finding B-roll")
-                job["overlay_plan"] = autoedit.resolve_overlays(
-                    job["cutlist"], job["all_words"], job["settings"]["model"],
-                    density=job["settings"].get("broll_density", "tasteful"),
-                    style=job["settings"].get("broll_style", "auto"),
-                    extra=job.get("broll_instruction", ""))
-                if not job["overlay_plan"]:
-                    reply += (" (Heads up: I couldn't fetch any matching B-roll — "
-                              "check that a PEXELS_API_KEY is set in .env.)")
-            else:
-                job["overlay_plan"] = []
-            _stage(job_id, stage="Re-rendering B-roll")
-            _regrade_only(job)
-        elif changed_fx:
-            _stage(job_id, stage="Applying effects")
-            _regrade_only(job)
-        elif changed_caps:
-            _stage(job_id, stage="Updating captions")
-            _reburn_only(job)
+            if changed_broll or changed_fx:
+                _stage(job_id, stage="Re-rendering")
+                _regrade_only(job)          # composites broll+fx, reburns caps+titles
+            elif changed_caps or changed_titles:
+                _stage(job_id, stage="Updating captions/titles")
+                _reburn_only(job)
 
         _chat(job_id, "editor", reply)
         _stage(job_id, state="done", stage="Done")
     except Exception as e:
         _chat(job_id, "editor", f"⚠ {type(e).__name__}: {e}")
-        _stage(job_id, state="done", stage="Done")
+        # Mirror run_job: record the failure as an error state (the UI keeps the
+        # chat enabled on "error" and still shows the last good preview) rather
+        # than masking a crashed revision as a clean "done".
+        _stage(job_id, state="error", error=str(e), stage="Error")
 
 
 # ── routes ───────────────────────────────────────────────────────────────────
@@ -470,6 +480,10 @@ def run():
 
 @app.route("/chat/<job_id>", methods=["POST"])
 def chat(job_id):
+    msg = (request.json or {}).get("message", "").strip() if request.is_json else \
+          (request.form.get("message") or "").strip()
+    if not msg:
+        return jsonify(error="empty message"), 400
     with LOCK:
         job = JOBS.get(job_id)
         if not job:
@@ -478,10 +492,10 @@ def chat(job_id):
             return jsonify(error="busy"), 409
         if not job.get("transcript_text"):
             return jsonify(error="not ready"), 409
-    msg = (request.json or {}).get("message", "").strip() if request.is_json else \
-          (request.form.get("message") or "").strip()
-    if not msg:
-        return jsonify(error="empty message"), 400
+        # Claim the job under the lock BEFORE spawning the worker — otherwise two
+        # near-simultaneous /chat posts both pass the busy check (the worker only
+        # sets state="running" once its thread starts) and double-render.
+        job["state"] = "running"
     _chat(job_id, "you", msg)
     threading.Thread(target=revise_job, args=(job_id, msg), daemon=True).start()
     return jsonify(ok=True)

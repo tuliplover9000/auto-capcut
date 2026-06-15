@@ -747,8 +747,12 @@ def _zoom_vf(zspec, dw, dh, fps, dur):
         # OUT then in when it follows a tighter segment — a hard punch avoids that
         # and reads cleaner). Crop window iw/L x ih/L anchored at bias B of the
         # vertical slack, then scale back to display dims.
+        # setsar=1: a non-integer iw/L crop makes ffmpeg nudge the SAR to preserve
+        # display geometry; without resetting it this segment ends non-1:1 while
+        # the other zoom types are 1:1, and the stream-copy concat then renders the
+        # punch-in frames at the wrong SAR (slight horizontal squish).
         return (f"crop=iw/{L}:ih/{L}:(iw-iw/{L})/2:(ih-ih/{L})*{B},"
-                f"scale={dw}:{dh},fps={f}")
+                f"scale={dw}:{dh},setsar=1,fps={f}")
     if t in ("push", "pullout") and L > 1.0:
         N = max(2, round(dur * fps)); nm1 = N - 1
         z = (f"min(1+({L}-1)*on/{nm1}\\,{L})" if t == "push"
@@ -1184,7 +1188,9 @@ def write_ass(cutlist, all_words, out_w, out_h, ass_path,
       oneword   — one big screen-centered word at a time (Hormozi style)
     """
     kept = _kept_words(cutlist, all_words)
-    if not kept:
+    if not kept and not titles:
+        # No caption words AND no title cards -> nothing to write. (A word-less
+        # clip with titles requested must still emit the title events below.)
         return 0
 
     out_w = int(out_w) if out_w and out_w > 0 else 1080
