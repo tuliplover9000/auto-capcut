@@ -47,3 +47,4 @@ ovfix/
 ovproto/
 out/
 *.png
+broll_cache/
