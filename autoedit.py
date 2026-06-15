@@ -784,8 +784,12 @@ def cut_offsets(cutlist):
     return offs[:-1]  # drop the final end; these are the internal cut points
 
 
-def _effects_vf(effects, boundaries, fps, color):
-    """Build the grade filter chain (or '' if nothing enabled)."""
+def _effects_filters(effects, boundaries, fps):
+    """Return the list of effect filter strings (grain/vignette/flash), no setparams.
+
+    Shared by _effects_vf (grade pass) and the overlay compositor (overlays.py),
+    which folds these into the SAME ffmpeg pass and re-stamps color itself.
+    """
     filters = []
     if effects.get("grain"):
         filters.append("noise=alls=10:allf=t")     # subtle moving film grain
@@ -802,6 +806,12 @@ def _effects_vf(effects, boundaries, fps, color):
             cond = "+".join(f"between(t\\,{t:.3f}\\,{t + d:.3f})" for t in times)
             filters.append(
                 f"drawbox=x=0:y=0:w=iw:h=ih:t=fill:color=white@0.7:enable='{cond}'")
+    return filters
+
+
+def _effects_vf(effects, boundaries, fps, color):
+    """Build the grade filter chain (or '' if nothing enabled)."""
+    filters = _effects_filters(effects, boundaries, fps)
     chain = ",".join(filters)
     if not chain:
         return ""

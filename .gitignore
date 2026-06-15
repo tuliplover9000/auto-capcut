@@ -39,3 +39,11 @@ Thumbs.db
 
 # stray font copies at repo root (burn_captions copies next to the .ass during tests)
 /*.ttf
+
+# overlay/test scratch dirs
+test_assets/
+test_outputs/
+ovfix/
+ovproto/
+out/
+*.png
