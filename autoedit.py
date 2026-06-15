@@ -872,6 +872,11 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             vf = _zoom_vf(z, dw, dh, fps, end - start)
             # Re-stamp source colour (zoompan drops HLG/HDR primaries+transfer).
             vf += _setparams_suffix(spec.get("color"))
+        elif dw > 0 and dh > 0 and (dw % 2 or dh % 2):
+            # libx264 yuv420p needs even W/H — an odd-dimensioned source would
+            # abort the encode. Correct to the nearest even dims (only when the
+            # source is actually odd, so the common even-dim path is untouched).
+            vf = "scale=trunc(iw/2)*2:trunc(ih/2)*2" + _setparams_suffix(spec.get("color"))
         cmd = [
             ff, "-y",
             "-ss", f"{start:.6f}",

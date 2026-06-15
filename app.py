@@ -545,7 +545,10 @@ def download(job_id, which):
     path = os.path.join(j["outdir"], fname)
     if not os.path.exists(path):
         abort(404)
-    return send_file(path, as_attachment=True, download_name=fname)
+    # Set an explicit MIME for the .srt sidecar so it downloads as text rather
+    # than being handed to a media player by the OS.
+    mime = "text/plain; charset=utf-8" if which == "srt" else None
+    return send_file(path, as_attachment=True, download_name=fname, mimetype=mime)
 
 
 PAGE = r"""<!doctype html>
@@ -736,6 +739,7 @@ $("#go").onclick=async()=>{
   catch(e){ alert("Upload failed: "+e); $("#go").disabled=false; return; }
   if(r.error){ alert(r.error); $("#go").disabled=false; return; }
   jobId=r.job_id;
+  try{ sessionStorage.setItem("jobId", jobId); }catch(e){}
   $("#setup").classList.add("hide");
   $("#work").classList.remove("hide");
   poll=setInterval(tick,1200); tick();
@@ -743,15 +747,29 @@ $("#go").onclick=async()=>{
 
 async function tick(){
   if(!jobId) return;
-  let s; try{ s=await (await fetch("/status/"+jobId)).json(); }catch(e){ return; }
-  if(s.error_http) return;
+  let s, resp;
+  try{ resp=await fetch("/status/"+jobId); s=await resp.json(); }catch(e){ return; }
+  if(!resp.ok){
+    // The job no longer exists (e.g. the server was restarted). Stop polling
+    // and return cleanly to the upload screen instead of silently freezing.
+    if(poll){ clearInterval(poll); poll=null; }
+    try{ sessionStorage.removeItem("jobId"); }catch(e){}
+    jobId=null; working=false;
+    $("#work").classList.add("hide");
+    $("#setup").classList.remove("hide");
+    $("#go").disabled = !chosen;
+    return;
+  }
   // progress
   const running = s.state==="running";
   working = running;
-  $("#stage").textContent = running ? (s.stage||"Working…") : (s.state==="error"?"":"");
+  $("#stage").textContent = running ? (s.stage||"Working…")
+                                    : (s.state==="error" ? ("⚠ "+(s.error||"failed")) : "");
   $("#prog").style.width = Math.round((s.step/7)*100)+"%";
-  $("#progwrap").classList.toggle("hide", s.has_mp4 && !running ? false : false); // keep bar visible during runs
-  if(s.has_mp4){ $("#progwrap").classList.add("hide"); $("#stage").classList.add("hide"); }
+  // Show the progress bar + stage while working — during the initial run AND
+  // during revisions; hide them only once a render exists and nothing is running.
+  $("#progwrap").classList.toggle("hide", !(running || !s.has_mp4));
+  $("#stage").classList.toggle("hide", !running && s.state!=="error");
 
   // video preview — reload only when a new version is rendered
   if(s.has_mp4 && s.version!==lastVer){
@@ -759,6 +777,11 @@ async function tick(){
     const v=$("#vid");
     const t=v.currentTime||0;
     v.classList.remove("hide");
+    // Restore the playback position after the reload (a revision shouldn't jump
+    // the viewer back to 0:00).
+    v.addEventListener("loadedmetadata", ()=>{
+      try{ if(t>0 && t < (v.duration||1e9)) v.currentTime=t; }catch(e){}
+    }, {once:true});
     v.src="/video/"+jobId+"?v="+s.version;
     v.load();
     $("#dl").classList.remove("hide");
@@ -802,12 +825,25 @@ async function send(){
   inp.value=""; $("#cmsg").disabled=true; $("#csend").disabled=true;
   try{
     const r=await (await fetch("/chat/"+jobId,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg})})).json();
-    if(r.error==="busy"){ /* will re-enable on tick */ }
-  }catch(e){}
+    // Restore the text so the user doesn't have to retype it (busy/not-ready/etc).
+    if(r && r.error){ inp.value=msg; }
+  }catch(e){ inp.value=msg; }
   tick();
 }
 $("#csend").onclick=send;
 $("#cmsg").addEventListener("keydown",e=>{ if(e.key==="Enter") send(); });
+
+// Reconnect to an in-progress (or finished) job after a page refresh, so a long
+// render isn't abandoned. If the job is gone, tick() falls back to the upload view.
+(function reconnect(){
+  let saved=null; try{ saved=sessionStorage.getItem("jobId"); }catch(e){}
+  if(saved){
+    jobId=saved;
+    $("#setup").classList.add("hide");
+    $("#work").classList.remove("hide");
+    poll=setInterval(tick,1200); tick();
+  }
+})();
 </script>
 </body></html>"""
 
