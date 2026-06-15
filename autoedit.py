@@ -467,6 +467,91 @@ The segments follow on stdin.'''
     return titles
 
 
+def decide_overlays_with_claude(cutlist, all_words, model="sonnet", extra="", density="tasteful"):
+    """
+    Decide a sparse, tasteful B-roll plan on the OUTPUT (post-cut) timeline.
+    Returns a list of dicts: {"start","end","query","format","kind","label"}
+      - start/end: OUTPUT-timeline seconds (lead + duration already applied/clamped)
+      - query: concrete stock search query
+      - format: "stacked" (default) | "cutaway"
+      - kind: "image" (default) | "video"
+      - label: short ALL-CAPS headline string ("" if none)
+    Never raises -> [] on any failure. NO files fetched here (Phase 3 resolves queries).
+    density in {"tasteful","more","less"} controls min spacing between overlays.
+    """
+    kept = _kept_words(cutlist, all_words)
+    if not kept:
+        return []
+    total_out = sum(e - s for s, e in cutlist)
+
+    # phrase-line payload on the OUTPUT timeline
+    lines = []
+    for line in _group_caption_lines(kept, max_words=6):
+        t = line[0]["new_start"]
+        text = " ".join(w["word"].strip() for w in line).strip()
+        lines.append(f"[t={t:.1f}] {text}")
+    payload = "\n".join(lines)
+
+    MIN_GAP = {"more": 3.0, "less": 7.0}.get(density, 4.5)
+    density_phrase = {
+        "more": "roughly one every 3 seconds",
+        "less": "sparingly, about one every 7 seconds",
+    }.get(density, "about ONE every 4-5 seconds")
+
+    extra_block = f"\nCreator's guidance (PRIORITY): {extra}\n" if extra else ""
+
+    prompt = f'''You are a short-form video editor adding B-ROLL (stock images / short video clips) to a talking-head edit, "show it when he says it" style. The kept transcript is on stdin, each line tagged with its time in the FINAL video: [t=SS.s] phrase.
+
+Choose a SMALL, TASTEFUL set of B-roll moments ({density_phrase}; fewer well-matched beats beat many mediocre ones). For each pick a CONCRETE visual findable in stock footage.
+
+GOOD triggers: concrete nouns (people/places/brands/products/objects), numbers/stats/money/dates, list items, comparisons, "let me show you".
+SKIP: abstract concepts (focus, productivity, mindset, "the future" - literal stock looks generic), filler/function words, hook/punchline face moments.
+
+Per moment return: time (final-video seconds of the trigger), phrase, query (CONCRETE 2-5 word stock query; translate ideas to filmable visuals, e.g. "market crashed"->"red downward stock chart"), kind (image default; video for motion subjects), format (stacked default; cutaway rare full-screen accent), duration (2 default; 3-4 for numbers/reveals), label (2-4 word ALL CAPS headline or "").
+{extra_block}
+Rules: skip abstracts, concrete queries only, never crowd.
+Return ONLY JSON: {{"overlays":[{{...}}]}}. Transcript on stdin.'''
+
+    try:
+        data = _extract_json(_claude_cli(prompt, payload, model))
+    except Exception:
+        return []
+    raw = data.get("overlays") if isinstance(data, dict) else (data if isinstance(data, list) else [])
+
+    items = []
+    for item in (raw or []):
+        try:
+            time = float(item["time"])
+            if not (0 <= time <= total_out):
+                continue
+            dur = max(1.2, min(4.0, float(item.get("duration", 2.0))))
+            start = max(0.0, time - 0.25)          # 0.25s LEAD
+            end = min(total_out, start + dur)
+            if end - start < 1.0:
+                continue
+            fmt = "cutaway" if str(item.get("format", "")).lower() == "cutaway" else "stacked"
+            kind = "video" if str(item.get("kind", "")).lower() == "video" else "image"
+            label = str(item.get("label") or "").strip()[:40]
+            query = str(item.get("query") or "").strip()
+            if not query:
+                continue
+            items.append({"start": start, "end": end, "query": query,
+                          "format": fmt, "kind": kind, "label": label})
+        except (KeyError, ValueError, TypeError):
+            continue
+
+    items.sort(key=lambda it: it["start"])
+    kept_overlays = []
+    last_kept_start = -1e9
+    last_kept_end = -1e9
+    for it in items:
+        if it["start"] >= last_kept_start + MIN_GAP and it["start"] >= last_kept_end + 0.3:
+            kept_overlays.append(it)
+            last_kept_start = it["start"]
+            last_kept_end = it["end"]
+    return kept_overlays
+
+
 def revise_with_claude(transcript_text, total_duration, current_keep,
                        caption_settings, chat_history, user_msg, model="sonnet"):
     """
