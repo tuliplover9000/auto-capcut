@@ -331,7 +331,7 @@ Rules:
 - The keep list must be in ascending time order, non-overlapping.
 - All start/end values must be within [0, {total_duration:.2f}].
 - Do NOT include any explanation, markdown, or extra text — ONLY the JSON object.
-- If you remove a section, omit it. Prefer several smaller keep spans over one big span so botched bits in the middle can be dropped.
+- If you remove a section, omit it. But keep each clean take as ONE continuous span — only break a span to drop a false start, a repeat, or a long dead stretch in the middle. Do NOT chop up good continuous speech into many tiny pieces; that makes the video feel choppy.
 
 Example output format:
 {{"keep":[{{"start":0.5,"end":12.3}},{{"start":15.0,"end":28.7}}]}}
@@ -802,18 +802,18 @@ def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
 
 # Silence longer than this (seconds), inside a kept span, is cut out (a jump cut).
 # Smaller = tighter pacing. Keyed to the content-cut aggressiveness control.
-DEAD_AIR_GAP = {"light": 0.7, "medium": 0.4, "heavy": 0.3}
+DEAD_AIR_GAP = {"light": 1.2, "medium": 0.8, "heavy": 0.5}
 
 
-def remove_dead_air(cutlist, all_words, max_gap=0.45, pad=0.10, fps=None, total_duration=None):
+def remove_dead_air(cutlist, all_words, max_gap=0.8, pad=0.12, fps=None, total_duration=None):
     """Tighten a cleaned cutlist into JUMP CUTS: split each kept span wherever
     there's a silence longer than `max_gap` (a stretch with no spoken word),
-    keeping `pad` seconds of breathing room on each side. This removes the dead
-    air *between* sentences that the content-level cut leaves INSIDE a span — the
-    main reason raw talking-head footage feels slow and 'uncut'. Frame-aligns the
-    result when fps is given (so nominal output time still equals rendered time).
-    A span with no words (e.g. music) passes through untouched. Never returns []
-    (falls back to the input cutlist).
+    keeping `pad` seconds of breathing room on each side. Only genuinely LONG
+    pauses are cut — natural sub-`max_gap` rhythm between words/phrases is left
+    intact so the edit doesn't feel choppy. Frame-aligns the result when fps is
+    given (so nominal output time still equals rendered time). A span with no
+    words (e.g. music) passes through untouched. Never returns [] (falls back to
+    the input cutlist).
     """
     MIN_SPAN = 0.20
     words = sorted(
