@@ -226,7 +226,10 @@ def _claude_cli(prompt, stdin_text, model="sonnet"):
     try:
         r = _spawn(cmd, False)
     except FileNotFoundError:
-        cmd_str = " ".join(f'"{c}"' if " " in c else c for c in cmd)
+        # list2cmdline escapes inner double-quotes (\") correctly — our prompts
+        # embed JSON examples full of quotes, so the old naive ' '.join wrapping
+        # produced a broken shell string that failed to parse.
+        cmd_str = subprocess.list2cmdline(cmd)
         try:
             r = _spawn(cmd_str, True)
         except subprocess.TimeoutExpired:
@@ -678,11 +681,19 @@ Rules:
 
 # ── R7: snap_and_clean ───────────────────────────────────────────────────────
 
-def snap_and_clean(keep_spans, all_words, total_duration):
+def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
     """
     Snap span boundaries to word boundaries, drop short spans, merge overlaps.
     all_words: flat list of {"start", "end", "word"} sorted by start time.
     Returns cleaned list of (start, end) tuples, or raises RuntimeError if empty.
+
+    fps: when given, each segment's DURATION is rounded UP to a whole frame so the
+    nominal output timeline (sum of segment durations, used by captions / titles /
+    B-roll / flash) matches what render_video actually produces. Without this, a
+    re-encoded segment whose length isn't a frame multiple renders ~half a frame
+    long, and the caption layer progressively leads the audio (~0.5s over ~30
+    cuts). Rounding UP (never down) guarantees the last word of a span is never
+    clipped out of the segment.
     """
     MIN_SPAN = 0.30   # seconds
     MERGE_GAP = 0.05  # merge spans within this gap
@@ -743,6 +754,17 @@ def snap_and_clean(keep_spans, all_words, total_duration):
 
     if not result:
         raise RuntimeError("No valid segments to keep after cleaning.")
+
+    # Frame-align each segment's duration so nominal output time == rendered time
+    # (kills cumulative caption/overlay drift). Round UP so no trailing word is
+    # clipped; clamp the end to the source duration (last segment only).
+    if fps and fps > 0:
+        aligned = []
+        for s, e in result:
+            n = max(1, math.ceil((e - s) * fps - 1e-6))
+            e2 = min(total_duration, s + n / fps)
+            aligned.append((s, e2))
+        result = aligned
 
     return result
 
@@ -1607,7 +1629,8 @@ def main():
 
         # ── Stage 6: snap & clean ─────────────────────────────────────────────
         section("6/7  SNAP & CLEAN CUT LIST")
-        cutlist = snap_and_clean(keep_spans, all_words, spec["duration"])
+        cutlist = snap_and_clean(keep_spans, all_words, spec["duration"],
+                                 fps=spec.get("fps"))
         orig_kept = sum(e - s for s, e in cutlist)
         print(f"  {len(cutlist)} segments after snap/clean")
         print(f"  Original duration : {spec['duration']:.2f}s")

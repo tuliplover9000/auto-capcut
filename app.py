@@ -235,7 +235,8 @@ def run_job(job_id, instructions):
         job["keep"] = keep
 
         _stage(job_id, step=6, stage="Cleaning cut list")
-        job["cutlist"] = autoedit.snap_and_clean(keep, job["all_words"], spec["duration"])
+        job["cutlist"] = autoedit.snap_and_clean(keep, job["all_words"], spec["duration"],
+                                                 fps=spec.get("fps"))
 
         if job["settings"].get("zoom"):
             _stage(job_id, stage="Deciding zooms")
@@ -285,7 +286,8 @@ def revise_job(job_id, msg):
         need_full = False
         if action.get("keep"):
             try:
-                cl = autoedit.snap_and_clean(action["keep"], job["all_words"], job["spec"]["duration"])
+                cl = autoedit.snap_and_clean(action["keep"], job["all_words"], job["spec"]["duration"],
+                                             fps=job["spec"].get("fps"))
                 job["keep"] = action["keep"]
                 job["cutlist"] = cl
                 need_full = True

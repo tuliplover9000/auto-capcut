@@ -126,9 +126,18 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
 
         chains.append(src)
         out_lbl = f"c{i}"
+        # Clamp this overlay's visible window so it never stays on screen past the
+        # NEXT overlay's start — otherwise two overlapping windows both enable at
+        # once and a later cutaway (full-frame) silently covers an earlier stacked
+        # one. (Display window only; the clip's own fade timing is unchanged.)
+        enable_end = end
+        if i + 1 < len(ovs):
+            nxt_start = float(ovs[i + 1].get("start") or 0.0)
+            if nxt_start > start:
+                enable_end = min(end, nxt_start)
         chains.append(
             f"[{prev_label}][ov{N}]overlay=0:{ov_y}:"
-            f"enable='between(t\\,{start}\\,{end})':eof_action=pass[{out_lbl}]")
+            f"enable='between(t\\,{start}\\,{enable_end})':eof_action=pass[{out_lbl}]")
         prev_label = out_lbl
 
     # ── Tail: effects + color re-stamp, applied to the final composite ──────────
