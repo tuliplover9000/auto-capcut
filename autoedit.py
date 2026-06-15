@@ -552,6 +552,28 @@ Return ONLY JSON: {{"overlays":[{{...}}]}}. Transcript on stdin.'''
     return kept_overlays
 
 
+def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", style="auto"):
+    """Decide a B-roll plan AND fetch the assets -> composite-ready overlay list.
+
+    Returns a list of {path,start,end,format,kenburns,fade} for overlays.composite.
+    Best-effort: an item whose asset can't be fetched (no API key / no match) is
+    skipped, never aborts. May return [] (no key / nothing found).
+    style: "auto" keeps each item's brain-chosen format; "stacked"/"cutaway" overrides.
+    """
+    import mediasource
+    plan = decide_overlays_with_claude(cutlist, all_words, model=model, density=density)
+    used, out = set(), []
+    for item in plan:
+        path = mediasource.search(item["query"], item.get("kind", "image"),
+                                  "portrait", used_ids=used)
+        if not path:
+            continue                       # skip unfetchable; B-roll is best-effort
+        fmt = item["format"] if style == "auto" else style   # stacked|cutaway override
+        out.append({"path": path, "start": item["start"], "end": item["end"],
+                    "format": fmt, "kenburns": True, "fade": 0.25})
+    return out                             # may be [] (no key / nothing found)
+
+
 def revise_with_claude(transcript_text, total_duration, current_keep,
                        caption_settings, chat_history, user_msg, model="sonnet"):
     """
@@ -1461,6 +1483,12 @@ def main():
                     help="Auto camera zooms (Claude-decided)")
     ap.add_argument("--zoom-mode", choices=["static", "animated"], default="static",
                     help="static = punch-in framing jumps (matches reels); animated = push/pull motion")
+    ap.add_argument("--broll", action="store_true",
+                    help="Auto B-roll: stacked/cutaway stock images+clips (Claude-decided, Pexels/Pixabay)")
+    ap.add_argument("--broll-density", choices=["tasteful", "more", "less"], default="tasteful",
+                    help="How often B-roll appears (default: tasteful, ~one every 4-5s)")
+    ap.add_argument("--broll-style", choices=["auto", "stacked", "cutaway"], default="auto",
+                    help="auto = per-item Claude choice; stacked/cutaway = force every overlay")
     ap.add_argument("--vignette", action="store_true",
                     help="Effect: subtle darkened edges")
     ap.add_argument("--grain", action="store_true",
@@ -1562,17 +1590,28 @@ def main():
             from collections import Counter
             print("  " + ", ".join(f"{k}:{v}" for k, v in Counter(z["type"] for z in zoomplan).items()))
 
-        # ── Stage 7: render (cut+zoom -> base), then effects grade -> roughcut ──
+        # ── Stage 6c: B-roll plan + asset fetch (optional) ────────────────────
+        overlay_plan = []
+        if args.broll:
+            section("6c/7  B-ROLL")
+            overlay_plan = resolve_overlays(cutlist, all_words, model=args.model,
+                                            density=args.broll_density, style=args.broll_style)
+            print(f"  {len(overlay_plan)} overlay(s) resolved" +
+                  ("" if overlay_plan
+                   else " — none (no API key or no matches); continuing without B-roll"))
+
+        # ── Stage 7: render (cut+zoom -> base), overlays+effects -> roughcut ───
+        # NOTE: brain returns short ALL-CAPS labels per overlay; label-bar
+        # rendering is NOT implemented yet (Phase 4) — labels are unused for now.
         section("7a/7  RENDER")
         effects = {"vignette": args.vignette, "grain": args.grain, "flash": args.flash}
-        if any(effects.values()):
-            base_mp4 = os.path.join(tmpdir, "roughcut_base.mp4")
-            render_video(input_path, cutlist, spec, base_mp4, tmpdir, zoomplan=zoomplan)
+        import overlays as _ov   # lazy: overlays imports autoedit at top (circular if top-level)
+        if overlay_plan:
+            print("  compositing B-roll + effects ...")
+        elif any(effects.values()):
             print("  effects: " + ", ".join(k for k, v in effects.items() if v))
-            grade_video(base_mp4, out_mp4, effects, cut_offsets(cutlist),
-                        spec["fps"], spec.get("color"), tmpdir)
-        else:
-            render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=zoomplan)
+        _ov.build_roughcut(input_path, cutlist, spec, out_mp4, tmpdir,
+                           zoomplan=zoomplan, effects=effects, overlay_plan=overlay_plan)
 
         # ── Stage 7b: captions ────────────────────────────────────────────────
         section("7b/7  CAPTIONS")

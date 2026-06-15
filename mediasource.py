@@ -343,10 +343,12 @@ def search(query, kind="image", orientation="portrait", used_ids=None):
         return None
 
     # Cheap query-level cache reuse (skips API call entirely within TTL).
-    # ONLY when no de-dup set is in play: when used_ids is provided (production),
-    # we must run the real fetch so selection can avoid repeats AND register the
-    # chosen id — returning a cached file here would silently repeat B-roll.
-    if not used_ids:
+    # ONLY when no de-dup set is in play: when a used_ids set is provided
+    # (production passes one, possibly EMPTY), we must run the real fetch so
+    # selection can avoid repeats AND register the chosen id — returning a cached
+    # file here would silently repeat B-roll. (Check `is None`, not truthiness:
+    # an empty set is falsy but still means "de-dup is in play".)
+    if used_ids is None:
         for provider in ("pexels", "pixabay"):
             if provider == "pexels" and not pexels_key:
                 continue

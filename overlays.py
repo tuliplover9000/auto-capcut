@@ -160,3 +160,29 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
         raise RuntimeError(
             f"Overlay composite failed — output missing or empty.\n"
             f"ffmpeg stderr: {(r.stderr or '')[-800:]}")
+
+
+def build_roughcut(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None,
+                   effects=None, overlay_plan=None):
+    """Render the rough cut: cut+zoom -> (overlays + effects) -> out_mp4.
+
+    overlay_plan: composite-ready list (from autoedit.resolve_overlays) or falsy.
+    Routes through composite() when there are overlays (it folds effects + HLG
+    color into one pass), else grade_video() when there are effects, else a
+    direct render. ONE encode either way.
+    """
+    import autoedit
+    boundaries = autoedit.cut_offsets(cutlist)
+    has_fx = bool(effects) and any(effects.values())
+    if overlay_plan:
+        base = os.path.join(tmpdir, "roughcut_base.mp4")
+        autoedit.render_video(input_path, cutlist, spec, base, tmpdir, zoomplan=zoomplan)
+        composite(base, out_mp4, overlay_plan, spec, effects=effects,
+                  boundaries=boundaries, tmpdir=tmpdir)
+    elif has_fx:
+        base = os.path.join(tmpdir, "roughcut_base.mp4")
+        autoedit.render_video(input_path, cutlist, spec, base, tmpdir, zoomplan=zoomplan)
+        autoedit.grade_video(base, out_mp4, effects, boundaries,
+                             spec["fps"], spec.get("color"), tmpdir)
+    else:
+        autoedit.render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=zoomplan)

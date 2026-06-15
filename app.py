@@ -27,6 +27,7 @@ for _s in (sys.stdout, sys.stderr):
 from flask import (Flask, request, jsonify, send_file,
                    render_template_string, abort)
 import autoedit
+import overlays
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 JOBS_DIR = os.path.join(HERE, "webjobs")
@@ -93,10 +94,21 @@ def _effects(job):
 
 
 def _grade_to_roughcut(job, base, out_mp4, tmp):
-    """Apply the effects grade (or copy) from the cut+zoom base to roughcut.mp4."""
-    autoedit.grade_video(base, out_mp4, _effects(job),
-                         autoedit.cut_offsets(job["cutlist"]),
-                         job["spec"]["fps"], job["spec"].get("color"), tmp)
+    """From the cut+zoom base -> roughcut.mp4: composite B-roll+effects when there's
+    an overlay plan (folds both in one pass), else just the effects grade.
+
+    The overlay plan persists in job["overlay_plan"], so a cheap re-grade (effects
+    or caption toggle) reuses the SAME fetched assets — no re-fetch.
+    """
+    plan = job.get("overlay_plan") or []
+    if plan:
+        overlays.composite(base, out_mp4, plan, job["spec"],
+                           effects=_effects(job),
+                           boundaries=autoedit.cut_offsets(job["cutlist"]), tmpdir=tmp)
+    else:
+        autoedit.grade_video(base, out_mp4, _effects(job),
+                             autoedit.cut_offsets(job["cutlist"]),
+                             job["spec"]["fps"], job["spec"].get("color"), tmp)
 
 
 def _render_outputs(job):
@@ -232,6 +244,13 @@ def run_job(job_id, instructions):
             job["titles"] = autoedit.decide_titles_with_claude(
                 job["cutlist"], job["all_words"], job["settings"]["model"])
 
+        if job["settings"].get("broll"):
+            _stage(job_id, stage="Finding B-roll")
+            job["overlay_plan"] = autoedit.resolve_overlays(
+                job["cutlist"], job["all_words"], job["settings"]["model"],
+                density=job["settings"].get("broll_density", "tasteful"),
+                style=job["settings"].get("broll_style", "auto"))
+
         _stage(job_id, step=7, stage="Rendering")
         _render_outputs(job)
 
@@ -312,6 +331,15 @@ def revise_job(job_id, msg):
                 _stage(job_id, stage="Deciding titles")
                 job["titles"] = autoedit.decide_titles_with_claude(
                     job["cutlist"], job["all_words"], job["settings"]["model"])
+            # A cut change shifts the OUTPUT timeline, so the cached overlay_plan's
+            # timestamps are stale — re-resolve B-roll for the new cut (else the
+            # overlays fire at wrong/old positions or vanish).
+            if job["settings"].get("broll"):
+                _stage(job_id, stage="Finding B-roll")
+                job["overlay_plan"] = autoedit.resolve_overlays(
+                    job["cutlist"], job["all_words"], job["settings"]["model"],
+                    density=job["settings"].get("broll_density", "tasteful"),
+                    style=job["settings"].get("broll_style", "auto"))
             _stage(job_id, stage="Re-rendering")
             _render_outputs(job)
         elif changed_titles:
@@ -370,6 +398,9 @@ def run():
         "vignette": request.form.get("vignette", "") in ("1", "true", "on", "yes"),
         "grain": request.form.get("grain", "") in ("1", "true", "on", "yes"),
         "flash": request.form.get("flash", "") in ("1", "true", "on", "yes"),
+        "broll": request.form.get("broll", "") in ("1", "true", "on", "yes"),
+        "broll_density": pick("broll_density", {"tasteful", "more", "less"}, "tasteful"),
+        "broll_style": pick("broll_style", {"auto", "stacked", "cutaway"}, "auto"),
     }
     instructions = (request.form.get("instructions") or "").strip()
 
@@ -393,6 +424,7 @@ def run():
             "state": "queued", "step": 0, "stage": "Starting…", "error": "",
             "version": 0, "spec": None, "all_words": [], "cutlist": [],
             "zoomplan": None, "zoom_instruction": "", "titles": [],
+            "overlay_plan": [],
         }
 
     threading.Thread(target=run_job, args=(job_id, instructions), daemon=True).start()
@@ -550,6 +582,17 @@ PAGE = r"""<!doctype html>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="zoom" checked>
         <span>Camera zooms (auto punch-ins) <span class="note">(Claude-decided; adjust in chat — "more zooms", "no zoom on the intro")</span></span></label>
+      <label class="chk mt"><input type="checkbox" id="broll"> <span>B-roll (auto images/clips) <span class="note">(Claude-decided stock; needs a Pexels/Pixabay key — slower)</span></span></label>
+      <div class="row mt" id="brollopts">
+        <div class="field"><label>B-roll density</label><select id="broll_density">
+          <option value="tasteful" selected>Tasteful (~one / 4-5s)</option>
+          <option value="more">More</option>
+          <option value="less">Less</option></select></div>
+        <div class="field"><label>B-roll style</label><select id="broll_style">
+          <option value="auto" selected>Auto (Claude picks)</option>
+          <option value="stacked">Stacked</option>
+          <option value="cutaway">Cutaway</option></select></div>
+      </div>
       <label class="chk mt"><input type="checkbox" id="titles"> <span>Editorial titles <span class="note">(big yellow hook/section text, Claude-decided)</span></span></label>
       <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
       <label class="chk"><input type="checkbox" id="grain"> <span>Film grain <span class="note">(light texture)</span></span></label>
@@ -624,6 +667,9 @@ $("#go").onclick=async()=>{
   fd.append("whisper_model",$("#whisper").value);
   fd.append("instructions",$("#instructions").value);
   fd.append("zoom",$("#zoom").checked?"1":"0");
+  fd.append("broll",$("#broll").checked?"1":"0");
+  if($("#broll_density")) fd.append("broll_density",$("#broll_density").value);
+  if($("#broll_style")) fd.append("broll_style",$("#broll_style").value);
   fd.append("titles",$("#titles").checked?"1":"0");
   fd.append("vignette",$("#vignette").checked?"1":"0");
   fd.append("grain",$("#grain").checked?"1":"0");
