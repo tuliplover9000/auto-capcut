@@ -527,9 +527,12 @@ def video(job_id):
     if not j:
         abort(404)
     path = _video_path(j)
-    if not os.path.exists(path):
+    # Catch the miss rather than pre-checking: a concurrent revision can delete
+    # the file between an exists() check and send_file's own stat (TOCTOU -> 500).
+    try:
+        return send_file(path, mimetype="video/mp4", conditional=True, max_age=0)
+    except (FileNotFoundError, OSError):
         abort(404)
-    return send_file(path, mimetype="video/mp4", conditional=True, max_age=0)
 
 
 @app.route("/download/<job_id>/<which>")
@@ -543,12 +546,13 @@ def download(job_id, which):
     if not fname:
         abort(404)
     path = os.path.join(j["outdir"], fname)
-    if not os.path.exists(path):
-        abort(404)
     # Set an explicit MIME for the .srt sidecar so it downloads as text rather
     # than being handed to a media player by the OS.
     mime = "text/plain; charset=utf-8" if which == "srt" else None
-    return send_file(path, as_attachment=True, download_name=fname, mimetype=mime)
+    try:
+        return send_file(path, as_attachment=True, download_name=fname, mimetype=mime)
+    except (FileNotFoundError, OSError):
+        abort(404)
 
 
 PAGE = r"""<!doctype html>

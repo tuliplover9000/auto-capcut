@@ -923,12 +923,15 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             "-movflags", "+faststart",
             seg_path,
         ]
-        r = run(cmd, timeout=600)
+        # Scale the timeout to the segment length (animated zoom/zoompan can run at
+        # a few fps, so a multi-minute segment needs far more than a flat 600s).
+        seg_timeout = max(600, int((end - start) * 60))
+        r = run(cmd, timeout=seg_timeout)
         if r.returncode == 124:
             # Timeout leaves a partial file with nonzero size that would pass the
             # size check below and ship a truncated video. Fail loudly instead.
             raise RuntimeError(
-                f"Segment {idx:04d} ({start:.2f}s–{end:.2f}s) timed out after 600s — "
+                f"Segment {idx:04d} ({start:.2f}s–{end:.2f}s) timed out after {seg_timeout}s — "
                 f"try a shorter clip or disable animated zoom.\n"
                 f"ffmpeg stderr: {r.stderr[-400:]}"
             )
@@ -1000,9 +1003,14 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
               f"concat=n={len(cutlist)}:v=0:a=1,apad,atrim=end={total_v:.6f},"
               f"asetpts=PTS-STARTPTS[aout]")
         audio_path = os.path.join(tmpdir, "audio_single.m4a")
+        # Pass the filtergraph via a script file, not inline: one atrim per segment
+        # blows past Windows' 32767-char command-line limit at ~430 cuts.
+        fg_path = os.path.join(tmpdir, "audio_fg.txt")
+        with open(fg_path, "w", encoding="utf-8") as fgf:
+            fgf.write(fg)
         ra = run([
             ff, "-y", "-i", input_path,
-            "-filter_complex", fg,
+            "-filter_complex_script", fg_path,
             "-map", "[aout]",
             "-c:a", "aac", "-ar", "48000",
             "-movflags", "+faststart",
