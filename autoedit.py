@@ -760,9 +760,14 @@ def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
     # clipped; clamp the end to the source duration (last segment only).
     if fps and fps > 0:
         aligned = []
-        for s, e in result:
+        for i, (s, e) in enumerate(result):
             n = max(1, math.ceil((e - s) * fps - 1e-6))
             e2 = min(total_duration, s + n / fps)
+            # Rounding UP can push the end past the next segment's start at low fps
+            # (1/fps > the inter-segment gap); clamp so we never re-introduce the
+            # overlap the merge step already removed.
+            if i + 1 < len(result):
+                e2 = min(e2, result[i + 1][0])
             aligned.append((s, e2))
         result = aligned
 
@@ -1055,7 +1060,10 @@ def write_srt(cutlist, all_words, out_srt):
 
     def flush_line():
         if current_words:
-            text = " ".join(w["word"].strip() for w in current_words).strip()
+            # Strip interior CR/LF so a transcribed word can't forge a second SRT
+            # cue (the ASS path already neutralizes newlines via _ass_escape).
+            text = " ".join(w["word"].replace("\n", " ").replace("\r", " ").strip()
+                            for w in current_words).strip()
             ls = current_words[0]["new_start"]
             le = current_words[-1]["new_end"]
             lines.append((ls, le, text))

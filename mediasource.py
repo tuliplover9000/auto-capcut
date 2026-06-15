@@ -150,7 +150,9 @@ def _looks_like_media(data, ext):
     if not data or len(data) < 64:
         return False
     if ext == ".mp4":
-        return b"ftyp" in data[:16]            # ISO-BMFF box
+        # ISO-BMFF: ftyp is usually first but a valid file may carry a leading
+        # free/skip box, so scan a bit further to avoid rejecting good video.
+        return b"ftyp" in data[:32]
     if data.startswith((b"\xff\xd8\xff",        # jpeg
                         b"\x89PNG\r\n",         # png
                         b"GIF87a", b"GIF89a",   # gif
