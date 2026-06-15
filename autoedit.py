@@ -320,12 +320,18 @@ The timestamped transcript of the recording is provided on stdin. Each line is o
 Aggressiveness level: {aggressiveness}
 Instruction: {aggr_desc.get(aggressiveness, aggr_desc['medium'])}
 {extra_block}
+ALWAYS remove (at every aggressiveness level):
+- False starts and self-corrections: when the speaker restarts a sentence, fumbles, or says things like "wait", "let me redo that", "start over", "actually", "um let me say that again" — drop the abandoned attempt and KEEP only the clean final take of that idea.
+- Repeated takes of the same line (the speaker says nearly the same sentence twice) — keep the better/last one, cut the rest.
+- Filler-only or dead segments with no real content.
+Be decisive: this is short-form, the viewer wants it TIGHT. When two segments say the same thing, keep one.
+
 Rules:
 - Return ONLY valid JSON with a single key "keep": a list of objects, each with "start" and "end" (seconds, floats).
 - The keep list must be in ascending time order, non-overlapping.
 - All start/end values must be within [0, {total_duration:.2f}].
 - Do NOT include any explanation, markdown, or extra text — ONLY the JSON object.
-- If you remove a section, omit it. If you keep everything, return all segments.
+- If you remove a section, omit it. Prefer several smaller keep spans over one big span so botched bits in the middle can be dropped.
 
 Example output format:
 {{"keep":[{{"start":0.5,"end":12.3}},{{"start":15.0,"end":28.7}}]}}
@@ -776,6 +782,59 @@ def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
         result = aligned
 
     return result
+
+
+# Silence longer than this (seconds), inside a kept span, is cut out (a jump cut).
+# Smaller = tighter pacing. Keyed to the content-cut aggressiveness control.
+DEAD_AIR_GAP = {"light": 0.7, "medium": 0.4, "heavy": 0.3}
+
+
+def remove_dead_air(cutlist, all_words, max_gap=0.45, pad=0.10, fps=None, total_duration=None):
+    """Tighten a cleaned cutlist into JUMP CUTS: split each kept span wherever
+    there's a silence longer than `max_gap` (a stretch with no spoken word),
+    keeping `pad` seconds of breathing room on each side. This removes the dead
+    air *between* sentences that the content-level cut leaves INSIDE a span — the
+    main reason raw talking-head footage feels slow and 'uncut'. Frame-aligns the
+    result when fps is given (so nominal output time still equals rendered time).
+    A span with no words (e.g. music) passes through untouched. Never returns []
+    (falls back to the input cutlist).
+    """
+    MIN_SPAN = 0.20
+    words = sorted(
+        (w for w in all_words
+         if isinstance(w, dict)
+         and isinstance(w.get("start"), (int, float))
+         and isinstance(w.get("end"), (int, float))
+         and w["end"] > w["start"]),
+        key=lambda w: w["start"])
+    raw = []
+    for (s, e) in cutlist:
+        inside = [w for w in words if w["end"] > s and w["start"] < e]
+        if not inside:
+            raw.append((s, e))                      # no speech here — keep as-is
+            continue
+        cur = max(s, inside[0]["start"] - pad)
+        prev_end = inside[0]["end"]
+        for w in inside[1:]:
+            if w["start"] - prev_end > max_gap:     # a real pause -> cut it
+                raw.append((cur, min(e, prev_end + pad)))
+                cur = max(s, w["start"] - pad)
+            prev_end = max(prev_end, w["end"])
+        raw.append((cur, min(e, prev_end + pad)))
+    # Drop tiny spans + frame-align (same rule as snap_and_clean).
+    out = []
+    for (s, e) in raw:
+        if total_duration is not None:
+            e = min(e, total_duration)
+        if e - s < MIN_SPAN:
+            continue
+        if fps and math.isfinite(fps) and fps > 0:
+            n = max(1, math.ceil((e - s) * fps - 1e-6))
+            e = s + n / fps
+            if total_duration is not None:
+                e = min(e, total_duration)
+        out.append((s, e))
+    return out or list(cutlist)
 
 
 # ── R8: render_video ─────────────────────────────────────────────────────────
@@ -1760,6 +1819,10 @@ def main():
         section("6/7  SNAP & CLEAN CUT LIST")
         cutlist = snap_and_clean(keep_spans, all_words, spec["duration"],
                                  fps=spec.get("fps"))
+        cutlist = remove_dead_air(                       # tighten into jump cuts
+            cutlist, all_words,
+            max_gap=DEAD_AIR_GAP.get(args.aggressiveness, 0.45),
+            fps=spec.get("fps"), total_duration=spec["duration"])
         orig_kept = sum(e - s for s, e in cutlist)
         print(f"  {len(cutlist)} segments after snap/clean")
         print(f"  Original duration : {spec['duration']:.2f}s")

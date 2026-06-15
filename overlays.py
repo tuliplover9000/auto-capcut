@@ -65,17 +65,15 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
     base_abs = os.path.abspath(base_mp4)
     out_abs = os.path.abspath(out_mp4)
 
-    # ── Stacked base (presenter band at the bottom, blurred/dimmed bg) ──────────
-    chains = [
-        f"[0:v]scale={DW}:{DH},boxblur=20:2,eq=brightness=-0.35,setsar=1[bg]",
-        f"[0:v]crop={DW}:{bandH}:0:{cropY},setsar=1[pband]",
-        f"[bg][pband]overlay=0:{bandY}[basec]",
-    ]
+    # ── Base = the FULL presenter. The stacked split / cutaway appear ONLY during
+    #    an overlay's window (hard cut in AND out); outside every window the full
+    #    presenter shows. No always-on band, no blurred background. ──────────────
+    chains = [f"[0:v]setsar=1[base]"]
 
     # ── Per-overlay chains ─────────────────────────────────────────────────────
     ovs = sorted(overlays, key=lambda o: float(o.get("start") or 0.0))
     inputs = []           # absolute paths in input-index order (after the base)
-    prev_label = "basec"
+    prev_label = "base"
     for i, ov in enumerate(ovs):
         N = i + 1                                   # ffmpeg input index (0 = base)
         path = ov.get("path")
@@ -93,59 +91,59 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
             raise RuntimeError(
                 f"overlay {i} ({path}): duration {dur:.3f}s too short (need >=0.1s).")
         frames = max(2, round(dur * fps))
-        fade = min(float(ov.get("fade") if ov.get("fade") is not None else DEFAULT_FADE),
-                   dur / 2.0)
         fmt = str(ov.get("format") or "stacked").lower()
         is_img = _is_image(path)
         kenburns = bool(ov.get("kenburns", True)) if is_img else False
 
-        # Target zone geometry: cutaway = full frame; stacked = top zone @ 0:0.
-        if fmt == "cutaway":
-            zw, zh = DW, DH
-        else:                                       # stacked (default)
-            zw, zh = DW, topH
-        ov_y = 0                                    # both still/video sit at y=0
+        # cutaway = media fills the whole frame; stacked = media fills the TOP zone
+        # and the presenter (cropped) is shown in the bottom band.
+        cutaway = (fmt == "cutaway")
+        zw, zh = (DW, DH) if cutaway else (DW, topH)
 
-        fade_chain = (f"format=yuva420p,"
-                      f"fade=t=in:st=0:d={fade}:alpha=1,"
-                      f"fade=t=out:st={dur - fade}:d={fade}:alpha=1,"
-                      f"setpts=PTS-STARTPTS+{start}/TB,setsar=1")
-
+        # Place the media on the base timeline at `start` via setpts — NO alpha
+        # fade, so it's a HARD CUT in/out. Stills run through zoompan to generate
+        # frames (a lone PNG is one frame): a slow ken-burns zoom, or constant z=1.
+        place = f"setpts=PTS-STARTPTS+{start}/TB,setsar=1"
         if is_img:
-            # Scale-COVER then crop to the target aspect (preserves the image's
-            # aspect — never stretch), 4x oversized so the ken-burns zoom has
-            # jitter-free headroom; then zoompan zooms within and outputs the
-            # exact target size. zoompan ALSO generates `frames` frames from the
-            # single still — which is what makes a static (non-ken-burns) still
-            # actually appear (a lone PNG frame at PTS=0 fades to alpha=0 and
-            # vanishes). So stills ALWAYS go through zoompan: a slow zoom when
-            # kenburns, a constant z=1.0 when not.
             z = f"min(zoom+0.0008\\,{KENBURNS_MAX})" if kenburns else "1.0"
-            src = (f"[{N}:v]scale={zw * 4}:{zh * 4}:force_original_aspect_ratio=increase,"
-                   f"crop={zw * 4}:{zh * 4},"
-                   f"zoompan=z='{z}':d={frames}:s={zw}x{zh}:fps={fps}:"
-                   f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)',"
-                   f"{fade_chain}[ov{N}]")
+            chains.append(
+                f"[{N}:v]scale={zw * 4}:{zh * 4}:force_original_aspect_ratio=increase,"
+                f"crop={zw * 4}:{zh * 4},"
+                f"zoompan=z='{z}':d={frames}:s={zw}x{zh}:fps={fps}:"
+                f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)',"
+                f"{place}[ov{N}]")
         else:                                       # video overlay
-            src = (f"[{N}:v]trim=0:{dur},setpts=PTS-STARTPTS,fps={fps},"
-                   f"scale={zw}:{zh}:force_original_aspect_ratio=increase,"
-                   f"crop={zw}:{zh},{fade_chain}[ov{N}]")
+            chains.append(
+                f"[{N}:v]trim=0:{dur},setpts=PTS-STARTPTS,fps={fps},"
+                f"scale={zw}:{zh}:force_original_aspect_ratio=increase,"
+                f"crop={zw}:{zh},{place}[ov{N}]")
 
-        chains.append(src)
-        out_lbl = f"c{i}"
-        # Clamp this overlay's visible window so it never stays on screen past the
-        # NEXT overlay's start — otherwise two overlapping windows both enable at
-        # once and a later cutaway (full-frame) silently covers an earlier stacked
-        # one. (Display window only; the clip's own fade timing is unchanged.)
+        # Clamp the visible window so it never runs past the NEXT overlay's start
+        # (two overlapping windows would otherwise show at once).
         enable_end = end
         if i + 1 < len(ovs):
             nxt_start = float(ovs[i + 1].get("start") or 0.0)
             if nxt_start > start:
                 enable_end = min(end, nxt_start)
-        chains.append(
-            f"[{prev_label}][ov{N}]overlay=0:{ov_y}:"
-            f"enable='between(t\\,{start}\\,{enable_end})':eof_action=pass[{out_lbl}]")
-        prev_label = out_lbl
+        gate = f"enable='between(t\\,{start}\\,{enable_end})'"
+
+        if cutaway:
+            out_lbl = f"c{i}"
+            chains.append(
+                f"[{prev_label}][ov{N}]overlay=0:0:{gate}:eof_action=pass[{out_lbl}]")
+            prev_label = out_lbl
+        else:
+            # stacked: media in the top zone + the presenter cropped into the
+            # bottom band, both gated to the SAME window -> cut to the split look
+            # and back to full presenter. The band is the live presenter ([0:v]),
+            # so it stays in sync.
+            chains.append(f"[0:v]crop={DW}:{bandH}:0:{cropY},setsar=1[pb{N}]")
+            mid, out_lbl = f"c{i}a", f"c{i}"
+            chains.append(
+                f"[{prev_label}][ov{N}]overlay=0:0:{gate}:eof_action=pass[{mid}]")
+            chains.append(
+                f"[{mid}][pb{N}]overlay=0:{bandY}:{gate}[{out_lbl}]")
+            prev_label = out_lbl
 
     # ── Tail: effects + color re-stamp, applied to the final composite ──────────
     tail_filters = list(_effects_filters(effects or {}, boundaries or [], fps))
