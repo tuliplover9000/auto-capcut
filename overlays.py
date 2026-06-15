@@ -159,11 +159,21 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
 
     filter_complex = ";".join(chains)
 
+    # Pass the filtergraph via a script file, not inline: with ~one overlay every
+    # few seconds, a multi-minute edit produces enough chains (~80+ overlays) to
+    # blow past Windows' 32767-char command-line limit -> WinError 206 kills the
+    # whole render with a cryptic message. (Same fix the audio pass uses.) Write
+    # it next to the other scratch files (tmpdir, falling back to the output dir).
+    script_dir = tmpdir or os.path.dirname(out_abs) or "."
+    fc_path = os.path.join(script_dir, "overlay_fc.txt")
+    with open(fc_path, "w", encoding="utf-8") as fcf:
+        fcf.write(filter_complex)
+
     cmd = [ff, "-y", "-i", base_abs]
     for p in inputs:
         cmd += ["-i", p]
     cmd += [
-        "-filter_complex", filter_complex,
+        "-filter_complex_script", fc_path,
         "-map", "[outv]", "-map", "0:a?",
         "-c:v", "libx264", "-pix_fmt", "yuv420p",
         "-c:a", "aac", "-ar", "48000",
