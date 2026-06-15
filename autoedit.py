@@ -16,7 +16,7 @@ Usage examples:
   python autoedit.py myclip.mp4 --whisper-model small --keep-temp
   python autoedit.py --selftest
 """
-import sys, os, re, json, math, shutil, tempfile, argparse, subprocess
+import sys, os, re, json, math, shutil, tempfile, argparse, subprocess, shlex
 
 # ── R1: Windows console UTF-8 fix (avoids cp1252 crashes on non-ASCII) ──────
 for _s in (sys.stdout, sys.stderr):
@@ -199,7 +199,8 @@ def build_transcript_text(segments):
     """
     lines = []
     for i, seg in enumerate(segments):
-        lines.append(f"[{i}] {seg['start']:.2f}-{seg['end']:.2f}: {seg['text']}")
+        text = (seg.get("text") or "").strip()   # a noise-only segment may lack "text"
+        lines.append(f"[{i}] {seg.get('start', 0.0):.2f}-{seg.get('end', 0.0):.2f}: {text}")
     return "\n".join(lines)
 
 
@@ -226,10 +227,11 @@ def _claude_cli(prompt, stdin_text, model="sonnet"):
     try:
         r = _spawn(cmd, False)
     except FileNotFoundError:
-        # list2cmdline escapes inner double-quotes (\") correctly — our prompts
-        # embed JSON examples full of quotes, so the old naive ' '.join wrapping
-        # produced a broken shell string that failed to parse.
-        cmd_str = subprocess.list2cmdline(cmd)
+        # Quote per the actual shell: list2cmdline for cmd.exe (Windows), shlex
+        # for a POSIX shell. Our prompts embed JSON full of quotes (and the
+        # transcript/instructions are user-controlled), so naive joining both
+        # breaks parsing AND would be an injection vector on POSIX.
+        cmd_str = subprocess.list2cmdline(cmd) if os.name == "nt" else shlex.join(cmd)
         try:
             r = _spawn(cmd_str, True)
         except subprocess.TimeoutExpired:
@@ -627,7 +629,7 @@ Decide how to revise. Respond with ONLY a JSON object:
 {{
   "reply": "<friendly 1-2 sentence reply describing what you changed (or why you can't)>",
   "keep": [[start,end], ...],
-  "captions": {{"style":"pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
+  "captions": {{"style":"clean|pop|highlight|oneword","font":"Anton|Bebas Neue|Montserrat|Arial Black|Impact","highlight":"yellow|green|cyan|red|white","pos":"lower|center","burn":true}},
   "zoom": {{"enabled": true, "mode": "static|animated", "instruction": "<how to change zooms, e.g. 'more punch-ins', 'no zoom on the intro', 'calmer'>"}},
   "effects": {{"vignette": true, "grain": true, "flash": true}},
   "titles": {{"enabled": true}},
@@ -844,10 +846,36 @@ def _setparams_suffix(color):
     return (",setparams=" + ":".join(parts)) if parts else ""
 
 
+def _video_frame_count(path):
+    """Exact decoded video frame count of `path` (None if unparseable)."""
+    ff = ff_exe()
+    r = run([ff, "-i", path, "-map", "0:v:0", "-c", "copy", "-f", "null", "-"], timeout=120)
+    fr = None
+    for m in re.finditer(r"frame=\s*(\d+)", r.stderr or ""):
+        fr = int(m.group(1))
+    return fr
+
+
+def _has_audio(input_path):
+    """True if `input_path` has at least one audio stream (parses ffmpeg -i)."""
+    ff = ff_exe()
+    r = run([ff, "-i", input_path], timeout=30)
+    return any("Audio:" in ln for ln in (r.stderr or "").splitlines())
+
+
 def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
     """
     Render each keep span as a normalized segment, then concatenate.
     spec: dict with "width", "height", "fps" keys.
+
+    A/V-drift fix: segments are rendered VIDEO-ONLY and concatenated with -c copy
+    (frame-exact, unchanged). The audio is built in a SINGLE ffmpeg pass from the
+    original (one filtergraph -> one AAC encode = ONE encoder priming, instead of
+    a priming per segment accumulating at every concat join — which pushed the
+    audio progressively behind the video for edit-list-ignoring importers like
+    CapCut). The single audio track is trimmed to the MEASURED video length and
+    muxed onto the concatenated video. A source with no audio still yields a
+    silent video, exactly as before.
     """
     ff = ff_exe()
     # Single-clip Tier 1: do NOT force -s/-r. Phone videos are often stored
@@ -882,14 +910,13 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             "-ss", f"{start:.6f}",
             "-i", input_path,
             "-t", f"{duration:.6f}",
+            "-an",                          # video-only; audio is built in one pass below
         ]
         if vf:
             cmd += ["-vf", vf]
         cmd += [
             "-c:v", "libx264",
             "-pix_fmt", "yuv420p",
-            "-c:a", "aac",
-            "-ar", "48000",
             "-movflags", "+faststart",
             seg_path,
         ]
@@ -918,25 +945,70 @@ def render_video(input_path, cutlist, spec, out_mp4, tmpdir, zoomplan=None):
             fwd = p.replace("\\", "/").replace("'", "'\\''")
             f.write(f"file '{fwd}'\n")
 
-    # Concatenate with stream copy (all segs share the same spec).
+    # Concatenate the VIDEO with stream copy (all segs share the same spec).
     # +faststart relocates the moov atom to the FRONT so a browser <video> can
     # read the duration and stream/seek immediately (otherwise it shows 0:00/0:00
     # and won't update until the whole file downloads).
-    cmd = [
+    video_only = os.path.join(tmpdir, "video_concat.mp4")
+    r = run([
         ff, "-y",
-        "-f", "concat",
-        "-safe", "0",
-        "-i", list_path,
+        "-f", "concat", "-safe", "0", "-i", list_path,
         "-c", "copy",
         "-movflags", "+faststart",
-        out_mp4,
-    ]
-    r = run(cmd, timeout=600)
+        video_only,
+    ], timeout=600)
+    if not (os.path.exists(video_only) and os.path.getsize(video_only) > 0):
+        raise RuntimeError(
+            f"Video concatenation failed — output file missing or empty.\n"
+            f"ffmpeg stderr: {r.stderr[-600:]}"
+        )
 
+    # Build the WHOLE audio in ONE pass (one priming, no per-join accumulation).
+    audio_path = None
+    if _has_audio(input_path):
+        # Pin audio to the MEASURED video length (a per-segment -ss/-t cut can drop
+        # a boundary frame, so real video is sometimes shorter than nominal); fall
+        # back to nominal sum if the frame count can't be parsed.
+        vframes = _video_frame_count(video_only)
+        total_v = (vframes / fps) if (vframes and fps > 0) else sum(e - s for s, e in cutlist)
+        parts = [f"[0:a]atrim=start={s:.6f}:end={e:.6f},asetpts=PTS-STARTPTS[a{i}]"
+                 for i, (s, e) in enumerate(cutlist)]
+        labels = "".join(f"[a{i}]" for i in range(len(cutlist)))
+        # apad + atrim clamp the result to exactly the video length so tiny
+        # per-chunk filter rounding can't re-accumulate into drift.
+        fg = (";".join(parts) + ";" + labels +
+              f"concat=n={len(cutlist)}:v=0:a=1,apad,atrim=end={total_v:.6f},"
+              f"asetpts=PTS-STARTPTS[aout]")
+        audio_path = os.path.join(tmpdir, "audio_single.m4a")
+        ra = run([
+            ff, "-y", "-i", input_path,
+            "-filter_complex", fg,
+            "-map", "[aout]",
+            "-c:a", "aac", "-ar", "48000",
+            "-movflags", "+faststart",
+            audio_path,
+        ], timeout=600)
+        if not (os.path.exists(audio_path) and os.path.getsize(audio_path) > 0):
+            # Unexpected audio failure -> degrade to a silent video, never abort.
+            print(f"  WARNING: single-pass audio build failed; shipping silent video.\n"
+                  f"  ffmpeg stderr: {(ra.stderr or '')[-400:]}")
+            audio_path = None
+
+    # Mux the concatenated video + single-pass audio (or pass the silent video
+    # through). NB: NO -shortest — with -c copy it truncates the VIDEO to the last
+    # audio packet boundary and drops trailing video frames.
+    if audio_path:
+        cmd = [ff, "-y", "-i", video_only, "-i", audio_path,
+               "-map", "0:v:0", "-map", "1:a:0", "-c", "copy",
+               "-movflags", "+faststart", out_mp4]
+    else:
+        cmd = [ff, "-y", "-i", video_only, "-c", "copy",
+               "-movflags", "+faststart", out_mp4]
+    r = run(cmd, timeout=600)
     if not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
         raise RuntimeError(
-            f"Concatenation failed — output file missing or empty.\n"
-            f"ffmpeg stderr: {r.stderr[-600:]}"
+            f"Final mux failed — output file missing or empty.\n"
+            f"ffmpeg stderr: {(r.stderr or '')[-600:]}"
         )
     print(f"  output: {out_mp4}  ({os.path.getsize(out_mp4)//1024} KiB)")
 

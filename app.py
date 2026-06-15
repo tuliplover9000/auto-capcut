@@ -434,7 +434,7 @@ def run():
 
     settings = {
         "aggressiveness": pick("aggressiveness", {"light", "medium", "heavy"}, "medium"),
-        "model": (request.form.get("model") or "sonnet").strip() or "sonnet",
+        "model": pick("model", {"sonnet", "opus", "haiku"}, "sonnet"),
         "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
         "burn": request.form.get("burn", "") in ("1", "true", "on", "yes"),
         "style": pick("style", STYLES, "clean"),
