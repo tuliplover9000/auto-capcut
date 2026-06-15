@@ -527,64 +527,80 @@ def decide_overlays_with_claude(cutlist, all_words, model="sonnet", extra="", de
         lines.append(f"[t={t:.1f}] {text}")
     payload = "\n".join(lines)
 
-    MIN_GAP = {"more": 3.0, "less": 7.0}.get(density, 4.5)
+    SECS_EACH = 3.0                       # each image in a sequence holds ~3s
+    # Full-presenter breathing room BETWEEN sequences (so we cut back to the
+    # speaker, then into the next sustained B-roll stretch).
+    GAP_BETWEEN = {"more": 2.5, "less": 8.0}.get(density, 5.0)
     density_phrase = {
-        "more": "roughly one every 3 seconds",
-        "less": "sparingly, about one every 7 seconds",
-    }.get(density, "about ONE every 4-5 seconds")
+        "more": "as many sustained sequences as the content genuinely supports",
+        "less": "just 1-2 sustained sequences for the whole video",
+    }.get(density, "a few sustained sequences")
 
     extra_block = f"\nCreator's guidance (PRIORITY): {extra}\n" if extra else ""
 
-    prompt = f'''You are a short-form video editor adding B-ROLL (stock images / short video clips) to a talking-head edit, "show it when he says it" style. The kept transcript is on stdin, each line tagged with its time in the FINAL video: [t=SS.s] phrase.
+    prompt = f'''You are a short-form video editor adding B-ROLL to a talking-head edit. The kept transcript is on stdin, each line tagged with its time in the FINAL video: [t=SS.s] phrase.
 
-Choose a SMALL, TASTEFUL set of B-roll moments ({density_phrase}; fewer well-matched beats beat many mediocre ones). For each pick a CONCRETE visual findable in stock footage.
+Build B-ROLL SEQUENCES, NOT single quick pops. When the speaker hits a visual stretch (a list, a story, describing objects/places/numbers), HOLD a sequence for several seconds while cycling through 2-4 RELATED images shown back-to-back (~3s each). Between sequences we cut back to full-screen of the speaker, so make each sequence sustained and worth holding.
 
-GOOD triggers: concrete nouns (people/places/brands/products/objects), numbers/stats/money/dates, list items, comparisons, "let me show you".
-SKIP: abstract concepts (focus, productivity, mindset, "the future" - literal stock looks generic), filler/function words, hook/punchline face moments.
+For each sequence return:
+- time: FINAL-video seconds where it should START (the trigger word/phrase)
+- format: "stacked" (speaker stays in a bottom band, images fill the top - the default) or "cutaway" (images fill the WHOLE screen - for a strong reveal)
+- kind: "image" (default) or "video"
+- queries: a LIST of 2-4 CONCRETE stock-search queries, all RELATED to that moment, in the order they should appear. e.g. for "a $30 desk lamp that cut my headaches": ["desk lamp on a desk","warm desk lamp glow at night","person relaxed at tidy desk"].
 
-Per moment return: time (final-video seconds of the trigger), phrase, query (CONCRETE 2-5 word stock query; translate ideas to filmable visuals, e.g. "market crashed"->"red downward stock chart"), kind (image default; video for motion subjects), format (stacked default; cutaway rare full-screen accent), duration (2 default; 3-4 for numbers/reveals), label (2-4 word ALL CAPS headline or "").
+Choose {density_phrase}. Concrete, findable visuals ONLY - skip abstract concepts (focus, mindset, "the future"); fewer, well-matched, SUSTAINED sequences beat many mediocre pops. Order the queries to track what's being said.
 {extra_block}
-Rules: skip abstracts, concrete queries only, never crowd.
-Return ONLY JSON: {{"overlays":[{{...}}]}}. Transcript on stdin.'''
+Return ONLY JSON: {{"sequences":[{{"time":12.5,"format":"stacked","kind":"image","queries":["...","...","..."]}}]}}. Transcript on stdin.'''
 
     try:
         data = _extract_json(_claude_cli(prompt, payload, model))
     except Exception:
         return []
-    raw = data.get("overlays") if isinstance(data, dict) else (data if isinstance(data, list) else [])
 
+    # Accept the new "sequences" shape; fall back to the legacy flat "overlays"
+    # (each becomes a 1-image sequence) so older responses still work.
+    seqs = []
+    if isinstance(data, dict) and isinstance(data.get("sequences"), list):
+        seqs = data["sequences"]
+    elif isinstance(data, dict) and isinstance(data.get("overlays"), list):
+        for o in data["overlays"]:
+            try:
+                seqs.append({"time": float(o["time"]),
+                             "format": o.get("format", "stacked"),
+                             "kind": o.get("kind", "image"),
+                             "queries": [str(o.get("query") or "").strip()]})
+            except (KeyError, ValueError, TypeError):
+                continue
+
+    # Expand each sequence into CONTIGUOUS overlay items (the compositor keeps the
+    # split alive across them and swaps the top image), with a full-presenter gap
+    # enforced BETWEEN sequences.
     items = []
-    for item in (raw or []):
+    last_seq_end = -1e9
+    for seq in sorted(seqs, key=lambda s: float(s.get("time", 0) or 0)):
         try:
-            time = float(item["time"])
-            if not (0 <= time <= total_out):
-                continue
-            dur = max(1.2, min(4.0, float(item.get("duration", 2.0))))
-            start = max(0.0, time - 0.25)          # 0.25s LEAD
-            end = min(total_out, start + dur)
-            if end - start < 1.0:
-                continue
-            fmt = "cutaway" if str(item.get("format", "")).lower() == "cutaway" else "stacked"
-            kind = "video" if str(item.get("kind", "")).lower() == "video" else "image"
-            label = str(item.get("label") or "").strip()[:40]
-            query = str(item.get("query") or "").strip()
-            if not query:
-                continue
-            items.append({"start": start, "end": end, "query": query,
-                          "format": fmt, "kind": kind, "label": label})
+            t = float(seq["time"])
         except (KeyError, ValueError, TypeError):
             continue
-
-    items.sort(key=lambda it: it["start"])
-    kept_overlays = []
-    last_kept_start = -1e9
-    last_kept_end = -1e9
-    for it in items:
-        if it["start"] >= last_kept_start + MIN_GAP and it["start"] >= last_kept_end + 0.3:
-            kept_overlays.append(it)
-            last_kept_start = it["start"]
-            last_kept_end = it["end"]
-    return kept_overlays
+        if not (0 <= t <= total_out):
+            continue
+        start = max(0.0, t - 0.25)                 # 0.25s lead
+        if start < last_seq_end + GAP_BETWEEN:     # keep sequences apart
+            continue
+        fmt = "cutaway" if str(seq.get("format", "")).lower() == "cutaway" else "stacked"
+        kind = "video" if str(seq.get("kind", "")).lower() == "video" else "image"
+        queries = [str(q).strip() for q in (seq.get("queries") or []) if str(q).strip()][:4]
+        if not queries:
+            continue
+        for q in queries:
+            end = min(total_out, start + SECS_EACH)
+            if end - start < 1.0:
+                break
+            items.append({"start": start, "end": end, "query": q,
+                          "format": fmt, "kind": kind, "label": ""})
+            start = end                            # CONTIGUOUS: hold split, swap image
+        last_seq_end = start
+    return items
 
 
 def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", style="auto", extra=""):
