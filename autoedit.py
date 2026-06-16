@@ -322,7 +322,7 @@ Instruction: {aggr_desc.get(aggressiveness, aggr_desc['medium'])}
 {extra_block}
 ALWAYS remove (at every aggressiveness level):
 - HOOK / OPENING: scan the first ~5 seconds. Discard leading filler ("okay", "so", "alright", "um", "mic check"), throat-clears, breaths, and any pre-roll before the real first sentence. The FIRST kept span MUST begin right on the high-energy start of the hook — never on a warm-up word.
-- RETAKES / DUPLICATION: if the same phrase or sentence is spoken two or more times in a row (e.g. "a $5 kitchen timer ... [pause] ... a $5 kitchen timer"), that's a mistake + retake — keep ONLY the LAST clean attempt and cut every earlier one.
+- RETAKES / DUPLICATION (THE CLEAN-TAKE RULE): if the same phrase or sentence is spoken two or more times in a row (e.g. "a $5 kitchen timer ... [pause] ... a $5 kitchen timer"), that's a mistake + retake. COMPLETELY PURGE every failed attempt AND the silence between takes from the keep list — keep ONLY the final clean take. The cut must jump straight from the end of the prior good content to the start of that clean take: no gap, no held/frozen frame, no dead air in between.
 - False starts and self-corrections: when the speaker restarts a sentence, fumbles, or says things like "wait", "let me redo that", "start over", "actually", "um let me say that again" — drop the abandoned attempt and KEEP only the clean final take of that idea.
 - Filler-only or dead segments with no real content.
 Be decisive: this is short-form, the viewer wants it TIGHT. When two segments say the same thing, keep one.
@@ -606,6 +606,26 @@ Return ONLY JSON: {{"sequences":[{{"time":12.5,"format":"stacked","kind":"image"
     return items
 
 
+def _query_fallbacks(q):
+    """Broader retries for a stock query that returns nothing: the head noun
+    phrase (first 2 words, usually the subject) then the last/core word. Lets a
+    too-specific phrase still fill the slot instead of leaving a hole in a
+    sequence (which would briefly drop the split back to full presenter)."""
+    toks = q.split()
+    cands = []
+    if len(toks) > 2:
+        cands.append(" ".join(toks[:2]))
+    if len(toks) > 1:
+        cands.append(toks[-1])
+    seen, out = {q.strip().lower()}, []
+    for a in cands:
+        a = a.strip()
+        if a and a.lower() not in seen:
+            seen.add(a.lower())
+            out.append(a)
+    return out
+
+
 def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", style="auto", extra=""):
     """Decide a B-roll plan AND fetch the assets -> composite-ready overlay list.
 
@@ -618,10 +638,15 @@ def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", sty
     plan = decide_overlays_with_claude(cutlist, all_words, model=model, density=density, extra=extra)
     used, out = set(), []
     for item in plan:
-        path = mediasource.search(item["query"], item.get("kind", "image"),
-                                  "portrait", used_ids=used)
+        kind = item.get("kind", "image")
+        path = mediasource.search(item["query"], kind, "portrait", used_ids=used)
         if not path:
-            continue                       # skip unfetchable; B-roll is best-effort
+            for alt in _query_fallbacks(item["query"]):   # broaden, don't leave a gap
+                path = mediasource.search(alt, kind, "portrait", used_ids=used)
+                if path:
+                    break
+        if not path:
+            continue                       # still nothing -> skip; B-roll is best-effort
         fmt = item["format"] if style == "auto" else style   # stacked|cutaway override
         out.append({"path": path, "start": item["start"], "end": item["end"],
                     "format": fmt, "kenburns": True, "fade": 0.25})
