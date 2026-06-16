@@ -247,6 +247,8 @@ def run_job(job_id, instructions):
         _stage(job_id, step=6, stage="Cleaning cut list")
         job["cutlist"] = autoedit.snap_and_clean(keep, job["all_words"], spec["duration"],
                                                  fps=spec.get("fps"))
+        job["cutlist"] = autoedit.remove_retakes(    # drop repeated/duplicate takes
+            job["cutlist"], job["all_words"])
         job["cutlist"] = autoedit.remove_dead_air(   # tighten dead air into jump cuts
             job["cutlist"], job["all_words"],
             max_gap=autoedit.DEAD_AIR_GAP.get(job["settings"].get("aggressiveness"), 0.45),
@@ -305,6 +307,7 @@ def revise_job(job_id, msg):
             try:
                 cl = autoedit.snap_and_clean(action["keep"], job["all_words"], job["spec"]["duration"],
                                              fps=job["spec"].get("fps"))
+                cl = autoedit.remove_retakes(cl, job["all_words"])
                 cl = autoedit.remove_dead_air(
                     cl, job["all_words"],
                     max_gap=autoedit.DEAD_AIR_GAP.get(job["settings"].get("aggressiveness"), 0.45),

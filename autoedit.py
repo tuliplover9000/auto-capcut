@@ -16,7 +16,7 @@ Usage examples:
   python autoedit.py myclip.mp4 --whisper-model small --keep-temp
   python autoedit.py --selftest
 """
-import sys, os, re, json, math, shutil, tempfile, argparse, subprocess, shlex
+import sys, os, re, json, math, shutil, tempfile, argparse, subprocess, shlex, difflib
 
 # ── R1: Windows console UTF-8 fix (avoids cp1252 crashes on non-ASCII) ──────
 for _s in (sys.stdout, sys.stderr):
@@ -868,6 +868,89 @@ def _hook_floor(words):
             except (TypeError, ValueError):
                 return 0.0
     return 0.0
+
+
+def _retake_ratio(a_toks, b_toks):
+    """Fraction of the EARLIER phrase `a` reproduced (in order) inside later `b`.
+    1.0 = a is fully repeated/contained in b (exact retake, or a false start that
+    b completes)."""
+    if not a_toks:
+        return 0.0
+    sm = difflib.SequenceMatcher(None, a_toks, b_toks, autojunk=False)
+    matched = sum(blk.size for blk in sm.get_matching_blocks())
+    return matched / len(a_toks)
+
+
+def remove_retakes(cutlist, all_words, min_words=3, ratio=0.8, window_s=12.0):
+    """Deterministically drop repeated takes: if a phrase is reproduced by a LATER
+    nearby phrase (you said the line, flubbed/paused, and said it again), remove the
+    EARLIER occurrence(s) and keep ONLY the last clean take. Independent of the LLM
+    — this is the reliable fix for 'I repeated the line 5x and it kept them all'.
+    Subtracts the retake time ranges from the cutlist. Conservative: only phrases
+    of >= min_words that are >= `ratio` reproduced by a later phrase within
+    window_s seconds, so genuine content isn't dropped.
+    """
+    words = sorted((w for w in all_words
+                    if isinstance(w, dict)
+                    and isinstance(w.get("start"), (int, float))
+                    and isinstance(w.get("end"), (int, float))),
+                   key=lambda w: w["start"])
+    kept = [w for w in words if any(s <= w["start"] < e for (s, e) in cutlist)]
+    if len(kept) < 2:
+        return cutlist
+    # Group kept words into phrases on sentence punctuation or a speech gap.
+    phrases, cur = [], []
+    for i, w in enumerate(kept):
+        cur.append(w)
+        nxt_gap = (kept[i + 1]["start"] - w["end"]) if i + 1 < len(kept) else 99.0
+        if re.search(r"[.?!]$", str(w["word"]).strip()) or nxt_gap > 0.7:
+            phrases.append(cur)
+            cur = []
+    if cur:
+        phrases.append(cur)
+
+    def toks(p):
+        out = []
+        for w in p:
+            t = re.sub(r"[^a-z0-9]", "", str(w["word"]).lower())
+            if t:
+                out.append(t)
+        return out
+
+    ptoks = [toks(p) for p in phrases]
+    drop = set()
+    for i in range(len(phrases)):
+        if len(ptoks[i]) < min_words:
+            continue
+        for j in range(i + 1, len(phrases)):
+            if phrases[j][0]["start"] - phrases[i][-1]["end"] > window_s:
+                break
+            if len(ptoks[j]) < min_words:
+                continue
+            if _retake_ratio(ptoks[i], ptoks[j]) >= ratio:
+                drop.add(i)                       # earlier take repeated later -> cut it
+                break
+    if not drop:
+        return cutlist
+    rem = [(phrases[i][0]["start"], phrases[i][-1]["end"]) for i in sorted(drop)]
+    # Subtract the retake intervals from the cutlist.
+    out = []
+    for (s, e) in cutlist:
+        segs = [(s, e)]
+        for (rs, re_) in rem:
+            nseg = []
+            for (a, b) in segs:
+                if re_ <= a or rs >= b:
+                    nseg.append((a, b))
+                else:
+                    if a < rs:
+                        nseg.append((a, rs))
+                    if re_ < b:
+                        nseg.append((re_, b))
+            segs = nseg
+        out.extend(segs)
+    out = [(s, e) for (s, e) in out if e - s > 0.15]
+    return out or cutlist
 
 
 def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.15, tail=0.25,
@@ -1919,6 +2002,7 @@ def main():
         section("6/7  SNAP & CLEAN CUT LIST")
         cutlist = snap_and_clean(keep_spans, all_words, spec["duration"],
                                  fps=spec.get("fps"))
+        cutlist = remove_retakes(cutlist, all_words)     # drop repeated/duplicate takes
         cutlist = remove_dead_air(                       # tighten into jump cuts
             cutlist, all_words,
             max_gap=DEAD_AIR_GAP.get(args.aggressiveness, 0.45),
