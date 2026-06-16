@@ -896,10 +896,11 @@ $("#newvid").onclick=(e)=>{ e.preventDefault(); resetToUpload(); };
 
 if __name__ == "__main__":
     print("CapCut Auto-Edit UI →  http://127.0.0.1:5000")
-    # use_reloader=True: auto-restart when a .py file changes, so code updates
-    # apply without manually stopping/starting the server (the recurring "it's
-    # the same / didn't pick up my change" gotcha). Reloader off only if the env
-    # var is set (e.g. while actively rendering a long job you don't want killed).
-    _reload = os.environ.get("AUTOEDIT_NO_RELOAD") != "1"
+    # NO auto-reloader by default: a .py file change mid-render restarts the
+    # server and KILLS the in-progress job (the worker is a daemon thread that
+    # dies with the process -> /status 404, lost render). That was wiping renders
+    # whenever code was edited during a session. Restart manually BETWEEN renders
+    # to pick up new code. Opt in with AUTOEDIT_RELOAD=1 only when not rendering.
+    _reload = os.environ.get("AUTOEDIT_RELOAD") == "1"
     app.run(host="127.0.0.1", port=5000, threaded=True,
             debug=_reload, use_reloader=_reload)
