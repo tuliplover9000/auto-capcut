@@ -321,8 +321,9 @@ Aggressiveness level: {aggressiveness}
 Instruction: {aggr_desc.get(aggressiveness, aggr_desc['medium'])}
 {extra_block}
 ALWAYS remove (at every aggressiveness level):
+- HOOK / OPENING: scan the first ~5 seconds. Discard leading filler ("okay", "so", "alright", "um", "mic check"), throat-clears, breaths, and any pre-roll before the real first sentence. The FIRST kept span MUST begin right on the high-energy start of the hook — never on a warm-up word.
+- RETAKES / DUPLICATION: if the same phrase or sentence is spoken two or more times in a row (e.g. "a $5 kitchen timer ... [pause] ... a $5 kitchen timer"), that's a mistake + retake — keep ONLY the LAST clean attempt and cut every earlier one.
 - False starts and self-corrections: when the speaker restarts a sentence, fumbles, or says things like "wait", "let me redo that", "start over", "actually", "um let me say that again" — drop the abandoned attempt and KEEP only the clean final take of that idea.
-- Repeated takes of the same line (the speaker says nearly the same sentence twice) — keep the better/last one, cut the rest.
 - Filler-only or dead segments with no real content.
 Be decisive: this is short-form, the viewer wants it TIGHT. When two segments say the same thing, keep one.
 
@@ -548,7 +549,9 @@ For each sequence return:
 - kind: "image" (default) or "video"
 - queries: a LIST of 2-4 CONCRETE stock-search queries, all RELATED to that moment, in the order they should appear. e.g. for "a $30 desk lamp that cut my headaches": ["desk lamp on a desk","warm desk lamp glow at night","person relaxed at tidy desk"].
 
-Choose {density_phrase}. Concrete, findable visuals ONLY - skip abstract concepts (focus, mindset, "the future"); fewer, well-matched, SUSTAINED sequences beat many mediocre pops. Order the queries to track what's being said.
+ANCHOR-NOUN RULE: only start a sequence on a PHYSICAL, TANGIBLE noun actually said — an object, product, place, person, or a number/price you can show. REJECT abstract feelings, verbs, and filler ("focus", "mindset", "the future", "productivity", "growth") — literal stock for those looks generic and cheap. Each query must be a concrete, specific, filmable thing (add a couple of descriptive words for better stock matches, e.g. "closeup mechanical keyboard rgb backlight" not just "keyboard").
+
+Choose {density_phrase}. Fewer, well-matched, SUSTAINED sequences beat many mediocre pops. Order the queries to track what's being said.
 {extra_block}
 Return ONLY JSON: {{"sequences":[{{"time":12.5,"format":"stacked","kind":"image","queries":["...","...","..."]}}]}}. Transcript on stdin.'''
 
@@ -805,15 +808,18 @@ def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
 DEAD_AIR_GAP = {"light": 1.2, "medium": 0.8, "heavy": 0.5}
 
 
-def remove_dead_air(cutlist, all_words, max_gap=0.8, pad=0.12, fps=None, total_duration=None):
+def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.15, tail=0.25,
+                    fps=None, total_duration=None):
     """Tighten a cleaned cutlist into JUMP CUTS: split each kept span wherever
-    there's a silence longer than `max_gap` (a stretch with no spoken word),
-    keeping `pad` seconds of breathing room on each side. Only genuinely LONG
-    pauses are cut — natural sub-`max_gap` rhythm between words/phrases is left
-    intact so the edit doesn't feel choppy. Frame-aligns the result when fps is
-    given (so nominal output time still equals rendered time). A span with no
-    words (e.g. music) passes through untouched. Never returns [] (falls back to
-    the input cutlist).
+    there's a silence longer than `max_gap` (a stretch with no spoken word). Only
+    genuinely LONG pauses are cut — natural sub-`max_gap` rhythm is left intact so
+    the edit doesn't feel choppy.
+
+    Padding is ASYMMETRIC around each kept speech run: keep `lead` seconds before
+    the run (so a hard consonant like P/T at the start isn't clipped) and `tail`
+    seconds after (to catch the trailing breath / vocal decay — which also softens
+    the cut so it doesn't feel abrupt). Frame-aligns when fps is given. A span with
+    no words (e.g. music) passes through untouched. Never returns [].
     """
     MIN_SPAN = 0.20
     words = sorted(
@@ -823,33 +829,35 @@ def remove_dead_air(cutlist, all_words, max_gap=0.8, pad=0.12, fps=None, total_d
          and isinstance(w.get("end"), (int, float))
          and w["end"] > w["start"]),
         key=lambda w: w["start"])
-    raw = []
+    # 1) Find the continuous speech RUNS (split a kept span at any gap > max_gap).
+    runs = []
     for (s, e) in cutlist:
         inside = [w for w in words if w["end"] > s and w["start"] < e]
         if not inside:
-            raw.append((s, e))                      # no speech here — keep as-is
+            runs.append((s, e))                     # no speech here — keep as-is
             continue
-        cur = max(s, inside[0]["start"] - pad)
+        run_start = inside[0]["start"]
         prev_end = inside[0]["end"]
         for w in inside[1:]:
-            if w["start"] - prev_end > max_gap:     # a real pause -> cut it
-                raw.append((cur, min(e, prev_end + pad)))
-                cur = max(s, w["start"] - pad)
+            if w["start"] - prev_end > max_gap:     # a real pause -> end this run
+                runs.append((run_start, prev_end))
+                run_start = w["start"]
             prev_end = max(prev_end, w["end"])
-        raw.append((cur, min(e, prev_end + pad)))
-    # Drop tiny spans + frame-align (same rule as snap_and_clean).
+        runs.append((run_start, prev_end))
+    # 2) Asymmetric pad, clamp to [0,total], and never overlap the previous run.
+    hi = total_duration if total_duration is not None else (runs[-1][1] + tail if runs else 0.0)
     out = []
-    for (s, e) in raw:
-        if total_duration is not None:
-            e = min(e, total_duration)
-        if e - s < MIN_SPAN:
+    for (rs, re_) in runs:
+        ps = max(0.0, rs - lead)
+        pe = min(hi, re_ + tail)
+        if out and ps < out[-1][1]:
+            ps = out[-1][1]                         # butt up against the prev kept span
+        if pe - ps < MIN_SPAN:
             continue
         if fps and math.isfinite(fps) and fps > 0:
-            n = max(1, math.ceil((e - s) * fps - 1e-6))
-            e = s + n / fps
-            if total_duration is not None:
-                e = min(e, total_duration)
-        out.append((s, e))
+            n = max(1, math.ceil((pe - ps) * fps - 1e-6))
+            pe = min(hi, ps + n / fps)
+        out.append((ps, pe))
 
     # Drop SHORT isolated blips at the very start/end: a stray sound, breath, or
     # shuffling before the first real words (or after the last) gets transcribed
