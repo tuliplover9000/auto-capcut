@@ -238,21 +238,15 @@ def run_job(job_id, instructions):
         job["transcript_text"] = autoedit.build_transcript_text(segs)
 
         _stage(job_id, step=5, stage="Claude deciding cuts")
-        keep = autoedit.decide_cuts_with_claude(
-            job["transcript_text"], spec["duration"],
-            job["settings"]["aggressiveness"], job["settings"]["model"],
-            extra=instructions or "")
-        job["keep"] = keep
-
         _stage(job_id, step=6, stage="Cleaning cut list")
-        job["cutlist"] = autoedit.snap_and_clean(keep, job["all_words"], spec["duration"],
-                                                 fps=spec.get("fps"))
-        job["cutlist"] = autoedit.remove_retakes(    # drop repeated/duplicate takes
-            job["cutlist"], job["all_words"])
-        job["cutlist"] = autoedit.remove_dead_air(   # tighten dead air into jump cuts
-            job["cutlist"], job["all_words"],
-            max_gap=autoedit.DEAD_AIR_GAP.get(job["settings"].get("aggressiveness"), 0.45),
-            fps=spec.get("fps"), total_duration=spec["duration"])
+        # Whitelist clean-cut (keep only the clean phrases) + tighten; falls back
+        # to keep-span + retake removal inside decide_cutlist if needed.
+        job["cutlist"] = autoedit.decide_cutlist(
+            job["transcript_text"], job["all_words"], spec["duration"],
+            aggressiveness=job["settings"]["aggressiveness"],
+            model=job["settings"]["model"], fps=spec.get("fps"),
+            extra=instructions or "")
+        job["keep"] = job["cutlist"]
 
         if job["settings"].get("zoom"):
             _stage(job_id, stage="Deciding zooms")

@@ -389,6 +389,95 @@ The transcript follows on stdin."""
     return spans
 
 
+def _norm_tokens(s):
+    return re.sub(r"[^a-z0-9 ]", " ", str(s).lower()).split()
+
+
+def _map_clean_to_spans(clean_phrases, all_words, min_ratio=0.55):
+    """WHITELIST mapping: for each clean phrase Claude chose to KEEP, find the
+    contiguous run of Whisper words that best matches it (fuzzy, so minor wording
+    drift is tolerated) and return that run's [start,end]. When a phrase was
+    spoken several times (retakes), the CLEAN take matches best and wins. Anything
+    not matched (false starts, filler, dead air, movement) is simply never kept.
+    Returns time-sorted, merged spans."""
+    words = sorted((w for w in all_words
+                    if isinstance(w, dict)
+                    and isinstance(w.get("start"), (int, float))
+                    and isinstance(w.get("end"), (int, float))),
+                   key=lambda w: w["start"])
+    wt = [re.sub(r"[^a-z0-9]", "", str(w["word"]).lower()) for w in words]
+    nW = len(words)
+    spans = []
+    for ph in clean_phrases:
+        pt = _norm_tokens(ph)
+        if len(pt) < 2:
+            continue
+        m = len(pt)
+        best_r, best = 0.0, None
+        for start in range(0, nW):
+            for L in (m, m + 1, m - 1, m + 2):
+                if L < 2 or start + L > nW:
+                    continue
+                r = difflib.SequenceMatcher(None, pt, wt[start:start + L]).ratio()
+                if r > best_r:
+                    best_r, best = r, (start, start + L)
+            if best_r >= 0.995:
+                break
+        if best and best_r >= min_ratio:
+            # Tighten the window to the actually-matching block so stray edge words
+            # (a leftover "day"/"if"/"a" from a neighbouring take) aren't included.
+            sm = difflib.SequenceMatcher(None, pt, wt[best[0]:best[1]])
+            jb = [(blk.b, blk.b + blk.size) for blk in sm.get_matching_blocks() if blk.size]
+            if jb:
+                w0 = best[0] + min(j0 for j0, _ in jb)
+                w1 = best[0] + max(j1 for _, j1 in jb)
+            else:
+                w0, w1 = best
+            spans.append((words[w0]["start"], words[w1 - 1]["end"]))
+    spans.sort()
+    merged = []
+    for s, e in spans:
+        if merged and s <= merged[-1][1] + 0.3:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], e))
+        else:
+            merged.append((s, e))
+    return merged
+
+
+def decide_clean_cuts_with_claude(transcript_text, all_words, model="sonnet"):
+    """WHITELIST cut: ask Claude to select ONLY the clean, complete phrases to keep
+    (the final good take of each idea), copied VERBATIM, then map them back to the
+    Whisper timestamps in Python. Everything else — false starts, retakes, filler,
+    dead air, the pre-roll where you're getting set — is dropped because it's never
+    selected. Returns keep spans, or [] on failure (caller falls back).
+    """
+    prompt = """You are editing a raw talking-head video transcript that contains MISTAKES, FALSE STARTS, RETAKES, and filler. The timestamped transcript is on stdin: [index] start-end: text.
+
+Your job: output the FINAL CLEAN SCRIPT — only the words that should remain in the finished video.
+
+RULES:
+- For each idea, the speaker often fumbles and repeats it. Keep ONLY the last, complete, clean delivery of that idea. DELETE every earlier attempt, false start ("the uh— wait", "lemme check"), and filler ("um", "uh", "okay", "yeah").
+- DELETE the warm-up / getting-settled part before the real first sentence.
+- COPY THE WORDS EXACTLY as they appear in the transcript for the takes you keep. Do NOT reword, paraphrase, fix grammar, add, or summarize — only select and delete. (Your output is matched back to the audio word-for-word.)
+- Output ONE clean phrase/sentence per line, in order. No timestamps, no numbering, no commentary — just the kept words.
+
+Example —
+ transcript has: "this timer was the uh wait... this timer was the best thing i evere... this timer was the best thing I have ever bought yeah"
+ you output: this timer was the best thing I have ever bought
+
+The transcript is on stdin."""
+    try:
+        out = _claude_cli(prompt, transcript_text, model)
+    except Exception as e:
+        print(f"  clean-cut pass failed ({e}); falling back.")
+        return []
+    phrases = [ln.strip(" -•\t") for ln in (out or "").splitlines() if len(ln.strip()) > 3]
+    if not phrases:
+        return []
+    spans = _map_clean_to_spans(phrases, all_words)
+    return spans
+
+
 def decide_zooms_with_claude(cutlist, all_words, model="sonnet", extra="", mode="static"):
     """
     Ask Claude to choose a camera zoom PER kept segment. Returns a list aligned
@@ -1005,6 +1094,34 @@ def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.15, tail=0.25,
     while len(out) > 1 and (out[-1][1] - out[-1][0]) < LEAD_BLIP:
         out.pop()
     return out or list(cutlist)
+
+
+def decide_cutlist(transcript_text, all_words, total_duration, aggressiveness="medium",
+                   model="sonnet", fps=None, extra=""):
+    """Decide the final cutlist for the INITIAL auto-edit.
+
+    PRIMARY (whitelist): ask Claude for the clean final phrases to keep and map
+    them back to timestamps — this drops retakes, false starts, filler, the
+    pre-roll, and reworded fumbles because they're simply never selected.
+    FALLBACK: if that yields too little (Claude failed / poor match), use the
+    keep-span approach + deterministic retake removal. Either way, finish with the
+    dead-air tighten. Returns the cutlist.
+    """
+    spans = decide_clean_cuts_with_claude(transcript_text, all_words, model=model)
+    enough = spans and sum(e - s for s, e in spans) >= max(5.0, 0.15 * total_duration)
+    if enough:
+        print(f"  clean-cut: kept {len(spans)} clean phrase span(s)")
+        cl = snap_and_clean(spans, all_words, total_duration, fps=fps)
+    else:
+        print("  clean-cut empty/too sparse -> fallback to keep-span + retake removal")
+        keep = decide_cuts_with_claude(transcript_text, total_duration,
+                                       aggressiveness=aggressiveness, model=model, extra=extra)
+        cl = snap_and_clean(keep, all_words, total_duration, fps=fps)
+        cl = remove_retakes(cl, all_words)
+    cl = remove_dead_air(cl, all_words,
+                         max_gap=DEAD_AIR_GAP.get(aggressiveness, 0.8),
+                         fps=fps, total_duration=total_duration)
+    return cl
 
 
 # ── R8: render_video ─────────────────────────────────────────────────────────
@@ -1971,29 +2088,14 @@ def main():
         transcript_text = build_transcript_text(segments)
         print(f"  {len(transcript_text)} chars, {len(segments)} lines")
 
-        # ── Stage 5: Claude decides cuts ──────────────────────────────────────
-        section("5/7  CLAUDE CUT DECISIONS")
+        # ── Stage 5+6: Claude clean-cut + snap/clean ─────────────────────────
+        section("5/7  CLAUDE CUT DECISIONS (whitelist clean-cut)")
         print(f"  Model: {args.model}  Aggressiveness: {args.aggressiveness}")
         print("  Calling claude CLI (this may take 20-60s) ...")
-        keep_spans = decide_cuts_with_claude(
-            transcript_text,
-            spec["duration"],
-            aggressiveness=args.aggressiveness,
-            model=args.model,
-        )
-        print(f"  Claude returned {len(keep_spans)} keep span(s)")
-        for s, e in keep_spans:
-            print(f"    {s:.2f}s – {e:.2f}s  ({e-s:.2f}s)")
-
-        # ── Stage 6: snap & clean ─────────────────────────────────────────────
-        section("6/7  SNAP & CLEAN CUT LIST")
-        cutlist = snap_and_clean(keep_spans, all_words, spec["duration"],
-                                 fps=spec.get("fps"))
-        cutlist = remove_retakes(cutlist, all_words)     # drop repeated/duplicate takes
-        cutlist = remove_dead_air(                       # tighten into jump cuts
-            cutlist, all_words,
-            max_gap=DEAD_AIR_GAP.get(args.aggressiveness, 0.45),
-            fps=spec.get("fps"), total_duration=spec["duration"])
+        cutlist = decide_cutlist(
+            transcript_text, all_words, spec["duration"],
+            aggressiveness=args.aggressiveness, model=args.model, fps=spec.get("fps"))
+        section("6/7  CUT LIST")
         orig_kept = sum(e - s for s, e in cutlist)
         print(f"  {len(cutlist)} segments after snap/clean")
         print(f"  Original duration : {spec['duration']:.2f}s")
