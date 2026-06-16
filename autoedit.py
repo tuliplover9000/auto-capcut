@@ -832,6 +832,28 @@ def snap_and_clean(keep_spans, all_words, total_duration, fps=None):
 # Smaller = tighter pacing. Keyed to the content-cut aggressiveness control.
 DEAD_AIR_GAP = {"light": 1.2, "medium": 0.8, "heavy": 0.5}
 
+# Leading throat-clears / warm-up words to skip when finding the true hook start.
+HOOK_FILLERS = {"okay", "ok", "so", "alright", "right", "uh", "um", "umm", "uhh",
+                "ah", "er", "erm", "hmm", "like", "well", "mic", "check", "testing",
+                "hello", "hey", "yo", "yeah"}
+
+
+def _hook_floor(words):
+    """Start time of the first NON-filler spoken word — the 'true' hook start.
+    Everything before it (warm-up words, "mic check", breaths transcribed as
+    filler) is leading dead space and should be chopped. Don't leave this to the
+    LLM. Returns 0.0 if no non-filler word is found or words is empty."""
+    for w in words:
+        if not isinstance(w, dict):
+            continue
+        tok = str(w.get("word", "")).strip().lower().strip(".,!?;:—-\"'“”‘’ ")
+        if tok and tok not in HOOK_FILLERS:
+            try:
+                return max(0.0, float(w.get("start", 0.0)))
+            except (TypeError, ValueError):
+                return 0.0
+    return 0.0
+
 
 def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.15, tail=0.25,
                     fps=None, total_duration=None):
@@ -869,6 +891,11 @@ def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.15, tail=0.25,
                 run_start = w["start"]
             prev_end = max(prev_end, w["end"])
         runs.append((run_start, prev_end))
+    # 1b) HOOK FLOOR: chop leading warm-up/filler — force the first kept run to
+    # begin on the first real (non-filler) word, decided in Python, not the LLM.
+    floor = _hook_floor(words)
+    if floor > 0:
+        runs = [(max(rs, floor), re_) for (rs, re_) in runs if re_ > floor] or runs
     # 2) Asymmetric pad, clamp to [0,total], and never overlap the previous run.
     hi = total_duration if total_duration is not None else (runs[-1][1] + tail if runs else 0.0)
     out = []
