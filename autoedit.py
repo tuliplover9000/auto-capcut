@@ -870,74 +870,61 @@ def _hook_floor(words):
     return 0.0
 
 
-def _retake_ratio(a_toks, b_toks):
-    """Fraction of the EARLIER phrase `a` reproduced (in order) inside later `b`.
-    1.0 = a is fully repeated/contained in b (exact retake, or a false start that
-    b completes)."""
-    if not a_toks:
-        return 0.0
-    sm = difflib.SequenceMatcher(None, a_toks, b_toks, autojunk=False)
-    matched = sum(blk.size for blk in sm.get_matching_blocks())
-    return matched / len(a_toks)
+def remove_retakes(cutlist, all_words, min_run=3, ratio=0.85, max_run=16):
+    """Deterministically drop repeated takes: when you say a run of words and then
+    immediately say (nearly) the same run again — "a $5 kitchen timer ... a $5
+    kitchen timer", "I type a hundred thousand words a day I type a hundred
+    thousand words a day" — remove the EARLIER copy and keep the last clean one.
 
-
-def remove_retakes(cutlist, all_words, min_words=3, ratio=0.8, window_s=12.0):
-    """Deterministically drop repeated takes: if a phrase is reproduced by a LATER
-    nearby phrase (you said the line, flubbed/paused, and said it again), remove the
-    EARLIER occurrence(s) and keep ONLY the last clean take. Independent of the LLM
-    — this is the reliable fix for 'I repeated the line 5x and it kept them all'.
-    Subtracts the retake time ranges from the cutlist. Conservative: only phrases
-    of >= min_words that are >= `ratio` reproduced by a later phrase within
-    window_s seconds, so genuine content isn't dropped.
+    Works on the WORD-TOKEN SEQUENCE (not phrases), so it catches back-to-back
+    repeats that have no pause or punctuation between them (the case the
+    phrase-based version missed). For a chain of N copies it strips the first N-1.
+    Conservative: only repeats of >= min_run words that match >= `ratio`. Subtracts
+    the removed time ranges from the cutlist; independent of the LLM.
     """
     words = sorted((w for w in all_words
                     if isinstance(w, dict)
                     and isinstance(w.get("start"), (int, float))
                     and isinstance(w.get("end"), (int, float))),
                    key=lambda w: w["start"])
-    kept = [w for w in words if any(s <= w["start"] < e for (s, e) in cutlist)]
-    if len(kept) < 2:
+    kw = [w for w in words if any(s <= w["start"] < e for (s, e) in cutlist)]
+    n = len(kw)
+    if n < 2 * min_run:
         return cutlist
-    # Group kept words into phrases on sentence punctuation or a speech gap.
-    phrases, cur = [], []
-    for i, w in enumerate(kept):
-        cur.append(w)
-        nxt_gap = (kept[i + 1]["start"] - w["end"]) if i + 1 < len(kept) else 99.0
-        if re.search(r"[.?!]$", str(w["word"]).strip()) or nxt_gap > 0.7:
-            phrases.append(cur)
-            cur = []
-    if cur:
-        phrases.append(cur)
-
-    def toks(p):
-        out = []
-        for w in p:
-            t = re.sub(r"[^a-z0-9]", "", str(w["word"]).lower())
-            if t:
-                out.append(t)
-        return out
-
-    ptoks = [toks(p) for p in phrases]
-    drop = set()
-    for i in range(len(phrases)):
-        if len(ptoks[i]) < min_words:
-            continue
-        for j in range(i + 1, len(phrases)):
-            if phrases[j][0]["start"] - phrases[i][-1]["end"] > window_s:
-                break
-            if len(ptoks[j]) < min_words:
+    toks = [re.sub(r"[^a-z0-9]", "", str(w["word"]).lower()) for w in kw]
+    remove = set()
+    i = 0
+    while i < n:
+        found = 0
+        hi = min(max_run, (n - i) // 2)
+        for L in range(hi, min_run - 1, -1):       # prefer the LONGEST repeated run
+            a, b = toks[i:i + L], toks[i + L:i + 2 * L]
+            if not all(a) or not all(b):
                 continue
-            if _retake_ratio(ptoks[i], ptoks[j]) >= ratio:
-                drop.add(i)                       # earlier take repeated later -> cut it
+            if difflib.SequenceMatcher(None, a, b, autojunk=False).ratio() >= ratio:
+                found = L
                 break
-    if not drop:
+        if found:
+            for k in range(i, i + found):           # drop the FIRST copy, keep the 2nd
+                remove.add(k)
+            i += found                              # re-examine from the 2nd copy
+        else:
+            i += 1
+    if not remove:
         return cutlist
-    rem = [(phrases[i][0]["start"], phrases[i][-1]["end"]) for i in sorted(drop)]
+    # Removed word spans -> merged time intervals (absorb the inter-word gaps).
+    rem = sorted((kw[k]["start"], kw[k]["end"]) for k in remove)
+    merged = []
+    for s, e in rem:
+        if merged and s <= merged[-1][1] + 0.35:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], e))
+        else:
+            merged.append((s, e))
     # Subtract the retake intervals from the cutlist.
     out = []
     for (s, e) in cutlist:
         segs = [(s, e)]
-        for (rs, re_) in rem:
+        for (rs, re_) in merged:
             nseg = []
             for (a, b) in segs:
                 if re_ <= a or rs >= b:
