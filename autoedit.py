@@ -1029,7 +1029,7 @@ def remove_retakes(cutlist, all_words, min_run=3, ratio=0.85, max_run=16):
     return out or cutlist
 
 
-def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.15, tail=0.25,
+def remove_dead_air(cutlist, all_words, max_gap=0.8, lead=0.2, tail=0.3,
                     fps=None, total_duration=None):
     """Tighten a cleaned cutlist into JUMP CUTS: split each kept span wherever
     there's a silence longer than `max_gap` (a stretch with no spoken word). Only
