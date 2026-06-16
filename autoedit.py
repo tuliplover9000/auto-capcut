@@ -171,9 +171,24 @@ def transcribe(wav_path, model_size="base"):
     try:
         from faster_whisper import WhisperModel
         m = WhisperModel(model_size, device="cpu", compute_type="int8")
-        segs, _ = m.transcribe(wav_path, word_timestamps=True)
+        segs, _ = m.transcribe(
+            wav_path,
+            word_timestamps=True,
+            # Silero VAD: skip non-speech so Whisper can't HALLUCINATE words onto
+            # the silent/movement intro (the "caption stuck on while I'm not
+            # talking" bug) or invent text over pauses.
+            vad_filter=True,
+            vad_parameters={"min_silence_duration_ms": 400},
+            # Don't feed prior text back in — that's what makes Whisper loop and
+            # repeat phantom phrases on noise (also worsens the retake problem).
+            condition_on_previous_text=False,
+        )
         result = []
         for seg in segs:
+            # Extra guard: drop a segment Whisper itself flags as very-likely
+            # non-speech (hallucination on noise/silence).
+            if getattr(seg, "no_speech_prob", 0.0) > 0.9:
+                continue
             words = []
             if seg.words:
                 for w in seg.words:
