@@ -444,19 +444,21 @@ def _map_clean_to_spans(clean_phrases, all_words, min_ratio=0.55):
     return merged
 
 
-def decide_clean_cuts_with_claude(transcript_text, all_words, model="sonnet"):
-    """WHITELIST cut: ask Claude to select ONLY the clean, complete phrases to keep
-    (the final good take of each idea), copied VERBATIM, then map them back to the
-    Whisper timestamps in Python. Everything else — false starts, retakes, filler,
-    dead air, the pre-roll where you're getting set — is dropped because it's never
-    selected. Returns keep spans, or [] on failure (caller falls back).
-    """
-    prompt = """You are editing a raw talking-head video transcript that contains MISTAKES, FALSE STARTS, RETAKES, and filler. The timestamped transcript is on stdin: [index] start-end: text.
+def _kept_text(spans, all_words):
+    """The transcript of what a cut currently contains, in order."""
+    ws = sorted((w for w in all_words
+                 if isinstance(w, dict) and isinstance(w.get("start"), (int, float))),
+                key=lambda w: w["start"])
+    return " ".join(str(w["word"]).strip() for w in ws
+                    if any(s <= w["start"] < e for (s, e) in spans))
+
+
+_CLEAN_CUT_PROMPT = """You are editing a raw talking-head video transcript that contains MISTAKES, FALSE STARTS, RETAKES, and filler. The timestamped transcript is on stdin: [index] start-end: text.
 
 Your job: output the FINAL CLEAN SCRIPT — only the words that should remain in the finished video.
 
 RULES:
-- For each idea, the speaker often fumbles and repeats it. Keep ONLY the last, complete, clean delivery of that idea. DELETE every earlier attempt, false start ("the uh— wait", "lemme check"), and filler ("um", "uh", "okay", "yeah").
+- For each idea, the speaker often fumbles and repeats it. Keep ONLY the last, complete, clean delivery of that idea. DELETE every earlier attempt, false start ("the uh— wait", "lemme check"), and filler ("um", "uh", "okay", "yeah", "so", "like").
 - DELETE the warm-up / getting-settled part before the real first sentence.
 - COPY THE WORDS EXACTLY as they appear in the transcript for the takes you keep. Do NOT reword, paraphrase, fix grammar, add, or summarize — only select and delete. (Your output is matched back to the audio word-for-word.)
 - Output ONE clean phrase/sentence per line, in order. No timestamps, no numbering, no commentary — just the kept words.
@@ -466,15 +468,66 @@ Example —
  you output: this timer was the best thing I have ever bought
 
 The transcript is on stdin."""
+
+_REVIEW_CUT_PROMPT = """Below (on stdin) is the CURRENT edit of a talking-head video — the transcript of exactly what the cut contains right now, read it as the final script.
+
+It may still have problems: a repeated phrase that slipped through, a leftover false start, or stray one-word fragments ("a", "I", "the", "and") stuck to the seams between cuts where they don't belong.
+
+Clean it up:
+- Remove any remaining repeated phrase / retake (keep one clean copy).
+- Remove stray fragments and false starts that don't read right.
+- Keep the words VERBATIM — copy exactly, do NOT reword or add anything.
+- Output the cleaned script, ONE phrase/sentence per line, nothing else.
+- If it already reads perfectly start to finish, output it unchanged.
+
+The current edit is on stdin."""
+
+
+def _parse_phrases(out):
+    return [ln.strip(" -•\t").strip() for ln in (out or "").splitlines()
+            if len(ln.strip()) > 3]
+
+
+def decide_clean_cuts_with_claude(transcript_text, all_words, model="sonnet", max_passes=3):
+    """WHITELIST cut, done ITERATIVELY: ask Claude to select ONLY the clean phrases
+    to keep (verbatim), map them back to the Whisper timestamps, then RE-READ the
+    resulting transcript and have Claude fix anything still off (leftover repeats,
+    stray seam fragments) — repeating until the kept transcript stops changing or
+    max_passes is hit. Everything not selected (false starts, retakes, filler,
+    pre-roll) is simply never kept. Returns keep spans, or [] on failure (fallback).
+    """
     try:
-        out = _claude_cli(prompt, transcript_text, model)
+        out = _claude_cli(_CLEAN_CUT_PROMPT, transcript_text, model)
     except Exception as e:
         print(f"  clean-cut pass failed ({e}); falling back.")
         return []
-    phrases = [ln.strip(" -•\t") for ln in (out or "").splitlines() if len(ln.strip()) > 3]
+    phrases = _parse_phrases(out)
     if not phrases:
         return []
     spans = _map_clean_to_spans(phrases, all_words)
+    if not spans:
+        return []
+    # Iterative review: re-read the cut and refine until it stops changing.
+    for p in range(max_passes - 1):
+        cur = _kept_text(spans, all_words)
+        if not cur:
+            break
+        try:
+            ref = _claude_cli(_REVIEW_CUT_PROMPT, cur, model)
+        except Exception:
+            break
+        refined = _parse_phrases(ref)
+        if not refined:
+            break
+        new_spans = _map_clean_to_spans(refined, all_words)
+        if not new_spans:
+            break
+        if _kept_text(new_spans, all_words) == cur:   # converged — no more fixes
+            print(f"  clean-cut: converged after review pass {p + 1}")
+            spans = new_spans
+            break
+        print(f"  clean-cut: review pass {p + 1} refined the script")
+        spans = new_spans
     return spans
 
 
