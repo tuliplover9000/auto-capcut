@@ -16,7 +16,7 @@ tweaks skip the re-render entirely.
 It runs the tested autoedit.py functions in-process; Claude is the headless
 `claude` CLI on your Max subscription (no API key).
 """
-import os, sys, uuid, threading, tempfile, shutil
+import os, re, sys, uuid, threading, tempfile, shutil
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -34,6 +34,7 @@ JOBS_DIR = os.path.join(HERE, "webjobs")
 os.makedirs(JOBS_DIR, exist_ok=True)
 
 ALLOWED_EXT = {".mp4", ".mov", ".mkv", ".avi", ".webm", ".m4v"}
+BROLL_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".mp4", ".mov", ".webm", ".m4v"}
 STYLES = {"clean", "pop", "highlight", "oneword"}
 COLORS = {"yellow", "green", "cyan", "red", "white"}
 POSES = {"lower", "center"}
@@ -582,6 +583,61 @@ def download(job_id, which):
         abort(404)
 
 
+# ── your B-roll library (my_broll/) — upload / list / delete via the UI ───────
+
+def _safe_broll_name(fn):
+    """Keep the descriptive filename (it's the keyword match) but strip path
+    separators and Windows-illegal chars so it's safe to save."""
+    fn = os.path.basename(str(fn))
+    fn = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", fn).strip().strip(".")
+    return fn or "media"
+
+
+def _broll_files():
+    d = autoedit.MY_BROLL_DIR
+    if not os.path.isdir(d):
+        return []
+    return sorted(f for f in os.listdir(d)
+                  if os.path.splitext(f)[1].lower() in BROLL_EXTS)
+
+
+@app.route("/broll/list")
+def broll_list():
+    return jsonify(files=_broll_files())
+
+
+@app.route("/broll/upload", methods=["POST"])
+def broll_upload():
+    os.makedirs(autoedit.MY_BROLL_DIR, exist_ok=True)
+    saved, skipped = [], []
+    for f in request.files.getlist("media"):
+        if not f or not f.filename:
+            continue
+        name = _safe_broll_name(f.filename)
+        if os.path.splitext(name)[1].lower() not in BROLL_EXTS:
+            skipped.append(f.filename)
+            continue
+        try:
+            f.save(os.path.join(autoedit.MY_BROLL_DIR, name))
+            saved.append(name)
+        except OSError:
+            skipped.append(f.filename)
+    return jsonify(saved=saved, skipped=skipped, files=_broll_files())
+
+
+@app.route("/broll/delete", methods=["POST"])
+def broll_delete():
+    name = os.path.basename((request.json or {}).get("name", ""))   # no traversal
+    if name and name.lower() != "readme.md":
+        p = os.path.join(autoedit.MY_BROLL_DIR, name)
+        try:
+            if os.path.exists(p):
+                os.remove(p)
+        except OSError:
+            pass
+    return jsonify(files=_broll_files())
+
+
 PAGE = r"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -601,6 +657,14 @@ PAGE = r"""<!doctype html>
           text-align:center; cursor:pointer; color:var(--muted); }
   #drop.hot { border-color:var(--accent); color:var(--fg); background:#1c2230; }
   #drop b { color:var(--fg); }
+  .drop.sm { border:2px dashed var(--line); border-radius:10px; padding:12px;
+             text-align:center; cursor:pointer; color:var(--muted); font-size:13px; }
+  .drop.sm.hot { border-color:var(--accent); color:var(--fg); background:#1c2230; }
+  #brolllist { margin-top:6px; line-height:1.9; }
+  #brolllist .bf { background:#1c2230; border:1px solid var(--line); border-radius:6px;
+                   padding:2px 6px; margin-right:4px; white-space:nowrap; }
+  #brolllist .bx { color:var(--muted); text-decoration:none; font-weight:700; }
+  #brolllist .bx:hover { color:#ff6b6b; }
   .row { display:flex; gap:12px; flex-wrap:wrap; }
   .field { flex:1; min-width:140px; }
   label { display:block; font-size:12px; color:var(--muted); margin-bottom:5px; }
@@ -681,8 +745,14 @@ PAGE = r"""<!doctype html>
           <option value="auto">Auto (Claude picks)</option></select></div>
         <div class="field"><label>B-roll source</label><select id="broll_source">
           <option value="stock" selected>Stock (Pexels/Pixabay)</option>
-          <option value="mine">My media only (my_broll/ folder)</option>
+          <option value="mine">My media only</option>
           <option value="mix">My media, then stock</option></select></div>
+      </div>
+      <div class="mt" id="brolllib">
+        <label>Your B-roll library <span class="note">(name files by what they show — desk-lamp.jpg, kitchen-timer.mp4, amazon.gif)</span></label>
+        <div id="brolldrop" class="drop sm">Drag images / GIFs / videos here, or click to add</div>
+        <input id="brollfiles" type="file" multiple accept="image/*,video/*,.gif,.webp" style="display:none">
+        <div id="brolllist" class="note"></div>
       </div>
       <label class="chk mt"><input type="checkbox" id="titles"> <span>Editorial titles <span class="note">(big yellow hook/section text, Claude-decided)</span></span></label>
       <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
@@ -748,6 +818,37 @@ drop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) pick(ev.dataTran
 file.onchange=()=>{ if(file.files[0]) pick(file.files[0]); };
 function pick(f){ chosen=f; $("#fname").textContent="✓ "+f.name; $("#go").disabled=false; }
 $("#burn").onchange=()=>$("#cwrap").classList.toggle("hide",!$("#burn").checked);
+
+// ── Your B-roll library: upload / list / delete into the my_broll/ folder ──
+const bdrop=$("#brolldrop"), bfiles=$("#brollfiles");
+function renderBroll(files){
+  const el=$("#brolllist"); el.innerHTML="";
+  if(!files || !files.length){ el.textContent="No files yet — add some named by what they show."; return; }
+  files.forEach(f=>{
+    const sp=document.createElement("span"); sp.className="bf"; sp.textContent=f+" ";
+    const x=document.createElement("a"); x.href="#"; x.textContent="×"; x.className="bx"; x.title="remove";
+    x.onclick=async e=>{ e.preventDefault();
+      const r=await (await fetch("/broll/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:f})})).json();
+      renderBroll(r.files); };
+    sp.appendChild(x); el.appendChild(sp);
+  });
+}
+async function loadBroll(){ try{ const r=await (await fetch("/broll/list")).json(); renderBroll(r.files); }catch(e){} }
+async function uploadBroll(list){
+  if(!list || !list.length) return;
+  const fd=new FormData(); for(const f of list) fd.append("media", f);
+  const prev=bdrop.textContent; bdrop.textContent="Uploading…";
+  try{ const r=await (await fetch("/broll/upload",{method:"POST",body:fd})).json(); renderBroll(r.files); }catch(e){}
+  bdrop.textContent=prev;
+}
+if(bdrop){
+  bdrop.onclick=()=>bfiles.click();
+  bfiles.onchange=()=>{ uploadBroll(bfiles.files); bfiles.value=""; };
+  ["dragover","dragenter"].forEach(e=>bdrop.addEventListener(e,ev=>{ev.preventDefault();bdrop.classList.add("hot");}));
+  ["dragleave","drop"].forEach(e=>bdrop.addEventListener(e,ev=>{ev.preventDefault();bdrop.classList.remove("hot");}));
+  bdrop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files) uploadBroll(ev.dataTransfer.files); });
+  loadBroll();
+}
 
 $("#go").onclick=async()=>{
   if(!chosen) return;
