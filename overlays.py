@@ -82,7 +82,6 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
         ov_abs = os.path.abspath(path)
         if not os.path.exists(ov_abs):
             raise RuntimeError(f"overlay {i}: file not found: {ov_abs}")
-        inputs.append(ov_abs)
 
         start = float(ov.get("start") or 0.0)
         end = float(ov.get("end") or 0.0)
@@ -93,6 +92,9 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
         frames = max(2, round(dur * fps))
         fmt = str(ov.get("format") or "stacked").lower()
         is_img = _is_image(path)
+        # Video/GIF inputs get -stream_loop -1 so a clip shorter than its slot
+        # repeats to fill it (a GIF is animated -> treated as video here).
+        inputs.append((ov_abs, not is_img))
         kenburns = bool(ov.get("kenburns", True)) if is_img else False
 
         # cutaway = media fills the whole frame; stacked = media fills the TOP zone
@@ -173,8 +175,11 @@ def composite(base_mp4, out_mp4, overlays, spec, effects=None, boundaries=None, 
         fcf.write(filter_complex)
 
     cmd = [ff, "-y", "-i", base_abs]
-    for p in inputs:
-        cmd += ["-i", p]
+    for p, is_video in inputs:
+        if is_video:
+            cmd += ["-stream_loop", "-1", "-i", p]   # loop a short clip/GIF to fill its slot
+        else:
+            cmd += ["-i", p]
     cmd += [
         "-filter_complex_script", fc_path,
         "-map", "[outv]", "-map", "0:a?",

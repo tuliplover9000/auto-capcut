@@ -18,6 +18,24 @@ Usage examples:
 """
 import sys, os, re, json, math, shutil, tempfile, argparse, subprocess, shlex, difflib
 
+# Folder for the creator's OWN B-roll (drop images/GIFs/videos named by content,
+# e.g. desk-lamp.jpg, mechanical_keyboard.mp4). Used when broll source is mine/mix.
+MY_BROLL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "my_broll")
+
+
+def broll_library(source):
+    """Map a B-roll source setting to (library_dir, library_only):
+      'stock' -> use stock only; 'mine' -> the creator's folder ONLY;
+      'mix'   -> the creator's folder first, then stock fills gaps."""
+    if source in ("mine", "mix"):
+        try:
+            os.makedirs(MY_BROLL_DIR, exist_ok=True)
+        except OSError:
+            pass
+        return (MY_BROLL_DIR, source == "mine")
+    return (None, False)
+
+
 # ── R1: Windows console UTF-8 fix (avoids cp1252 crashes on non-ASCII) ──────
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -783,31 +801,35 @@ def _query_fallbacks(q):
     return out
 
 
-def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful", style="auto", extra=""):
+def resolve_overlays(cutlist, all_words, model="sonnet", density="tasteful",
+                     style="stacked", extra="", library_dir=None, library_only=False):
     """Decide a B-roll plan AND fetch the assets -> composite-ready overlay list.
 
     Returns a list of {path,start,end,format,kenburns,fade} for overlays.composite.
-    Best-effort: an item whose asset can't be fetched (no API key / no match) is
-    skipped, never aborts. May return [] (no key / nothing found).
-    style: "auto" keeps each item's brain-chosen format; "stacked"/"cutaway" overrides.
+    Best-effort: an item whose asset can't be fetched (no match) is skipped.
+    style: "stacked" (default, half/half) | "cutaway" | "auto" (brain's choice).
+    library_dir: a folder of the creator's OWN media tried first (matched by
+    filename); library_only -> never fall back to stock.
     """
     import mediasource
     plan = decide_overlays_with_claude(cutlist, all_words, model=model, density=density, extra=extra)
     used, out = set(), []
     for item in plan:
         kind = item.get("kind", "image")
-        path = mediasource.search(item["query"], kind, "portrait", used_ids=used)
-        if not path:
+        path = mediasource.search(item["query"], kind, "portrait", used_ids=used,
+                                  library_dir=library_dir, library_only=library_only)
+        if not path and not library_only:
             for alt in _query_fallbacks(item["query"]):   # broaden, don't leave a gap
-                path = mediasource.search(alt, kind, "portrait", used_ids=used)
+                path = mediasource.search(alt, kind, "portrait", used_ids=used,
+                                          library_dir=library_dir, library_only=library_only)
                 if path:
                     break
         if not path:
             continue                       # still nothing -> skip; B-roll is best-effort
-        fmt = item["format"] if style == "auto" else style   # stacked|cutaway override
+        fmt = item["format"] if style == "auto" else style   # default stacked (half/half)
         out.append({"path": path, "start": item["start"], "end": item["end"],
                     "format": fmt, "kenburns": True, "fade": 0.25})
-    return out                             # may be [] (no key / nothing found)
+    return out                             # may be [] (nothing found)
 
 
 def revise_with_claude(transcript_text, total_duration, current_keep,
@@ -2068,8 +2090,10 @@ def main():
                     help="Auto B-roll: stacked/cutaway stock images+clips (Claude-decided, Pexels/Pixabay)")
     ap.add_argument("--broll-density", choices=["tasteful", "more", "less"], default="tasteful",
                     help="How often B-roll appears (default: tasteful, ~one every 4-5s)")
-    ap.add_argument("--broll-style", choices=["auto", "stacked", "cutaway"], default="auto",
-                    help="auto = per-item Claude choice; stacked/cutaway = force every overlay")
+    ap.add_argument("--broll-style", choices=["auto", "stacked", "cutaway"], default="stacked",
+                    help="stacked = half/half (default); cutaway = full image; auto = Claude picks")
+    ap.add_argument("--broll-source", choices=["stock", "mine", "mix"], default="stock",
+                    help="stock (default) | mine (your my_broll/ folder only) | mix (yours then stock)")
     ap.add_argument("--vignette", action="store_true",
                     help="Effect: subtle darkened edges")
     ap.add_argument("--grain", action="store_true",
@@ -2166,8 +2190,10 @@ def main():
         overlay_plan = []
         if args.broll:
             section("6c/7  B-ROLL")
+            _libdir, _libonly = broll_library(args.broll_source)
             overlay_plan = resolve_overlays(cutlist, all_words, model=args.model,
-                                            density=args.broll_density, style=args.broll_style)
+                                            density=args.broll_density, style=args.broll_style,
+                                            library_dir=_libdir, library_only=_libonly)
             print(f"  {len(overlay_plan)} overlay(s) resolved" +
                   ("" if overlay_plan
                    else " — none (no API key or no matches); continuing without B-roll"))

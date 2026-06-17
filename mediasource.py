@@ -4,6 +4,7 @@ Dependency-free: only stdlib (urllib/json/os/time/hashlib/random).
 Returns a LOCAL vertical asset file path for a search query, or None.
 """
 import os
+import re
 import sys
 import json
 import time
@@ -21,6 +22,56 @@ CACHE_TTL = 24 * 3600
 MIN_HEIGHT = 1280
 MIN_RATIO = 1.4        # height/width must be >= this (true vertical)
 TOP_N = 8              # pick randomly among the top N qualifying results
+
+# User's own B-roll library: drop images / GIFs / videos in a folder, named by
+# what they show (e.g. desk-lamp.jpg, mechanical_keyboard.mp4, amazon-box.gif).
+LIB_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".mp4", ".mov", ".webm", ".m4v"}
+_STOPWORDS = {"the", "and", "for", "with", "this", "that", "your", "you", "are",
+              "closeup", "close", "shot", "footage", "video", "clip", "stock"}
+
+
+def _lib_tokens(filename):
+    """Keyword tokens from a library filename (handles -, _, spaces, camelCase)."""
+    base = os.path.splitext(os.path.basename(filename))[0]
+    base = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", base)        # camelCase -> spaced
+    return set(t for t in re.split(r"[^A-Za-z0-9]+", base.lower()) if len(t) >= 2)
+
+
+def _library_match(query, library_dir, used_ids=None):
+    """Best-matching file in the user's library for `query`, by filename keyword
+    overlap (most shared words wins; ties -> the more specific filename). Returns a
+    path (and registers it in used_ids) or None. Aspect-agnostic — the compositor
+    crops it to the zone."""
+    if not library_dir or not os.path.isdir(library_dir):
+        return None
+    qtoks = set(t for t in re.split(r"[^a-z0-9]+", str(query).lower())
+                if len(t) >= 3 and t not in _STOPWORDS)
+    if not qtoks:
+        return None
+    best, best_key = None, (0, 0.0)
+    try:
+        names = sorted(os.listdir(library_dir))
+    except OSError:
+        return None
+    for fn in names:
+        if os.path.splitext(fn)[1].lower() not in LIB_EXTS:
+            continue
+        uid = "lib:" + fn
+        if used_ids is not None and uid in used_ids:
+            continue
+        ftoks = _lib_tokens(fn) - _STOPWORDS
+        overlap = qtoks & ftoks
+        if not overlap:
+            continue
+        key = (len(overlap), len(overlap) / max(1, len(ftoks)))   # count, then coverage
+        if key > best_key:
+            best_key, best = key, (os.path.join(library_dir, fn), uid)
+    if best:
+        path, uid = best
+        if used_ids is not None:
+            used_ids.add(uid)
+        return path
+    return None
 
 
 def _load_env():
@@ -365,13 +416,22 @@ def _pixabay_video(query, key, orientation, used_ids):
 
 # ───────────────────────── public API ─────────────────────────
 
-def search(query, kind="image", orientation="portrait", used_ids=None):
-    """Return a local file path to a vertical stock asset for `query`, or None.
+def search(query, kind="image", orientation="portrait", used_ids=None,
+           library_dir=None, library_only=False):
+    """Return a local file path for `query`, or None.
 
-    kind in {"image","video"}. Tries Pexels first, then Pixabay (if key set).
-    used_ids: optional set of "provider:id" strings to avoid repeats; updated
-    in place. Any provider error falls through; ultimately returns None.
+    If `library_dir` is set, the user's OWN media (matched by filename) is tried
+    FIRST. `library_only` -> never fall through to stock. Otherwise tries Pexels
+    then Pixabay (if keys set). used_ids avoids repeats; updated in place.
     """
+    if library_dir:
+        p = _library_match(query, library_dir, used_ids)
+        if p:
+            print(f"[mediasource] your-media match for '{query}': {os.path.basename(p)}")
+            return p
+        if library_only:
+            print(f"[mediasource] no library match for '{query}' (library-only) — skipping.")
+            return None
     if kind not in ("image", "video"):
         kind = "image"
     env = _load_env()

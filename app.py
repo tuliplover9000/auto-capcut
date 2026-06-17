@@ -261,10 +261,12 @@ def run_job(job_id, instructions):
 
         if job["settings"].get("broll"):
             _stage(job_id, stage="Finding B-roll")
+            _libdir, _libonly = autoedit.broll_library(job["settings"].get("broll_source", "stock"))
             job["overlay_plan"] = autoedit.resolve_overlays(
                 job["cutlist"], job["all_words"], job["settings"]["model"],
                 density=job["settings"].get("broll_density", "tasteful"),
-                style=job["settings"].get("broll_style", "auto"))
+                style=job["settings"].get("broll_style", "stacked"),
+                library_dir=_libdir, library_only=_libonly)
 
         _stage(job_id, step=7, stage="Rendering")
         _render_outputs(job)
@@ -379,11 +381,13 @@ def revise_job(job_id, msg):
             # overlays fire at wrong/old positions or vanish).
             if job["settings"].get("broll"):
                 _stage(job_id, stage="Finding B-roll")
+                _libdir, _libonly = autoedit.broll_library(job["settings"].get("broll_source", "stock"))
                 job["overlay_plan"] = autoedit.resolve_overlays(
                     job["cutlist"], job["all_words"], job["settings"]["model"],
                     density=job["settings"].get("broll_density", "tasteful"),
-                    style=job["settings"].get("broll_style", "auto"),
-                    extra=job.get("broll_instruction", ""))
+                    style=job["settings"].get("broll_style", "stacked"),
+                    extra=job.get("broll_instruction", ""),
+                    library_dir=_libdir, library_only=_libonly)
                 if _broll_note(job):
                     reply += "  (" + _broll_note(job) + ")"
             else:
@@ -400,11 +404,13 @@ def revise_job(job_id, msg):
             if changed_broll:
                 if job["settings"].get("broll"):
                     _stage(job_id, stage="Finding B-roll")
+                    _libdir, _libonly = autoedit.broll_library(job["settings"].get("broll_source", "stock"))
                     job["overlay_plan"] = autoedit.resolve_overlays(
                         job["cutlist"], job["all_words"], job["settings"]["model"],
                         density=job["settings"].get("broll_density", "tasteful"),
-                        style=job["settings"].get("broll_style", "auto"),
-                        extra=job.get("broll_instruction", ""))
+                        style=job["settings"].get("broll_style", "stacked"),
+                        extra=job.get("broll_instruction", ""),
+                        library_dir=_libdir, library_only=_libonly)
                     if _broll_note(job):
                         reply += "  (" + _broll_note(job) + ")"
                 else:
@@ -469,7 +475,8 @@ def run():
         "flash": request.form.get("flash", "") in ("1", "true", "on", "yes"),
         "broll": request.form.get("broll", "") in ("1", "true", "on", "yes"),
         "broll_density": pick("broll_density", {"tasteful", "more", "less"}, "tasteful"),
-        "broll_style": pick("broll_style", {"auto", "stacked", "cutaway"}, "auto"),
+        "broll_style": pick("broll_style", {"auto", "stacked", "cutaway"}, "stacked"),
+        "broll_source": pick("broll_source", {"stock", "mine", "mix"}, "stock"),
     }
     instructions = (request.form.get("instructions") or "").strip()
 
@@ -669,9 +676,13 @@ PAGE = r"""<!doctype html>
           <option value="more">More</option>
           <option value="less">Less</option></select></div>
         <div class="field"><label>B-roll style</label><select id="broll_style">
-          <option value="auto" selected>Auto (Claude picks)</option>
-          <option value="stacked">Stacked</option>
-          <option value="cutaway">Cutaway</option></select></div>
+          <option value="stacked" selected>Half / half (you + image)</option>
+          <option value="cutaway">Cutaway (full image)</option>
+          <option value="auto">Auto (Claude picks)</option></select></div>
+        <div class="field"><label>B-roll source</label><select id="broll_source">
+          <option value="stock" selected>Stock (Pexels/Pixabay)</option>
+          <option value="mine">My media only (my_broll/ folder)</option>
+          <option value="mix">My media, then stock</option></select></div>
       </div>
       <label class="chk mt"><input type="checkbox" id="titles"> <span>Editorial titles <span class="note">(big yellow hook/section text, Claude-decided)</span></span></label>
       <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
@@ -751,6 +762,7 @@ $("#go").onclick=async()=>{
   fd.append("broll",$("#broll").checked?"1":"0");
   if($("#broll_density")) fd.append("broll_density",$("#broll_density").value);
   if($("#broll_style")) fd.append("broll_style",$("#broll_style").value);
+  if($("#broll_source")) fd.append("broll_source",$("#broll_source").value);
   fd.append("titles",$("#titles").checked?"1":"0");
   fd.append("vignette",$("#vignette").checked?"1":"0");
   fd.append("grain",$("#grain").checked?"1":"0");

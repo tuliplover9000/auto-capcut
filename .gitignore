@@ -48,3 +48,7 @@ ovproto/
 out/
 *.png
 broll_cache/
+
+# user B-roll media (keep the README/folder, ignore the media)
+my_broll/*
+!my_broll/README.md
