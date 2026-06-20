@@ -115,15 +115,19 @@ def _grade_to_roughcut(job, base, out_mp4, tmp):
     The overlay plan persists in job["overlay_plan"], so a cheap re-grade (effects
     or caption toggle) reuses the SAME fetched assets — no re-fetch.
     """
+    sfx_on = bool(job["settings"].get("sfx"))
+    target = os.path.join(tmp, "pre_sfx.mp4") if sfx_on else out_mp4
     plan = job.get("overlay_plan") or []
     if plan:
-        overlays.composite(base, out_mp4, plan, job["spec"],
-                           effects=_effects(job),
+        overlays.composite(base, target, plan, job["spec"], effects=_effects(job),
                            boundaries=autoedit.cut_offsets(job["cutlist"]), tmpdir=tmp)
     else:
-        autoedit.grade_video(base, out_mp4, _effects(job),
+        autoedit.grade_video(base, target, _effects(job),
                              autoedit.cut_offsets(job["cutlist"]),
                              job["spec"]["fps"], job["spec"].get("color"), tmp)
+    if sfx_on:
+        ev = autoedit.decide_sfx_events(job["cutlist"], job["all_words"], plan)
+        autoedit.mix_sfx(target, out_mp4, ev, tmp)
 
 
 def _render_outputs(job):
@@ -478,6 +482,7 @@ def run():
         "broll_density": pick("broll_density", {"tasteful", "more", "less"}, "tasteful"),
         "broll_style": pick("broll_style", {"auto", "stacked", "cutaway"}, "stacked"),
         "broll_source": pick("broll_source", {"stock", "mine", "mix"}, "stock"),
+        "sfx": request.form.get("sfx", "") in ("1", "true", "on", "yes"),
     }
     instructions = (request.form.get("instructions") or "").strip()
 
@@ -758,6 +763,7 @@ PAGE = r"""<!doctype html>
       <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
       <label class="chk"><input type="checkbox" id="grain"> <span>Film grain <span class="note">(light texture)</span></span></label>
       <label class="chk"><input type="checkbox" id="flash"> <span>Flash on cut <span class="note">(quick white flash on cuts)</span></span></label>
+      <label class="chk mt"><input type="checkbox" id="sfx"> <span>Sound effects <span class="note">(whoosh on cuts + impact on emphasis; drop whoosh.mp3 / impact.mp3 in my_sfx/)</span></span></label>
     </div>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="burn">
@@ -868,6 +874,7 @@ $("#go").onclick=async()=>{
   fd.append("vignette",$("#vignette").checked?"1":"0");
   fd.append("grain",$("#grain").checked?"1":"0");
   fd.append("flash",$("#flash").checked?"1":"0");
+  fd.append("sfx",$("#sfx").checked?"1":"0");
   fd.append("burn",$("#burn").checked?"1":"0");
   fd.append("style",$("#style").value);
   fd.append("font",$("#font").value);

@@ -36,6 +36,27 @@ def broll_library(source):
     return (None, False)
 
 
+MY_SFX_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "my_sfx")
+_SFX_EXTS = (".mp3", ".wav", ".m4a", ".ogg", ".aac", ".flac")
+_SFX_ROLES = {"whoosh": ("whoosh", "swoosh", "swish"),
+              "impact": ("impact", "riser", "boom", "hit")}
+
+def _sfx_file(role):
+    """First file in my_sfx/ whose stem matches a name for `role`, or None."""
+    if not os.path.isdir(MY_SFX_DIR):
+        return None
+    names = _SFX_ROLES.get(role, (role,))
+    try:
+        files = sorted(os.listdir(MY_SFX_DIR))
+    except OSError:
+        return None
+    for fn in files:
+        stem, ext = os.path.splitext(fn)
+        if ext.lower() in _SFX_EXTS and stem.strip().lower() in names:
+            return os.path.join(MY_SFX_DIR, fn)
+    return None
+
+
 # ── R1: Windows console UTF-8 fix (avoids cp1252 crashes on non-ASCII) ──────
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -1579,6 +1600,98 @@ def _kept_words(cutlist, all_words):
     return kept
 
 
+# ── R2/R3: opt-in sound effects (whoosh on cuts + impact on emphasis) ────────
+
+# NOTE: match against tokens stripped to [a-z0-9] — so no apostrophes here
+# ("here's" -> "heres"), or the phrase can never match.
+SFX_EMPHASIS_PHRASES = ("the big one", "heres the crazy", "crazy part", "number one",
+                        "number two", "number three", "the best", "the secret",
+                        "biggest", "game changer", "life changing")
+
+def decide_sfx_events(cutlist, all_words, overlay_plan=None):
+    total = sum(e - s for s, e in cutlist) if cutlist else 0.0
+    # whoosh: on internal cuts, gated >=1.2s apart, a hair BEFORE the cut.
+    whoosh, last = [], -99.0
+    for b in cut_offsets(cutlist):
+        if b > 0 and b - last >= 1.2:
+            whoosh.append(max(0.0, b - 0.08)); last = b
+    # impact: hook + B-roll reveals + emphasis phrases, gated >=2.5s, capped.
+    cand = []
+    kept = _kept_words(cutlist, all_words)
+    if kept:
+        cand.append(max(0.0, kept[0]["new_start"] - 0.05))      # hook
+    prev_end = None                                              # B-roll sequence starts
+    for ov in sorted(overlay_plan or [], key=lambda o: float(o.get("start") or 0)):
+        s = float(ov.get("start") or 0.0)
+        if prev_end is None or s > prev_end + 0.3:
+            cand.append(max(0.0, s - 0.08))
+        prev_end = max(prev_end or 0.0, float(ov.get("end") or 0.0))
+    toks = [(re.sub(r"[^a-z0-9]", "", w["word"].lower()), w["new_start"]) for w in kept]
+    joined = " ".join(t for t, _ in toks)
+    for ph in SFX_EMPHASIS_PHRASES:                              # phrase -> first word time
+        pos = joined.find(ph)
+        # require word boundaries so "internumber one" can't match "number one"
+        if (pos != -1 and (pos == 0 or joined[pos - 1] == " ")
+                and (pos + len(ph) == len(joined) or joined[pos + len(ph)] == " ")):
+            wi = joined[:pos].count(" ")
+            if wi < len(toks):
+                cand.append(max(0.0, toks[wi][1] - 0.05))
+    impact, last = [], -99.0
+    for t in sorted(c for c in cand if 0 <= c <= total):
+        if t - last >= 2.5:
+            impact.append(t); last = t
+    impact = impact[:6]
+    return {"whoosh": whoosh, "impact": impact}
+
+
+def mix_sfx(in_mp4, out_mp4, events, tmpdir):
+    """Mix whoosh/impact one-shots over the roughcut's voice audio. Best-effort:
+    on ANY problem (no files, no audio, ffmpeg failure) copy the input through."""
+    ff = ff_exe()
+    in_abs, out_abs = os.path.abspath(in_mp4), os.path.abspath(out_mp4)
+    plan = []  # (sfx_path, [times], volume)
+    wf, imf = _sfx_file("whoosh"), _sfx_file("impact")
+    if wf and events.get("whoosh"):
+        plan.append((wf, list(events["whoosh"]), 0.55))
+    if imf and events.get("impact"):
+        plan.append((imf, list(events["impact"]), 0.85))
+
+    def _copy():
+        run([ff, "-y", "-i", in_abs, "-c", "copy", "-movflags", "+faststart", out_abs],
+            timeout=600)
+
+    if not plan or not _has_audio(in_abs):
+        _copy(); return
+    try:
+        cmd = [ff, "-y", "-i", in_abs]            # [0] = video + voice
+        chains, labels = [], []
+        for k, (path, times, vol) in enumerate(plan):
+            idx = k + 1                           # ffmpeg input index for this sfx file
+            cmd += ["-i", os.path.abspath(path)]
+            n = len(times)
+            chains.append(f"[{idx}:a]asplit={n}" + "".join(f"[s{idx}_{j}]" for j in range(n)))
+            for j, t in enumerate(times):
+                ms = max(0, int(round(float(t) * 1000)))
+                chains.append(
+                    f"[s{idx}_{j}]aformat=sample_rates=48000:channel_layouts=stereo,"
+                    f"adelay=delays={ms}:all=1,volume={vol}[d{idx}_{j}]")
+                labels.append(f"[d{idx}_{j}]")
+        chains.append(
+            f"[0:a]{''.join(labels)}amix=inputs={1 + len(labels)}:normalize=0:duration=first[aout]")
+        fc_path = os.path.join(tmpdir or os.path.dirname(out_abs) or ".", "sfx_fc.txt")
+        with open(fc_path, "w", encoding="utf-8") as f:
+            f.write(";".join(chains))            # script file: avoids the cmdline limit
+        cmd += ["-filter_complex_script", fc_path,
+                "-map", "0:v", "-map", "[aout]",
+                "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                "-movflags", "+faststart", out_abs]
+        r = run(cmd, timeout=600)
+        if r.returncode == 124 or not (os.path.exists(out_abs) and os.path.getsize(out_abs) > 0):
+            _copy()
+    except Exception:
+        _copy()
+
+
 def write_srt(cutlist, all_words, out_srt):
     """
     Build SRT captions aligned to the output (post-cut) timeline.
@@ -2100,6 +2213,8 @@ def main():
                     help="Effect: light film grain texture")
     ap.add_argument("--flash", action="store_true",
                     help="Effect: quick white flash on cuts (gated >=1.5s apart)")
+    ap.add_argument("--sfx", action="store_true",
+                    help="Sound effects: whoosh on cuts + impact on emphasis (drop files in my_sfx/)")
     ap.add_argument("--selftest", action="store_true",
                     help="Check dependencies and exit")
     args = ap.parse_args()
@@ -2210,6 +2325,14 @@ def main():
             print("  effects: " + ", ".join(k for k, v in effects.items() if v))
         _ov.build_roughcut(input_path, cutlist, spec, out_mp4, tmpdir,
                            zoomplan=zoomplan, effects=effects, overlay_plan=overlay_plan)
+
+        if args.sfx:
+            section("7a2/7  SOUND EFFECTS")
+            ev = decide_sfx_events(cutlist, all_words, overlay_plan)
+            _tmp_sfx = os.path.join(tmpdir, "pre_sfx.mp4")
+            shutil.move(out_mp4, _tmp_sfx)
+            mix_sfx(_tmp_sfx, out_mp4, ev, tmpdir)
+            print(f"  whoosh x{len(ev['whoosh'])}, impact x{len(ev['impact'])}")
 
         # ── Stage 7b: captions ────────────────────────────────────────────────
         section("7b/7  CAPTIONS")

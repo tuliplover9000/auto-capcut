@@ -52,3 +52,7 @@ broll_cache/
 # user B-roll media (keep the README/folder, ignore the media)
 my_broll/*
 !my_broll/README.md
+
+# user sound effects (keep the README/folder, ignore the media)
+my_sfx/*
+!my_sfx/README.md
