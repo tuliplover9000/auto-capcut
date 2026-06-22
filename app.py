@@ -643,6 +643,68 @@ def broll_delete():
     return jsonify(files=_broll_files())
 
 
+# ── your sound effects (my_sfx/) — upload / list / delete BY ROLE ─────────────
+# A dropped file is saved as <role>.<ext> (whoosh.* / impact.*), replacing any
+# prior file for that role, so autoedit._sfx_file() always finds it by name.
+SFX_EXTS = {".mp3", ".wav", ".m4a", ".ogg", ".aac", ".flac"}
+SFX_ROLES = ("whoosh", "impact")
+
+
+def _sfx_role_files(role):
+    d = autoedit.MY_SFX_DIR
+    if not os.path.isdir(d):
+        return []
+    return [fn for fn in os.listdir(d)
+            if os.path.splitext(fn)[1].lower() in SFX_EXTS
+            and os.path.splitext(fn)[0].strip().lower() == role]
+
+
+def _sfx_current():
+    return {r: (_sfx_role_files(r)[:1] or [None])[0] for r in SFX_ROLES}
+
+
+@app.route("/sfx/list")
+def sfx_list():
+    return jsonify(sfx=_sfx_current())
+
+
+@app.route("/sfx/upload", methods=["POST"])
+def sfx_upload():
+    role = (request.form.get("role") or "").strip().lower()
+    if role not in SFX_ROLES:
+        return jsonify(error="bad role", sfx=_sfx_current()), 400
+    f = request.files.get("media")
+    if not f or not f.filename:
+        return jsonify(error="no file", sfx=_sfx_current()), 400
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in SFX_EXTS:
+        return jsonify(error="Unsupported audio type. Use mp3/wav/m4a/ogg/aac/flac.",
+                       sfx=_sfx_current()), 400
+    os.makedirs(autoedit.MY_SFX_DIR, exist_ok=True)
+    for old in _sfx_role_files(role):                 # one file per role
+        try:
+            os.remove(os.path.join(autoedit.MY_SFX_DIR, old))
+        except OSError:
+            pass
+    try:
+        f.save(os.path.join(autoedit.MY_SFX_DIR, role + ext))
+    except OSError:
+        return jsonify(error="save failed", sfx=_sfx_current()), 500
+    return jsonify(sfx=_sfx_current())
+
+
+@app.route("/sfx/delete", methods=["POST"])
+def sfx_delete():
+    role = ((request.json or {}).get("role") or "").strip().lower()
+    if role in SFX_ROLES:
+        for fn in _sfx_role_files(role):
+            try:
+                os.remove(os.path.join(autoedit.MY_SFX_DIR, fn))
+            except OSError:
+                pass
+    return jsonify(sfx=_sfx_current())
+
+
 PAGE = r"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -763,7 +825,17 @@ PAGE = r"""<!doctype html>
       <label class="chk mt"><input type="checkbox" id="vignette"> <span>Vignette <span class="note">(subtle darkened edges)</span></span></label>
       <label class="chk"><input type="checkbox" id="grain"> <span>Film grain <span class="note">(light texture)</span></span></label>
       <label class="chk"><input type="checkbox" id="flash"> <span>Flash on cut <span class="note">(quick white flash on cuts)</span></span></label>
-      <label class="chk mt"><input type="checkbox" id="sfx"> <span>Sound effects <span class="note">(whoosh on cuts + impact on emphasis; drop whoosh.mp3 / impact.mp3 in my_sfx/)</span></span></label>
+      <label class="chk mt"><input type="checkbox" id="sfx"> <span>Sound effects <span class="note">(whoosh on cuts + impact on emphasis)</span></span></label>
+      <div class="mt" id="sfxlib">
+        <label>Your sounds <span class="note">(drop any audio file — it's saved to the right slot automatically)</span></label>
+        <div class="row">
+          <div class="field"><label class="note">Whoosh — on cuts</label>
+            <div id="sfxdrop_whoosh" class="drop sm" data-role="whoosh">Drop / click a sound</div></div>
+          <div class="field"><label class="note">Impact — on emphasis</label>
+            <div id="sfxdrop_impact" class="drop sm" data-role="impact">Drop / click a sound</div></div>
+        </div>
+        <input id="sfxfile" type="file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.flac" style="display:none">
+      </div>
     </div>
     <div class="caps">
       <label class="chk"><input type="checkbox" id="burn">
@@ -855,6 +927,40 @@ if(bdrop){
   bdrop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files) uploadBroll(ev.dataTransfer.files); });
   loadBroll();
 }
+
+// ── Your sound effects: upload / clear by ROLE into the my_sfx/ folder ──
+const SFX_ROLES=["whoosh","impact"]; let _sfxRole=null; const sfxfile=$("#sfxfile");
+function renderSfx(s){
+  s=s||{};
+  SFX_ROLES.forEach(role=>{
+    const z=$("#sfxdrop_"+role); if(!z) return;
+    z.innerHTML="";
+    if(s[role]){
+      const t=document.createElement("span"); t.textContent="✓ "+s[role]+" "; z.appendChild(t);
+      const x=document.createElement("a"); x.href="#"; x.textContent="×"; x.className="bx"; x.title="remove";
+      x.onclick=async e=>{ e.preventDefault(); e.stopPropagation();
+        const r=await (await fetch("/sfx/delete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({role})})).json();
+        renderSfx(r.sfx); };
+      z.appendChild(x);
+    } else { z.textContent="Drop / click a sound"; }
+  });
+}
+async function loadSfx(){ try{ const r=await (await fetch("/sfx/list")).json(); renderSfx(r.sfx); }catch(e){} }
+async function uploadSfx(role,f){
+  if(!f) return; const z=$("#sfxdrop_"+role); const prev=z.textContent; z.textContent="Uploading…";
+  const fd=new FormData(); fd.append("role",role); fd.append("media",f);
+  try{ const r=await (await fetch("/sfx/upload",{method:"POST",body:fd})).json();
+    if(r.error){ z.textContent=r.error; } else { renderSfx(r.sfx); } }
+  catch(e){ z.textContent=prev; }
+}
+SFX_ROLES.forEach(role=>{
+  const z=$("#sfxdrop_"+role); if(!z) return;
+  z.onclick=()=>{ _sfxRole=role; sfxfile.click(); };
+  ["dragover","dragenter"].forEach(e=>z.addEventListener(e,ev=>{ev.preventDefault();z.classList.add("hot");}));
+  ["dragleave","drop"].forEach(e=>z.addEventListener(e,ev=>{ev.preventDefault();z.classList.remove("hot");}));
+  z.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) uploadSfx(role,ev.dataTransfer.files[0]); });
+});
+if(sfxfile){ sfxfile.onchange=()=>{ if(_sfxRole && sfxfile.files[0]) uploadSfx(_sfxRole,sfxfile.files[0]); sfxfile.value=""; }; loadSfx(); }
 
 $("#go").onclick=async()=>{
   if(!chosen) return;
