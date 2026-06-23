@@ -483,6 +483,38 @@ def _map_clean_to_spans(clean_phrases, all_words, min_ratio=0.55):
     return merged
 
 
+def _window_transcript(all_words, total_duration, window_s=240.0, overlap_s=30.0):
+    """Split words into overlapping time windows so the highlight detector never
+    sees more than ~window_s of transcript per Claude call (keeps each call well
+    under the 300s CLI timeout) and a moment on a boundary still lands whole in a
+    neighbouring window. Returns [{start_s, words, text}, ...]."""
+    words = sorted((w for w in all_words
+                    if isinstance(w, dict)
+                    and isinstance(w.get("start"), (int, float))),
+                   key=lambda w: w["start"])
+    if not words:
+        return []
+    window_s = float(window_s)
+    step = max(1.0, window_s - float(overlap_s))
+    dur = float(total_duration) if total_duration and total_duration > 0 else (words[-1]["start"] + 1.0)
+    wins = []
+    t = 0.0
+    while t < dur:
+        lo, hi = t, t + window_s
+        chunk = [w for w in words if lo <= w["start"] < hi]
+        if chunk:
+            wins.append({"start_s": round(t, 3), "words": chunk,
+                         "text": " ".join(str(w["word"]).strip() for w in chunk)})
+        if hi >= dur:
+            break
+        t += step
+    # collapse the degenerate case (one short window duplicated) to a single window
+    if len(wins) >= 2 and len(wins[0]["words"]) == len(words):
+        return wins[:1]
+    return wins or ([{"start_s": 0.0, "words": words,
+                      "text": " ".join(str(w["word"]).strip() for w in words)}])
+
+
 def _kept_text(spans, all_words):
     """The transcript of what a cut currently contains, in order."""
     ws = sorted((w for w in all_words
