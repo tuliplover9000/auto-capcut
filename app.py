@@ -726,6 +726,167 @@ def sfx_delete():
     return jsonify(sfx=_sfx_current())
 
 
+# ── Auto-clipper: two-phase analyze -> pick -> render ────────────────────────
+
+def analyze_clip_job(job_id):
+    job = JOBS[job_id]
+    try:
+        _stage(job_id, state="running", step=1, stage="Probing video")
+        spec = autoedit.probe(job["input_path"])
+        if spec["duration"] <= 0:
+            raise RuntimeError("Couldn't read a valid duration — is this a real video?")
+        job["spec"] = spec
+        _stage(job_id, step=2, stage="Extracting audio")
+        wav = os.path.join(job["tmpdir"], "audio.wav")
+        if not autoedit.extract_audio(job["input_path"], wav):
+            raise RuntimeError("Audio extraction failed — does the video have an audio track?")
+        _stage(job_id, step=3, stage="Transcribing (Whisper)")
+        segs = autoedit.transcribe(wav, job["settings"]["whisper_model"])
+        if not segs:
+            raise RuntimeError("Transcription returned nothing — is the video silent?")
+        job["all_words"] = [w for sg in segs for w in sg.get("words", [])]
+        ttext = autoedit.build_transcript_text(segs)
+        _stage(job_id, step=4, stage="Finding highlights")
+        cands = autoedit.find_highlights(
+            ttext, job["all_words"], spec["duration"],
+            model=job["settings"]["model"], max_clips=job["settings"]["max_clips"])
+        job["candidates"] = cands
+        if not cands:
+            _stage(job_id, state="ready", step=5,
+                   stage="No clear spoken highlights found — is there enough speech?")
+        else:
+            _stage(job_id, state="ready", step=5, stage=f"Found {len(cands)} clips")
+    except Exception as e:                                   # noqa: BLE001
+        _stage(job_id, state="error", error=str(e), stage="Failed")
+
+
+def render_clips_job(job_id, indices):
+    job = JOBS[job_id]
+    try:
+        _stage(job_id, state="running", stage="Rendering clips")
+        for idx in indices:
+            if idx < 0 or idx >= len(job.get("candidates", [])):
+                continue
+            job["clips"][str(idx)] = {"state": "running"}
+            _stage(job_id, stage=f"Rendering clip {idx + 1}")
+            try:
+                path = _render_one_clip(
+                    job["input_path"], job["candidates"][idx], job["spec"],
+                    job["all_words"], job["outdir"], idx,
+                    captions=job["settings"]["captions"])
+                job["clips"][str(idx)] = {"state": "done", "file": path,
+                                          "title": job["candidates"][idx]["title"]}
+            except Exception as e:                            # noqa: BLE001
+                job["clips"][str(idx)] = {"state": "error", "error": str(e)}
+        _stage(job_id, state="done", stage="Clips ready")
+    except Exception as e:                                    # noqa: BLE001
+        _stage(job_id, state="error", error=str(e))
+
+
+@app.route("/clip/analyze", methods=["POST"])
+def clip_analyze():
+    f = request.files.get("video")
+    if not f or not f.filename:
+        return jsonify(error="No file uploaded."), 400
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in ALLOWED_EXT:
+        return jsonify(error=f"Unsupported type '{ext or '(none)'}'."), 400
+
+    def pick(name, allowed, default):
+        v = (request.form.get(name) or "").strip()
+        return v if v in allowed else default
+
+    try:
+        max_clips = max(1, min(20, int(request.form.get("max_clips", "12"))))
+    except ValueError:
+        max_clips = 12
+    settings = {
+        "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
+        "model": pick("model", {"sonnet", "opus", "haiku"}, "sonnet"),
+        "captions": request.form.get("captions", "1") in ("1", "true", "on", "yes"),
+        "max_clips": max_clips,
+    }
+    job_id = uuid.uuid4().hex[:12]
+    jobdir = os.path.join(JOBS_DIR, job_id)
+    outdir = os.path.join(jobdir, "out"); os.makedirs(outdir, exist_ok=True)
+    tmpdir = os.path.join(jobdir, "tmp"); os.makedirs(tmpdir, exist_ok=True)
+    input_path = os.path.join(jobdir, "input" + ext)
+    f.save(input_path)
+    with LOCK:
+        JOBS[job_id] = {
+            "kind": "clip", "input_path": input_path, "outdir": outdir,
+            "tmpdir": tmpdir, "name": f.filename, "settings": settings,
+            "chat": [], "state": "queued", "step": 0, "stage": "Starting…",
+            "error": "", "spec": None, "all_words": [], "candidates": [], "clips": {},
+        }
+    threading.Thread(target=analyze_clip_job, args=(job_id,), daemon=True).start()
+    return jsonify(job_id=job_id)
+
+
+@app.route("/clip/status/<job_id>")
+def clip_status(job_id):
+    with LOCK:
+        j = JOBS.get(job_id)
+        if not j or j.get("kind") != "clip":
+            return jsonify(error="unknown job"), 404
+        cands = []
+        for i, c in enumerate(j.get("candidates", [])):
+            d = dict(c); d["index"] = i
+            d["rendered"] = j["clips"].get(str(i), {}).get("state") == "done"
+            cands.append(d)
+        return jsonify(state=j["state"], step=j["step"], stage=j["stage"],
+                       error=j["error"], candidates=cands, clips=dict(j["clips"]))
+
+
+@app.route("/clip/render/<job_id>", methods=["POST"])
+def clip_render(job_id):
+    body = request.json or {}
+    indices = [int(i) for i in body.get("indices", []) if str(i).lstrip("-").isdigit()]
+    with LOCK:
+        j = JOBS.get(job_id)
+        if not j or j.get("kind") != "clip":
+            return jsonify(error="unknown job"), 404
+        if j["state"] == "running":
+            return jsonify(error="busy"), 409
+        if not j.get("candidates"):
+            return jsonify(error="no candidates"), 409
+        j["state"] = "running"
+    threading.Thread(target=render_clips_job, args=(job_id, indices), daemon=True).start()
+    return jsonify(ok=True)
+
+
+def _clip_file(job_id, idx):
+    with LOCK:
+        j = JOBS.get(job_id)
+    if not j or j.get("kind") != "clip":
+        return None
+    info = j["clips"].get(str(idx))
+    return info.get("file") if info and info.get("state") == "done" else None
+
+
+@app.route("/clip/video/<job_id>/<int:idx>")
+def clip_video(job_id, idx):
+    path = _clip_file(job_id, idx)
+    if not path:
+        abort(404)
+    try:
+        return send_file(path, mimetype="video/mp4", conditional=True, max_age=0)
+    except (FileNotFoundError, OSError):
+        abort(404)
+
+
+@app.route("/clip/download/<job_id>/<int:idx>")
+def clip_download(job_id, idx):
+    path = _clip_file(job_id, idx)
+    if not path:
+        abort(404)
+    try:
+        return send_file(path, as_attachment=True,
+                         download_name=f"clip_{idx}.mp4")
+    except (FileNotFoundError, OSError):
+        abort(404)
+
+
 PAGE = r"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
