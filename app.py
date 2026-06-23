@@ -152,6 +152,27 @@ def _render_outputs(job):
     _bump(job)
 
 
+def _render_one_clip(input_path, cand, spec, all_words, outdir, idx, captions=True):
+    """Render one highlight candidate to outdir/clip_<idx>.mp4 (vertical fit+blur),
+    burning word-by-word captions rebased to the clip when captions=True."""
+    tmp = os.path.join(outdir, f"_tmp_{idx}")
+    os.makedirs(tmp, exist_ok=True)
+    out_path = os.path.join(outdir, f"clip_{idx}.mp4")
+    base = os.path.join(tmp, "base.mp4")
+    autoedit.render_clip_vertical(input_path, cand["start"], cand["end"], spec, base, tmp)
+    if not captions:
+        shutil.move(base, out_path)
+        return os.path.abspath(out_path)
+    ass_path = os.path.join(tmp, "captions.ass")
+    n = autoedit.write_ass([(cand["start"], cand["end"])], all_words,
+                           1080, 1920, ass_path, style="pop", pos="lower")
+    if n > 0:
+        autoedit.burn_captions(base, ass_path, out_path)
+    else:
+        shutil.move(base, out_path)      # no words landed in the clip -> ship uncaptioned
+    return os.path.abspath(out_path)
+
+
 def _regrade_only(job):
     """Effect-only change: re-grade the existing base -> roughcut (+reburn). No re-cut."""
     outdir = job["outdir"]
