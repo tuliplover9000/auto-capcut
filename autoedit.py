@@ -556,6 +556,74 @@ def _dedup_candidates(cands, max_clips=12):
     return kept
 
 
+_HIGHLIGHT_PROMPT = """You are finding the best short-form clips inside a slice of a longer video's transcript (on stdin). Pick the moments that would make strong standalone vertical shorts for TikTok / Reels / YouTube Shorts.
+
+A good clip is ONE self-contained idea with a hook — a surprising claim, a story beat, a strong tip, a punchline — that makes sense without the surrounding context. Ideally 15-90 seconds of speech.
+
+Return ONLY a JSON array (no prose, no code fence). For each clip:
+{
+  "start_phrase": "<the FIRST ~6 words of the clip, copied VERBATIM from the transcript>",
+  "end_phrase":   "<the LAST ~6 words of the clip, copied VERBATIM from the transcript>",
+  "title": "<a punchy 3-8 word title for the short>",
+  "hook":  "<one short sentence: why someone keeps watching>",
+  "score": <integer 1-100, how strong/viral this clip is>,
+  "reason": "<one short clause on what makes it work>"
+}
+
+Rules:
+- start_phrase and end_phrase MUST be copied word-for-word from the transcript (they are matched back to the audio). Do not paraphrase.
+- Prefer fewer, stronger clips over many weak ones. Skip filler, throat-clearing, and rambling.
+- If this slice has nothing clip-worthy, return [].
+
+The transcript slice is on stdin."""
+
+
+def find_highlights(transcript_text, all_words, total_duration, model="sonnet",
+                    window_s=240.0, overlap_s=30.0, max_clips=12):
+    """Find ranked highlight clips in a long transcript. Windows the transcript,
+    asks Claude per window for self-contained moments (verbatim start/end
+    phrases), maps those phrases back to word timestamps, snaps/clamps the
+    bounds, dedups across windows, and returns the top max_clips by score.
+    Best-effort per window: a failed/timed-out/garbled window is skipped."""
+    windows = _window_transcript(all_words, total_duration, window_s, overlap_s)
+    raw = []
+    for win in windows:
+        if len(win["words"]) < 20:           # too little speech to clip from
+            continue
+        try:
+            out = _claude_cli(_HIGHLIGHT_PROMPT, win["text"], model=model)
+            data = _extract_json(out)
+        except (RuntimeError, ValueError, OSError):
+            continue
+        items = data if isinstance(data, list) else (
+            data.get("clips", []) if isinstance(data, dict) else [])
+        for it in items:
+            if not isinstance(it, dict):
+                continue
+            sp = str(it.get("start_phrase", "")).strip()
+            ep = str(it.get("end_phrase", "")).strip()
+            if not sp or not ep:
+                continue
+            ss = _map_clean_to_spans([sp], all_words)
+            ee = _map_clean_to_spans([ep], all_words)
+            if not ss or not ee:
+                continue
+            start, end = ss[0][0], ee[-1][1]
+            if end <= start:
+                continue
+            start, end = _snap_clip_bounds(start, end, total_duration)
+            if end - start < 10.0:           # too short even to be a short
+                continue
+            raw.append({
+                "start": start, "end": end, "dur": round(end - start, 3),
+                "title": (str(it.get("title", "")).strip()[:120] or "Clip"),
+                "hook": str(it.get("hook", "")).strip()[:200],
+                "score": _clamp_score(it.get("score")),
+                "reason": str(it.get("reason", "")).strip()[:300],
+            })
+    return _dedup_candidates(raw, max_clips)
+
+
 def _kept_text(spans, all_words):
     """The transcript of what a cut currently contains, in order."""
     ws = sorted((w for w in all_words
