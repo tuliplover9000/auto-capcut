@@ -508,9 +508,6 @@ def _window_transcript(all_words, total_duration, window_s=240.0, overlap_s=30.0
         if hi >= dur:
             break
         t += step
-    # collapse the degenerate case (one short window duplicated) to a single window
-    if len(wins) >= 2 and len(wins[0]["words"]) == len(words):
-        return wins[:1]
     return wins or ([{"start_s": 0.0, "words": words,
                       "text": " ".join(str(w["word"]).strip() for w in words)}])
 
@@ -584,7 +581,9 @@ def find_highlights(transcript_text, all_words, total_duration, model="sonnet",
     asks Claude per window for self-contained moments (verbatim start/end
     phrases), maps those phrases back to word timestamps, snaps/clamps the
     bounds, dedups across windows, and returns the top max_clips by score.
-    Best-effort per window: a failed/timed-out/garbled window is skipped."""
+    Best-effort per window: a failed/timed-out/garbled window is skipped.
+    (transcript_text is accepted for call-site symmetry but unused — detection
+    works directly off the word-level timestamps in all_words.)"""
     windows = _window_transcript(all_words, total_duration, window_s, overlap_s)
     raw = []
     for win in windows:
@@ -1790,6 +1789,14 @@ def render_clip_vertical(input_path, start, end, spec, out_mp4, tmpdir,
         raise RuntimeError(
             f"Vertical clip render failed{' (timed out)' if r.returncode == 124 else ''}.\n"
             f"ffmpeg stderr: {(r.stderr or '')[-800:]}")
+    # A trim window entirely past the source end yields a valid-header but
+    # frame-less stub (size>0, returncode 0) — catch that as a real failure so a
+    # caller doesn't hand an empty 0x0 clip to burn_captions.
+    ospec = probe(out_abs)
+    if ospec.get("duration", 0) < 0.05 or not ospec.get("width"):
+        raise RuntimeError(
+            f"Vertical clip render produced empty output — start={start:.3f}s "
+            f"may be at/after the source end.")
 
 
 # ── R2/R3: opt-in sound effects (whoosh on cuts + impact on emphasis) ────────
