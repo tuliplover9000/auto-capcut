@@ -536,6 +536,26 @@ def _clamp_score(v):
     return max(1, min(100, n))
 
 
+def _dedup_candidates(cands, max_clips=12):
+    """Rank candidates by score (desc) and drop any that overlap an already-kept
+    clip by more than 50% of the shorter clip. Truncate to max_clips."""
+    ranked = sorted(cands, key=lambda x: x.get("score", 0), reverse=True)
+    kept = []
+    for x in ranked:
+        xs, xe, xd = x["start"], x["end"], max(0.001, x["dur"])
+        dup = False
+        for k in kept:
+            ov = max(0.0, min(xe, k["end"]) - max(xs, k["start"]))
+            if ov > 0.5 * min(xd, max(0.001, k["dur"])):
+                dup = True
+                break
+        if not dup:
+            kept.append(x)
+        if len(kept) >= max_clips:
+            break
+    return kept
+
+
 def _kept_text(spans, all_words):
     """The transcript of what a cut currently contains, in order."""
     ws = sorted((w for w in all_words
