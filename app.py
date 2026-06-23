@@ -900,6 +900,12 @@ PAGE = r"""<!doctype html>
   .wrap { max-width:1100px; margin:28px auto; padding:0 18px; }
   h1 { font-size:21px; margin:0 0 4px; }
   .sub { color:var(--muted); margin:0 0 20px; }
+  .modesw{display:flex;gap:8px;margin:8px 0 16px}
+  .modebtn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line);background:#222836;color:var(--fg);font-weight:600;cursor:pointer}
+  .modebtn.on{background:var(--accent);color:#fff;border:0}
+  .clipcard{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+  .clipcard .meta{flex:1}
+  .clipcard .sc{color:var(--accent);font-weight:700}
   .card { background:var(--card); border:1px solid var(--line);
           border-radius:12px; padding:18px; }
   #drop { border:2px dashed var(--line); border-radius:12px; padding:34px 18px;
@@ -956,6 +962,35 @@ PAGE = r"""<!doctype html>
   <h1>🎬 CapCut Auto-Edit</h1>
   <p class="sub">Edit a talking-head clip, then chat with the editor to revise it.</p>
 
+  <div class="modesw">
+    <button id="mode-edit" class="modebtn on">Edit a clip</button>
+    <button id="mode-clip" class="modebtn">Auto-clip a long video</button>
+  </div>
+
+  <div id="clipMode" class="hide">
+    <div class="card">
+      <p class="sub">Drop a long video (podcast, talk, interview…). It finds the best moments and turns the ones you pick into vertical shorts with captions.</p>
+      <div id="clipDrop" class="drop">Drag a long video here, or click to choose</div>
+      <input id="clipFile" type="file" accept="video/*,.mp4,.mov,.mkv,.webm,.m4v" style="display:none">
+      <div class="row mt">
+        <div class="field"><label>Whisper model</label><select id="clipWhisper">
+          <option value="base" selected>base (fast)</option>
+          <option value="small">small</option>
+          <option value="medium">medium (best)</option></select></div>
+        <div class="field"><label>Max clips</label><select id="clipMax">
+          <option>6</option><option selected>12</option><option>20</option></select></div>
+      </div>
+      <label class="chk mt"><input type="checkbox" id="clipCaptions" checked>
+        <span>Word-by-word captions <span class="note">(burned in)</span></span></label>
+      <button id="clipFind" class="go mt" disabled>Find highlights</button>
+      <div id="clipStage" class="note mt"></div>
+    </div>
+    <div id="clipList" class="mt"></div>
+    <button id="clipRender" class="go mt hide" disabled>Render selected shorts</button>
+    <div id="clipResults" class="mt"></div>
+  </div>
+
+  <div id="editMode">
   <!-- SETUP -->
   <div class="card" id="setup">
     <div id="drop">
@@ -1065,6 +1100,7 @@ PAGE = r"""<!doctype html>
       </div>
     </div>
   </div>
+  </div><!-- /#editMode -->
 </div>
 <script>
 const $ = s => document.querySelector(s);
@@ -1295,6 +1331,88 @@ $("#newvid").onclick=(e)=>{ e.preventDefault(); resetToUpload(); };
     poll=setInterval(tick,1200); tick();
   }
 })();
+
+// ── Auto-clip mode ──────────────────────────────────────────────
+let clipFileObj=null, clipJob=null, clipCands=[];
+const $c=s=>document.querySelector(s);
+function setMode(m){
+  $c("#mode-edit").classList.toggle("on", m==="edit");
+  $c("#mode-clip").classList.toggle("on", m==="clip");
+  $c("#editMode").classList.toggle("hide", m!=="edit");
+  $c("#clipMode").classList.toggle("hide", m!=="clip");
+}
+$c("#mode-edit").onclick=()=>setMode("edit");
+$c("#mode-clip").onclick=()=>setMode("clip");
+const cdrop=$c("#clipDrop"), cfile=$c("#clipFile");
+cdrop.onclick=()=>cfile.click();
+cfile.onchange=()=>{ if(cfile.files[0]) pickClip(cfile.files[0]); };
+["dragover","dragenter"].forEach(e=>cdrop.addEventListener(e,ev=>{ev.preventDefault();cdrop.classList.add("hot");}));
+["dragleave","drop"].forEach(e=>cdrop.addEventListener(e,ev=>{ev.preventDefault();cdrop.classList.remove("hot");}));
+cdrop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) pickClip(ev.dataTransfer.files[0]); });
+function pickClip(f){ clipFileObj=f; cdrop.textContent="✓ "+f.name; $c("#clipFind").disabled=false; }
+function fmt(t){ t=Math.max(0,Math.round(t)); const m=Math.floor(t/60), s=t%60; return m+":"+String(s).padStart(2,"0"); }
+
+$c("#clipFind").onclick=async()=>{
+  if(!clipFileObj) return;
+  $c("#clipFind").disabled=true; $c("#clipList").innerHTML=""; $c("#clipResults").innerHTML="";
+  $c("#clipRender").classList.add("hide");
+  const fd=new FormData();
+  fd.append("video",clipFileObj);
+  fd.append("whisper_model",$c("#clipWhisper").value);
+  fd.append("max_clips",$c("#clipMax").value);
+  fd.append("captions",$c("#clipCaptions").checked?"1":"0");
+  const r=await (await fetch("/clip/analyze",{method:"POST",body:fd})).json();
+  if(r.error){ $c("#clipStage").textContent=r.error; $c("#clipFind").disabled=false; return; }
+  clipJob=r.job_id; clipPoll();
+};
+async function clipPoll(){
+  const st=await (await fetch("/clip/status/"+clipJob)).json();
+  $c("#clipStage").textContent=st.stage||"";
+  if(st.state==="ready"){ clipCands=st.candidates||[]; renderCandidates(); $c("#clipFind").disabled=false; return; }
+  if(st.state==="done"||st.state==="error"){ renderCandidates(st); if(st.state==="error") $c("#clipStage").textContent=st.error; $c("#clipFind").disabled=false; return; }
+  setTimeout(clipPoll, 1000);
+}
+function renderCandidates(st){
+  const wrap=$c("#clipList"); wrap.innerHTML="";
+  if(!clipCands.length){ wrap.innerHTML='<p class="note">No clips found.</p>'; return; }
+  clipCands.forEach((c,i)=>{
+    const div=document.createElement("div"); div.className="clipcard";
+    const pre = i<3 ? "checked":"";
+    div.innerHTML=`<input type="checkbox" class="cpick" data-i="${i}" ${pre}>
+      <div class="meta"><b>${c.title||"Clip"}</b> <span class="sc">${c.score}</span>
+      <div class="note">⏱ ${fmt(c.start)}–${fmt(c.end)} · ${Math.round(c.dur)}s</div>
+      <div class="note">${c.hook||""}</div></div>`;
+    wrap.appendChild(div);
+  });
+  const btn=$c("#clipRender"); btn.classList.remove("hide"); btn.disabled=false;
+}
+$c("#clipRender").onclick=async()=>{
+  const idx=[...document.querySelectorAll(".cpick:checked")].map(x=>+x.dataset.i);
+  if(!idx.length) return;
+  $c("#clipRender").disabled=true;
+  const r=await (await fetch("/clip/render/"+clipJob,{method:"POST",
+    headers:{"Content-Type":"application/json"},body:JSON.stringify({indices:idx})})).json();
+  if(r.error){ $c("#clipStage").textContent=r.error; $c("#clipRender").disabled=false; return; }
+  clipRenderPoll();
+};
+async function clipRenderPoll(){
+  const st=await (await fetch("/clip/status/"+clipJob)).json();
+  $c("#clipStage").textContent=st.stage||"";
+  const res=$c("#clipResults"); res.innerHTML="";
+  Object.entries(st.clips||{}).forEach(([i,info])=>{
+    const d=document.createElement("div"); d.className="clipcard";
+    if(info.state==="done"){
+      d.innerHTML=`<div class="meta"><b>${info.title||("Clip "+i)}</b>
+        <video src="/clip/video/${clipJob}/${i}" controls style="width:180px;border-radius:8px;display:block;margin-top:6px"></video>
+        <a class="dlbtn" href="/clip/download/${clipJob}/${i}">Download</a></div>`;
+    } else if(info.state==="error"){
+      d.innerHTML=`<div class="meta"><b>Clip ${i}</b> <span class="err">failed: ${info.error||""}</span></div>`;
+    } else { d.innerHTML=`<div class="meta">Clip ${i} — ${info.state}…</div>`; }
+    res.appendChild(d);
+  });
+  if(st.state==="done"||st.state==="error"){ $c("#clipRender").disabled=false; return; }
+  setTimeout(clipRenderPoll, 1000);
+}
 </script>
 </body></html>"""
 
