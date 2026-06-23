@@ -515,6 +515,27 @@ def _window_transcript(all_words, total_duration, window_s=240.0, overlap_s=30.0
                       "text": " ".join(str(w["word"]).strip() for w in words)}])
 
 
+def _snap_clip_bounds(start, end, total_duration, max_len=90.0, tail=0.3):
+    """Finalise a clip's [start,end]: pad the end with a small tail (so the last
+    word isn't clipped), cap the length at max_len, and clamp inside the video."""
+    start = max(0.0, float(start))
+    end = float(end) + float(tail)
+    if total_duration and total_duration > 0:
+        end = min(end, float(total_duration))
+    if end - start > max_len:
+        end = start + max_len
+    return (round(start, 3), round(end, 3))
+
+
+def _clamp_score(v):
+    """Coerce a model-provided score to an int in [1,100]; default 50."""
+    try:
+        n = int(round(float(v)))
+    except (TypeError, ValueError):
+        return 50
+    return max(1, min(100, n))
+
+
 def _kept_text(spans, all_words):
     """The transcript of what a cut currently contains, in order."""
     ws = sorted((w for w in all_words
