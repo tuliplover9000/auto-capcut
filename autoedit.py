@@ -1741,6 +1741,57 @@ def _kept_words(cutlist, all_words):
     return kept
 
 
+def render_clip_vertical(input_path, start, end, spec, out_mp4, tmpdir,
+                         out_w=1080, out_h=1920):
+    """Trim [start,end] from input_path and reframe to out_w x out_h vertical
+    with the fit+blur look: the whole frame is scaled to FIT the width and
+    centred over a blurred, slightly darkened COVER of itself (nothing cropped
+    out). Frame/sample-exact trim (filter trim/atrim, not -ss) so burned captions
+    written against cutlist=[(start,end)] stay in sync. One encode."""
+    ff = ff_exe()
+    if not ff:
+        raise RuntimeError("ffmpeg not found — pip install imageio-ffmpeg")
+    start = max(0.0, float(start))
+    end = float(end)
+    if end - start < 0.1:
+        raise RuntimeError(f"clip too short: {end - start:.3f}s")
+    out_w -= out_w % 2
+    out_h -= out_h % 2
+    out_abs = os.path.abspath(out_mp4)
+    setparams = _setparams_suffix(spec.get("color"))     # ",setparams=..." or ""
+
+    vchain = (
+        f"[0:v]trim={start:.3f}:{end:.3f},setpts=PTS-STARTPTS,setsar=1,split[bgsrc][fgsrc];"
+        f"[bgsrc]scale={out_w}:{out_h}:force_original_aspect_ratio=increase,"
+        f"crop={out_w}:{out_h},boxblur=18:2,eq=brightness=-0.18[bg];"
+        f"[fgsrc]scale={out_w}:{out_h}:force_original_aspect_ratio=decrease[fg];"
+        f"[bg][fg]overlay=(W-w)/2:(H-h)/2{setparams}[outv]"
+    )
+    have_audio = _has_audio(input_path)
+    if have_audio:
+        achain = f";[0:a]atrim={start:.3f}:{end:.3f},asetpts=PTS-STARTPTS[outa]"
+    else:
+        achain = ""
+
+    fc_path = os.path.join(tmpdir or os.path.dirname(out_abs) or ".", "clip_fc.txt")
+    with open(fc_path, "w", encoding="utf-8") as fcf:
+        fcf.write(vchain + achain)
+
+    cmd = [ff, "-y", "-i", os.path.abspath(input_path),
+           "-filter_complex_script", fc_path, "-map", "[outv]"]
+    if have_audio:
+        cmd += ["-map", "[outa]", "-c:a", "aac", "-ar", "48000"]
+    else:
+        cmd += ["-an"]
+    cmd += ["-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out_abs]
+
+    r = run(cmd, timeout=600)
+    if r.returncode == 124 or not (os.path.exists(out_abs) and os.path.getsize(out_abs) > 0):
+        raise RuntimeError(
+            f"Vertical clip render failed{' (timed out)' if r.returncode == 124 else ''}.\n"
+            f"ffmpeg stderr: {(r.stderr or '')[-800:]}")
+
+
 # ── R2/R3: opt-in sound effects (whoosh on cuts + impact on emphasis) ────────
 
 # NOTE: match against tokens stripped to [a-z0-9] — so no apostrophes here
