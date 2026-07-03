@@ -586,13 +586,18 @@ def find_highlights(transcript_text, all_words, total_duration, model="sonnet",
     works directly off the word-level timestamps in all_words.)"""
     windows = _window_transcript(all_words, total_duration, window_s, overlap_s)
     raw = []
+    attempted = ok = 0
+    last_err = ""
     for win in windows:
         if len(win["words"]) < 20:           # too little speech to clip from
             continue
+        attempted += 1
         try:
             out = _claude_cli(_HIGHLIGHT_PROMPT, win["text"], model=model)
             data = _extract_json(out)
-        except (RuntimeError, ValueError, OSError):
+            ok += 1
+        except (RuntimeError, ValueError, OSError) as e:
+            last_err = str(e)
             continue
         items = data if isinstance(data, list) else (
             data.get("clips", []) if isinstance(data, dict) else [])
@@ -620,6 +625,14 @@ def find_highlights(transcript_text, all_words, total_duration, model="sonnet",
                 "score": _clamp_score(it.get("score")),
                 "reason": str(it.get("reason", "")).strip()[:300],
             })
+    # Distinguish "Claude couldn't be reached at all" from "ran fine, found
+    # nothing". If EVERY window call errored (e.g. the `claude` CLI is logged
+    # out -> 401), surface that instead of the misleading "no speech" path.
+    if attempted and ok == 0:
+        raise RuntimeError(
+            "Highlight detection failed — every Claude call errored. "
+            "Is the `claude` CLI logged in? (run `claude` and sign in, then retry.) "
+            f"Last error: {last_err[:300]}")
     return _dedup_candidates(raw, max_clips)
 
 
