@@ -728,9 +728,40 @@ def sfx_delete():
 
 # ── Auto-clipper: two-phase analyze -> pick -> render ────────────────────────
 
+def _download_youtube(url, jobdir, timeout=1800):
+    """Download a video URL (YouTube or any yt-dlp-supported site) to
+    jobdir/input.mp4 via yt-dlp. Returns the saved path; raises RuntimeError on
+    failure. Uses the bundled imageio ffmpeg for muxing so no PATH ffmpeg needed."""
+    ff = autoedit.ff_exe()
+    out_tmpl = os.path.join(jobdir, "input.%(ext)s")
+    cmd = [sys.executable, "-m", "yt_dlp", "-f", "bv*+ba/b",
+           "--merge-output-format", "mp4", "--no-playlist", "-o", out_tmpl]
+    if ff:
+        cmd += ["--ffmpeg-location", ff]
+    cmd += [url]
+    r = autoedit.run(cmd, timeout=timeout)
+    if r.returncode == 124:
+        raise RuntimeError("Download timed out — the video may be very long or the connection slow.")
+    if r.returncode != 0:
+        tail = (r.stderr or "").strip().splitlines()[-1:] or ["unknown error"]
+        raise RuntimeError(f"Couldn't download that video — is the URL public and valid? ({tail[0]})")
+    cand = os.path.join(jobdir, "input.mp4")
+    if os.path.exists(cand) and os.path.getsize(cand) > 0:
+        return cand
+    for fn in os.listdir(jobdir):                      # merge may land as another ext
+        if fn.startswith("input.") and os.path.splitext(fn)[1].lower() in ALLOWED_EXT:
+            p = os.path.join(jobdir, fn)
+            if os.path.getsize(p) > 0:
+                return p
+    raise RuntimeError("Download finished but produced no usable video file.")
+
+
 def analyze_clip_job(job_id):
     job = JOBS[job_id]
     try:
+        if not job.get("input_path") and job.get("url"):
+            _stage(job_id, state="running", step=0, stage="Downloading video…")
+            job["input_path"] = _download_youtube(job["url"], job["jobdir"])
         _stage(job_id, state="running", step=1, stage="Probing video")
         spec = autoedit.probe(job["input_path"])
         if spec["duration"] <= 0:
@@ -786,11 +817,15 @@ def render_clips_job(job_id, indices):
 @app.route("/clip/analyze", methods=["POST"])
 def clip_analyze():
     f = request.files.get("video")
-    if not f or not f.filename:
-        return jsonify(error="No file uploaded."), 400
-    ext = os.path.splitext(f.filename)[1].lower()
-    if ext not in ALLOWED_EXT:
-        return jsonify(error=f"Unsupported type '{ext or '(none)'}'."), 400
+    url = (request.form.get("url") or "").strip()
+    has_file = bool(f and f.filename)
+    is_url = url.lower().startswith(("http://", "https://"))
+    if not has_file and not is_url:
+        return jsonify(error="Upload a file or paste a video URL (http…)."), 400
+    if has_file:
+        ext = os.path.splitext(f.filename)[1].lower()
+        if ext not in ALLOWED_EXT:
+            return jsonify(error=f"Unsupported type '{ext or '(none)'}'."), 400
 
     def pick(name, allowed, default):
         v = (request.form.get(name) or "").strip()
@@ -810,14 +845,19 @@ def clip_analyze():
     jobdir = os.path.join(JOBS_DIR, job_id)
     outdir = os.path.join(jobdir, "out"); os.makedirs(outdir, exist_ok=True)
     tmpdir = os.path.join(jobdir, "tmp"); os.makedirs(tmpdir, exist_ok=True)
-    input_path = os.path.join(jobdir, "input" + ext)
-    f.save(input_path)
+    if has_file:
+        input_path = os.path.join(jobdir, "input" + os.path.splitext(f.filename)[1].lower())
+        f.save(input_path)
+        name, src_url = f.filename, ""
+    else:
+        input_path, name, src_url = "", url, url      # worker downloads it first
     with LOCK:
         JOBS[job_id] = {
-            "kind": "clip", "input_path": input_path, "outdir": outdir,
-            "tmpdir": tmpdir, "name": f.filename, "settings": settings,
-            "chat": [], "state": "queued", "step": 0, "stage": "Starting…",
-            "error": "", "spec": None, "all_words": [], "candidates": [], "clips": {},
+            "kind": "clip", "input_path": input_path, "url": src_url,
+            "jobdir": jobdir, "outdir": outdir, "tmpdir": tmpdir,
+            "name": name, "settings": settings, "chat": [], "state": "queued",
+            "step": 0, "stage": "Starting…", "error": "", "spec": None,
+            "all_words": [], "candidates": [], "clips": {},
         }
     threading.Thread(target=analyze_clip_job, args=(job_id,), daemon=True).start()
     return jsonify(job_id=job_id)
@@ -969,7 +1009,10 @@ PAGE = r"""<!doctype html>
 
   <div id="clipMode" class="hide">
     <div class="card">
-      <p class="sub">Drop a long video (podcast, talk, interview…). It finds the best moments and turns the ones you pick into vertical shorts with captions.</p>
+      <p class="sub">Paste a YouTube link (or drop a long video — podcast, talk, interview…). It finds the best moments and turns the ones you pick into vertical shorts with captions.</p>
+      <label>YouTube / video URL</label>
+      <input id="clipUrl" type="text" placeholder="https://www.youtube.com/watch?v=…" style="width:100%;box-sizing:border-box">
+      <div class="note" style="text-align:center;margin:8px 0">— or upload a file —</div>
       <div id="clipDrop" class="drop">Drag a long video here, or click to choose</div>
       <input id="clipFile" type="file" accept="video/*,.mp4,.mov,.mkv,.webm,.m4v" style="display:none">
       <div class="row mt">
@@ -1349,15 +1392,18 @@ cfile.onchange=()=>{ if(cfile.files[0]) pickClip(cfile.files[0]); };
 ["dragover","dragenter"].forEach(e=>cdrop.addEventListener(e,ev=>{ev.preventDefault();cdrop.classList.add("hot");}));
 ["dragleave","drop"].forEach(e=>cdrop.addEventListener(e,ev=>{ev.preventDefault();cdrop.classList.remove("hot");}));
 cdrop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) pickClip(ev.dataTransfer.files[0]); });
-function pickClip(f){ clipFileObj=f; cdrop.textContent="✓ "+f.name; $c("#clipFind").disabled=false; }
+function clipReady(){ return !!($c("#clipUrl").value.trim() || clipFileObj); }
+function pickClip(f){ clipFileObj=f; cdrop.textContent="✓ "+f.name; $c("#clipFind").disabled=!clipReady(); }
+$c("#clipUrl").addEventListener("input",()=>{ $c("#clipFind").disabled=!clipReady(); });
 function fmt(t){ t=Math.max(0,Math.round(t)); const m=Math.floor(t/60), s=t%60; return m+":"+String(s).padStart(2,"0"); }
 
 $c("#clipFind").onclick=async()=>{
-  if(!clipFileObj) return;
+  const url=$c("#clipUrl").value.trim();
+  if(!url && !clipFileObj) return;
   $c("#clipFind").disabled=true; $c("#clipList").innerHTML=""; $c("#clipResults").innerHTML="";
   $c("#clipRender").classList.add("hide");
   const fd=new FormData();
-  fd.append("video",clipFileObj);
+  if(url) fd.append("url",url); else fd.append("video",clipFileObj);
   fd.append("whisper_model",$c("#clipWhisper").value);
   fd.append("max_clips",$c("#clipMax").value);
   fd.append("captions",$c("#clipCaptions").checked?"1":"0");
