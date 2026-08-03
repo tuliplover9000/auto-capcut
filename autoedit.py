@@ -171,9 +171,24 @@ def probe(path):
     # e.g. "yuv420p10le(tv, bt2020nc/bt2020/arib-std-b67, progressive)".
     info["color"] = {}
     vline = next((ln for ln in stderr.splitlines() if "Video:" in ln), "")
-    cm = re.search(r"\((?:(tv|pc|full|limited),\s*)?([a-z0-9]+)/([a-z0-9-]+)/([a-z0-9-]+)", vline)
+    # ffmpeg prints matrix/primaries/transfer as three slash-separated tokens
+    # ONLY when they differ ("bt2020nc/bt2020/arib-std-b67"); when equal — i.e.
+    # essentially all plain SDR footage — it COLLAPSES to one token:
+    # "yuv420p(tv, bt709, progressive)". The old 3-part-only regex returned {}
+    # for that common shape, silently disabling the color re-stamp.
+    cm = re.search(r"\((?:(tv|pc|full|limited),\s*)?([a-z][a-z0-9-]*)"
+                   r"(?:/([a-z0-9-]+)/([a-z0-9-]+))?[,)]",
+                   vline.split("Video:", 1)[-1])   # skip "#0:0(und)" lang tag
     if cm:
-        rng, mat, pri, trc = cm.group(1), cm.group(2), cm.group(3), cm.group(4)
+        rng, tok, pri, trc = cm.groups()
+        if tok in ("tv", "pc", "full", "limited") and not rng:
+            rng, tok = tok, None               # "(pc)" alone = range, not matrix
+        if pri:                                # full 3-part form
+            mat = tok
+        elif tok and tok not in ("progressive", "interlaced", "unknown", "und"):
+            mat = pri = trc = tok              # collapsed form: one token for all
+        else:
+            mat = pri = trc = None
         if rng:
             info["color"]["range"] = "pc" if rng in ("pc", "full") else "tv"
         if mat and mat != "unknown":
@@ -518,11 +533,15 @@ def _window_transcript(all_words, total_duration, window_s=240.0, overlap_s=30.0
 
 def _snap_clip_bounds(start, end, total_duration, max_len=90.0, tail=0.3):
     """Finalise a clip's [start,end]: pad the end with a small tail (so the last
-    word isn't clipped), cap the length at max_len, and clamp inside the video."""
+    word isn't clipped), cap the length at max_len, and clamp BOTH ends inside
+    the video (a start past the end collapses to a zero-length span, which
+    callers drop)."""
     start = max(0.0, float(start))
     end = float(end) + float(tail)
     if total_duration and total_duration > 0:
+        start = min(start, float(total_duration))
         end = min(end, float(total_duration))
+    end = max(end, start)
     if end - start > max_len:
         end = start + max_len
     return (round(start, 3), round(end, 3))
@@ -539,8 +558,13 @@ def _clamp_score(v):
 
 def _dedup_candidates(cands, max_clips=12):
     """Rank candidates by score (desc) and drop any that overlap an already-kept
-    clip by more than 50% of the shorter clip. Truncate to max_clips."""
-    ranked = sorted(cands, key=lambda x: x.get("score", 0), reverse=True)
+    clip by more than 50% of the shorter clip. Truncate to max_clips.
+    Secondary sort keys (start, end) make the result DETERMINISTIC: windows now
+    finish in arbitrary thread order, and a bare stable-sort on score kept
+    whichever equal-score duplicate happened to arrive first."""
+    ranked = sorted(cands, key=lambda x: (-x.get("score", 0),
+                                          x.get("start", 0.0),
+                                          x.get("end", 0.0)))
     kept = []
     for x in ranked:
         xs, xe, xd = x["start"], x["end"], max(0.001, x["dur"])

@@ -7,12 +7,31 @@ bad takes removed — plus word-accurate captions.
 **Output:** `out/roughcut.mp4` + `out/captions.srt`  
 Import both into CapCut and refine from there.
 
-There's also a **localhost web UI with a chat editor** — run `python app.py`,
-open http://127.0.0.1:5000, drag a clip in, and edit it. A preview plays on the
-left and a chat panel sits on the right: type instructions before editing, then
-keep chatting to revise — "keep the intro", "cut the first 5 seconds", "make the
-captions Bebas Neue", "one word at a time". The transcript is cached per job, so
-re-cuts only re-render and caption tweaks are near-instant.
+There's also a **localhost web UI** — run `python app.py`, open
+http://127.0.0.1:5000. It has two modes:
+
+**Edit a clip** (your own talking-head footage): drag a clip in and edit it with
+a chat panel — "keep the intro", "cut the first 5 seconds", "make the captions
+Bebas Neue". The transcript is cached per job, so re-cuts only re-render and
+caption tweaks are near-instant. Toggles: camera zooms, B-roll (stock via
+Pexels/Pixabay or **your own media** — drop files into the in-page library,
+named by what they show), editorial titles, vignette/grain/flash, and **sound
+effects** (whoosh on cuts + impact on emphasis — drop your own sounds into the
+two slots under the toggle).
+
+**Auto-clip a long video** (repurpose someone else's content): paste a
+**YouTube URL** (downloaded server-side at ≤1080p via yt-dlp) or upload a long
+video. It transcribes, scans the transcript in parallel windows for
+self-contained highlight moments, and shows a **ranked candidate list** (title,
+hook, timestamps, score). Check the ones you want → each renders as a vertical
+**9:16 short** (whole frame fit over a blurred background) with word-by-word
+captions burned in. Clips are kept verbatim — precise in/out + a small tail,
+no internal re-cutting. Old job folders in `webjobs/` are swept automatically
+after 3 days (`AUTOEDIT_KEEP_JOBS_DAYS` to change).
+
+> **Note:** both modes call the `claude` CLI for editing decisions. If every
+> analysis fails (or the UI says every Claude call errored), run `claude`
+> interactively and sign in again — an expired login surfaces as 401s.
 
 ## Install note
 

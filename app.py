@@ -16,7 +16,7 @@ tweaks skip the re-render entirely.
 It runs the tested autoedit.py functions in-process; Claude is the headless
 `claude` CLI on your Max subscription (no API key).
 """
-import os, re, sys, uuid, threading, tempfile, shutil
+import os, re, sys, time, uuid, threading, tempfile, shutil
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -45,6 +45,37 @@ app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024 * 1024  # 4 GB
 
 JOBS = {}
 LOCK = threading.Lock()
+
+
+def _sweep_old_jobs(max_age_days=None):
+    """Delete webjobs/ dirs older than max_age_days (default 3, override with
+    AUTOEDIT_KEEP_JOBS_DAYS). Every upload/download/render lives in webjobs/
+    and nothing ever removed them — this repo had accumulated 4 GB across 81
+    dead job dirs. Runs at server start (not import, so tests are unaffected);
+    live jobs are always newer than the cutoff. Returns (removed, freed_bytes)."""
+    if max_age_days is None:
+        try:
+            max_age_days = float(os.environ.get("AUTOEDIT_KEEP_JOBS_DAYS", "3"))
+        except ValueError:
+            max_age_days = 3.0
+    cutoff = time.time() - max_age_days * 86400
+    removed, freed = 0, 0
+    try:
+        entries = os.listdir(JOBS_DIR)
+    except OSError:
+        return (0, 0)
+    for name in entries:
+        d = os.path.join(JOBS_DIR, name)
+        try:
+            if not os.path.isdir(d) or os.path.getmtime(d) >= cutoff:
+                continue
+            freed += sum(os.path.getsize(os.path.join(r, f))
+                         for r, _dirs, fs in os.walk(d) for f in fs)
+            shutil.rmtree(d, ignore_errors=True)
+            removed += 1
+        except OSError:
+            continue
+    return (removed, freed)
 
 
 # ── small state helpers ──────────────────────────────────────────────────────
@@ -736,9 +767,13 @@ def _download_youtube(url, jobdir, timeout=1800):
     out_tmpl = os.path.join(jobdir, "input.%(ext)s")
     # Cap at 1080p: the vertical reframe outputs 1080x1920, so 4K source pixels
     # are wasted — and a 70-min 4K download is ~2 GB vs ~300 MB at 1080p.
+    # --playlist-items 1 belt-and-suspenders with --no-playlist: the latter only
+    # applies to video+list URLs; a bare /playlist?list=... URL would otherwise
+    # iterate EVERY entry's metadata before keeping just the first file.
     cmd = [sys.executable, "-m", "yt_dlp",
            "-f", "bv*[height<=1080]+ba/b[height<=1080]/b",
-           "--merge-output-format", "mp4", "--no-playlist", "-o", out_tmpl]
+           "--merge-output-format", "mp4", "--no-playlist",
+           "--playlist-items", "1", "-o", out_tmpl]
     if ff:
         cmd += ["--ffmpeg-location", ff]
     cmd += [url]
@@ -807,17 +842,20 @@ def render_clips_job(job_id, indices):
         for idx in indices:
             if idx < 0 or idx >= len(job.get("candidates", [])):
                 continue
-            job["clips"][str(idx)] = {"state": "running"}
+            with LOCK:                       # same discipline as every reader
+                job["clips"][str(idx)] = {"state": "running"}
             _stage(job_id, stage=f"Rendering clip {idx + 1}")
             try:
                 path = _render_one_clip(
                     job["input_path"], job["candidates"][idx], job["spec"],
                     job["all_words"], job["outdir"], idx,
                     captions=job["settings"]["captions"])
-                job["clips"][str(idx)] = {"state": "done", "file": path,
-                                          "title": job["candidates"][idx]["title"]}
+                with LOCK:
+                    job["clips"][str(idx)] = {"state": "done", "file": path,
+                                              "title": job["candidates"][idx]["title"]}
             except Exception as e:                            # noqa: BLE001
-                job["clips"][str(idx)] = {"state": "error", "error": str(e)}
+                with LOCK:
+                    job["clips"][str(idx)] = {"state": "error", "error": str(e)}
         _stage(job_id, state="done", stage="Clips ready")
     except Exception as e:                                    # noqa: BLE001
         _stage(job_id, state="error", error=str(e))
@@ -1406,9 +1444,15 @@ function pickClip(f){ clipFileObj=f; cdrop.textContent="✓ "+f.name; $c("#clipF
 $c("#clipUrl").addEventListener("input",()=>{ $c("#clipFind").disabled=!clipReady(); });
 function fmt(t){ t=Math.max(0,Math.round(t)); const m=Math.floor(t/60), s=t%60; return m+":"+String(s).padStart(2,"0"); }
 
+// esc(): candidate titles/hooks/errors come from an LLM reading arbitrary
+// video audio — attacker-influenced text. NEVER interpolate them into
+// innerHTML raw (stored XSS); route every such string through this.
+function esc(s){ const d=document.createElement("div"); d.textContent=String(s??""); return d.innerHTML; }
+let clipRendering=false;
 $c("#clipFind").onclick=async()=>{
   const url=$c("#clipUrl").value.trim();
   if(!url && !clipFileObj) return;
+  if(clipRendering){ $c("#clipStage").textContent="Wait for the current render to finish first."; return; }
   $c("#clipFind").disabled=true; $c("#clipList").innerHTML=""; $c("#clipResults").innerHTML="";
   $c("#clipRender").classList.add("hide");
   const fd=new FormData();
@@ -1418,25 +1462,33 @@ $c("#clipFind").onclick=async()=>{
   fd.append("captions",$c("#clipCaptions").checked?"1":"0");
   const r=await (await fetch("/clip/analyze",{method:"POST",body:fd})).json();
   if(r.error){ $c("#clipStage").textContent=r.error; $c("#clipFind").disabled=false; return; }
-  clipJob=r.job_id; clipPoll();
+  clipJob=r.job_id; clipPoll(clipJob);
 };
-async function clipPoll(){
-  const st=await (await fetch("/clip/status/"+clipJob)).json();
+async function clipPoll(jid){
+  if(jid!==clipJob) return;                        // a newer job took over
+  const st=await (await fetch("/clip/status/"+jid)).json();
+  if(jid!==clipJob) return;
   $c("#clipStage").textContent=st.stage||"";
-  if(st.state==="ready"){ clipCands=st.candidates||[]; renderCandidates(); $c("#clipFind").disabled=false; return; }
-  if(st.state==="done"||st.state==="error"){ renderCandidates(st); if(st.state==="error") $c("#clipStage").textContent=st.error; $c("#clipFind").disabled=false; return; }
-  setTimeout(clipPoll, 1000);
+  if(st.state==="ready"||st.state==="done"){
+    clipCands=st.candidates||[]; renderCandidates(); $c("#clipFind").disabled=false; return;
+  }
+  if(st.state==="error"){
+    $c("#clipStage").textContent=st.error||"Analyze failed.";
+    $c("#clipList").innerHTML=`<p class="note err">Analyze failed: ${esc(st.error||"unknown error")}</p>`;
+    $c("#clipFind").disabled=false; return;
+  }
+  setTimeout(()=>clipPoll(jid), 1000);
 }
-function renderCandidates(st){
+function renderCandidates(){
   const wrap=$c("#clipList"); wrap.innerHTML="";
   if(!clipCands.length){ wrap.innerHTML='<p class="note">No clips found.</p>'; return; }
   clipCands.forEach((c,i)=>{
     const div=document.createElement("div"); div.className="clipcard";
     const pre = i<3 ? "checked":"";
     div.innerHTML=`<input type="checkbox" class="cpick" data-i="${i}" ${pre}>
-      <div class="meta"><b>${c.title||"Clip"}</b> <span class="sc">${c.score}</span>
+      <div class="meta"><b>${esc(c.title||"Clip")}</b> <span class="sc">${Number(c.score)||0}</span>
       <div class="note">⏱ ${fmt(c.start)}–${fmt(c.end)} · ${Math.round(c.dur)}s</div>
-      <div class="note">${c.hook||""}</div></div>`;
+      <div class="note">${esc(c.hook||"")}</div></div>`;
     wrap.appendChild(div);
   });
   const btn=$c("#clipRender"); btn.classList.remove("hide"); btn.disabled=false;
@@ -1444,29 +1496,32 @@ function renderCandidates(st){
 $c("#clipRender").onclick=async()=>{
   const idx=[...document.querySelectorAll(".cpick:checked")].map(x=>+x.dataset.i);
   if(!idx.length) return;
-  $c("#clipRender").disabled=true;
+  $c("#clipRender").disabled=true; clipRendering=true;
   const r=await (await fetch("/clip/render/"+clipJob,{method:"POST",
     headers:{"Content-Type":"application/json"},body:JSON.stringify({indices:idx})})).json();
-  if(r.error){ $c("#clipStage").textContent=r.error; $c("#clipRender").disabled=false; return; }
-  clipRenderPoll();
+  if(r.error){ $c("#clipStage").textContent=r.error; $c("#clipRender").disabled=false; clipRendering=false; return; }
+  clipRenderPoll(clipJob);
 };
-async function clipRenderPoll(){
-  const st=await (await fetch("/clip/status/"+clipJob)).json();
+async function clipRenderPoll(jid){
+  if(jid!==clipJob){ clipRendering=false; return; }   // superseded by a new job
+  const st=await (await fetch("/clip/status/"+jid)).json();
+  if(jid!==clipJob){ clipRendering=false; return; }
   $c("#clipStage").textContent=st.stage||"";
   const res=$c("#clipResults"); res.innerHTML="";
-  Object.entries(st.clips||{}).forEach(([i,info])=>{
+  Object.entries(st.clips||{}).forEach(([k,info])=>{
+    const i=Number(k)||0;
     const d=document.createElement("div"); d.className="clipcard";
     if(info.state==="done"){
-      d.innerHTML=`<div class="meta"><b>${info.title||("Clip "+i)}</b>
-        <video src="/clip/video/${clipJob}/${i}" controls style="width:180px;border-radius:8px;display:block;margin-top:6px"></video>
-        <a class="dlbtn" href="/clip/download/${clipJob}/${i}">Download</a></div>`;
+      d.innerHTML=`<div class="meta"><b>${esc(info.title||("Clip "+i))}</b>
+        <video src="/clip/video/${jid}/${i}" controls style="width:180px;border-radius:8px;display:block;margin-top:6px"></video>
+        <a class="dlbtn" href="/clip/download/${jid}/${i}">Download</a></div>`;
     } else if(info.state==="error"){
-      d.innerHTML=`<div class="meta"><b>Clip ${i}</b> <span class="err">failed: ${info.error||""}</span></div>`;
-    } else { d.innerHTML=`<div class="meta">Clip ${i} — ${info.state}…</div>`; }
+      d.innerHTML=`<div class="meta"><b>Clip ${i}</b> <span class="err">failed: ${esc(info.error||"")}</span></div>`;
+    } else { d.innerHTML=`<div class="meta">Clip ${i} — ${esc(info.state)}…</div>`; }
     res.appendChild(d);
   });
-  if(st.state==="done"||st.state==="error"){ $c("#clipRender").disabled=false; return; }
-  setTimeout(clipRenderPoll, 1000);
+  if(st.state==="done"||st.state==="error"){ $c("#clipRender").disabled=false; clipRendering=false; return; }
+  setTimeout(()=>clipRenderPoll(jid), 1000);
 }
 </script>
 </body></html>"""
@@ -1474,6 +1529,12 @@ async function clipRenderPoll(){
 
 if __name__ == "__main__":
     print("CapCut Auto-Edit UI →  http://127.0.0.1:5000")
+    def _startup_sweep():
+        removed, freed = _sweep_old_jobs()
+        if removed:
+            print(f"  (cleaned {removed} old job dirs, freed {freed/1e9:.1f} GB "
+                  f"— keep window: AUTOEDIT_KEEP_JOBS_DAYS, default 3)")
+    threading.Thread(target=_startup_sweep, daemon=True).start()
     # NO auto-reloader by default: a .py file change mid-render restarts the
     # server and KILLS the in-progress job (the worker is a daemon thread that
     # dies with the process -> /status 404, lost render). That was wiping renders
