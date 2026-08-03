@@ -734,7 +734,10 @@ def _download_youtube(url, jobdir, timeout=1800):
     failure. Uses the bundled imageio ffmpeg for muxing so no PATH ffmpeg needed."""
     ff = autoedit.ff_exe()
     out_tmpl = os.path.join(jobdir, "input.%(ext)s")
-    cmd = [sys.executable, "-m", "yt_dlp", "-f", "bv*+ba/b",
+    # Cap at 1080p: the vertical reframe outputs 1080x1920, so 4K source pixels
+    # are wasted — and a 70-min 4K download is ~2 GB vs ~300 MB at 1080p.
+    cmd = [sys.executable, "-m", "yt_dlp",
+           "-f", "bv*[height<=1080]+ba/b[height<=1080]/b",
            "--merge-output-format", "mp4", "--no-playlist", "-o", out_tmpl]
     if ff:
         cmd += ["--ffmpeg-location", ff]
@@ -771,7 +774,11 @@ def analyze_clip_job(job_id):
         wav = os.path.join(job["tmpdir"], "audio.wav")
         if not autoedit.extract_audio(job["input_path"], wav):
             raise RuntimeError("Audio extraction failed — does the video have an audio track?")
-        _stage(job_id, step=3, stage="Transcribing (Whisper)")
+        mins = spec["duration"] / 60.0
+        _stage(job_id, step=3,
+               stage=f"Transcribing {mins:.0f} min of audio (Whisper "
+                     f"{job['settings']['whisper_model']}) — no progress bar, "
+                     f"but it IS working…")
         segs = autoedit.transcribe(wav, job["settings"]["whisper_model"])
         if not segs:
             raise RuntimeError("Transcription returned nothing — is the video silent?")
@@ -780,7 +787,9 @@ def analyze_clip_job(job_id):
         _stage(job_id, step=4, stage="Finding highlights")
         cands = autoedit.find_highlights(
             ttext, job["all_words"], spec["duration"],
-            model=job["settings"]["model"], max_clips=job["settings"]["max_clips"])
+            model=job["settings"]["model"], max_clips=job["settings"]["max_clips"],
+            progress_cb=lambda d, t: _stage(
+                job_id, stage=f"Finding highlights ({d}/{t} sections scanned)"))
         job["candidates"] = cands
         if not cands:
             _stage(job_id, state="ready", step=5,

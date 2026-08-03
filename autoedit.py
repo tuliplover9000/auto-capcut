@@ -209,7 +209,11 @@ def transcribe(wav_path, model_size="base"):
     print(f"  (using faster-whisper '{model_size}' model; first run downloads weights)")
     try:
         from faster_whisper import WhisperModel
-        m = WhisperModel(model_size, device="cpu", compute_type="int8")
+        # cpu_threads: ctranslate2 defaults to ~4 threads; on a 12-core box that
+        # leaves most of the machine idle during the slowest stage of the whole
+        # pipeline. Use every core (measured ~2x+ on long videos).
+        m = WhisperModel(model_size, device="cpu", compute_type="int8",
+                         cpu_threads=max(4, os.cpu_count() or 4))
         segs, _ = m.transcribe(
             wav_path,
             word_timestamps=True,
@@ -575,64 +579,86 @@ Rules:
 The transcript slice is on stdin."""
 
 
+def _window_candidates(data, all_words, total_duration):
+    """Turn one window's parsed Claude output into candidate dicts (pure)."""
+    items = data if isinstance(data, list) else (
+        data.get("clips", []) if isinstance(data, dict) else [])
+    out = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        sp = str(it.get("start_phrase", "")).strip()
+        ep = str(it.get("end_phrase", "")).strip()
+        if not sp or not ep:
+            continue
+        ss = _map_clean_to_spans([sp], all_words)
+        ee = _map_clean_to_spans([ep], all_words)
+        if not ss or not ee:
+            continue
+        start, end = ss[0][0], ee[-1][1]
+        if end <= start:
+            continue
+        start, end = _snap_clip_bounds(start, end, total_duration)
+        if end - start < 10.0:               # too short even to be a short
+            continue
+        out.append({
+            "start": start, "end": end, "dur": round(end - start, 3),
+            "title": (str(it.get("title", "")).strip()[:120] or "Clip"),
+            "hook": str(it.get("hook", "")).strip()[:200],
+            "score": _clamp_score(it.get("score")),
+            "reason": str(it.get("reason", "")).strip()[:300],
+        })
+    return out
+
+
 def find_highlights(transcript_text, all_words, total_duration, model="sonnet",
-                    window_s=240.0, overlap_s=30.0, max_clips=12):
+                    window_s=240.0, overlap_s=30.0, max_clips=12,
+                    progress_cb=None, workers=4):
     """Find ranked highlight clips in a long transcript. Windows the transcript,
     asks Claude per window for self-contained moments (verbatim start/end
     phrases), maps those phrases back to word timestamps, snaps/clamps the
     bounds, dedups across windows, and returns the top max_clips by score.
-    Best-effort per window: a failed/timed-out/garbled window is skipped.
+    Windows run CONCURRENTLY (each is an independent subprocess call — a 1-hour
+    video is ~17 windows, sequential was the analyze phase's bottleneck), capped
+    at `workers` in flight. Best-effort per window: a failed/timed-out/garbled
+    window is skipped. progress_cb(done, total) fires as windows finish.
     (transcript_text is accepted for call-site symmetry but unused — detection
     works directly off the word-level timestamps in all_words.)"""
-    windows = _window_transcript(all_words, total_duration, window_s, overlap_s)
-    raw = []
-    attempted = ok = 0
-    last_err = ""
-    for win in windows:
-        if len(win["words"]) < 20:           # too little speech to clip from
-            continue
-        attempted += 1
-        try:
-            out = _claude_cli(_HIGHLIGHT_PROMPT, win["text"], model=model)
-            data = _extract_json(out)
-            ok += 1
-        except (RuntimeError, ValueError, OSError) as e:
-            last_err = str(e)
-            continue
-        items = data if isinstance(data, list) else (
-            data.get("clips", []) if isinstance(data, dict) else [])
-        for it in items:
-            if not isinstance(it, dict):
-                continue
-            sp = str(it.get("start_phrase", "")).strip()
-            ep = str(it.get("end_phrase", "")).strip()
-            if not sp or not ep:
-                continue
-            ss = _map_clean_to_spans([sp], all_words)
-            ee = _map_clean_to_spans([ep], all_words)
-            if not ss or not ee:
-                continue
-            start, end = ss[0][0], ee[-1][1]
-            if end <= start:
-                continue
-            start, end = _snap_clip_bounds(start, end, total_duration)
-            if end - start < 10.0:           # too short even to be a short
-                continue
-            raw.append({
-                "start": start, "end": end, "dur": round(end - start, 3),
-                "title": (str(it.get("title", "")).strip()[:120] or "Clip"),
-                "hook": str(it.get("hook", "")).strip()[:200],
-                "score": _clamp_score(it.get("score")),
-                "reason": str(it.get("reason", "")).strip()[:300],
-            })
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    windows = [w for w in _window_transcript(all_words, total_duration,
+                                             window_s, overlap_s)
+               if len(w["words"]) >= 20]     # skip near-silent windows
+    total = len(windows)
+    if progress_cb and total:
+        progress_cb(0, total)
+    raw, errs = [], []
+
+    def _one(win):
+        out = _claude_cli(_HIGHLIGHT_PROMPT, win["text"], model=model)
+        return _extract_json(out)
+
+    done = 0
+    if windows:
+        with ThreadPoolExecutor(max_workers=max(1, min(workers, total))) as ex:
+            futs = {ex.submit(_one, w): w for w in windows}
+            for fut in as_completed(futs):
+                done += 1
+                try:
+                    data = fut.result()
+                except (RuntimeError, ValueError, OSError) as e:
+                    errs.append(str(e))
+                else:
+                    raw.extend(_window_candidates(data, all_words, total_duration))
+                if progress_cb:
+                    progress_cb(done, total)
     # Distinguish "Claude couldn't be reached at all" from "ran fine, found
     # nothing". If EVERY window call errored (e.g. the `claude` CLI is logged
     # out -> 401), surface that instead of the misleading "no speech" path.
-    if attempted and ok == 0:
+    if total and len(errs) == total:
         raise RuntimeError(
             "Highlight detection failed — every Claude call errored. "
             "Is the `claude` CLI logged in? (run `claude` and sign in, then retry.) "
-            f"Last error: {last_err[:300]}")
+            f"Last error: {errs[-1][:300]}")
     return _dedup_candidates(raw, max_clips)
 
 
