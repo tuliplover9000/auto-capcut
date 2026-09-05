@@ -14,6 +14,10 @@ import autoedit
 
 FONT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                          "fonts", "Anton-Regular.ttf")
+# The "top" layout mimics the clean lyric-edit reference look: light sans,
+# sentence case, centered — Anton's heavy caps would wreck it.
+FONT_TOP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "fonts", "Montserrat-Variable.ttf")
 MAX_LINE_HOLD = 7.0       # a line never lingers longer than this
 LINE_FADE = 0.2
 
@@ -120,35 +124,48 @@ def _wrap_rows(words, probe, font, maxw):
     return rows
 
 
-def build_line_image(line, W, H, tint, layout="side", side="left"):
+def build_line_image(line, W, H, tint, layout="top", side="left"):
     """One lyric line as an HxWx4 float32 RGBA layer in [0,1], faded fill.
-    layout="poster": the original giant full-width look (letters cross the
-      person — needs a near-perfect matte to hold up).
-    layout="side" (default): SMALLER text living in the frame's dead space —
-      anchored to `side`, width budget ~55% of the frame so its inner edge
-      only TUCKS slightly behind the person. Mask flaws barely matter because
-      most letters never touch the person at all (user-requested after mask
-      softness on fast tricks)."""
+    layout="top" (default): the clean lyric-edit reference look — light sans
+      (Montserrat), SENTENCE CASE, short centered rows in the upper dead
+      space; the person tucks into the block's bottom rows when they lean in.
+    layout="side": smaller Anton caps anchored to `side` (the emptier half),
+      inner edge tucking slightly behind the person.
+    layout="poster": the original giant full-width Anton look (letters cross
+      the person — needs a near-perfect matte to hold up)."""
     from PIL import Image, ImageDraw, ImageFont
     fill = (255, 255, 255, 105) if tint == "light" else (25, 25, 30, 80)
-    words = line.upper().split() or ["♪"]
     probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
-    if layout == "poster":
-        start_size, min_size, maxw, max_hfrac = 210, 70, W - 110, 0.62
-    else:
-        start_size, min_size, maxw, max_hfrac = 118, 44, round(W * 0.55) - 55, 0.42
-    size, rows, line_h = start_size, [words[0]], round(start_size * 1.12)
+    if layout == "top":
+        words = line.split() or ["♪"]                  # keep the song's casing
+        font_path = FONT_TOP_PATH
+        start_size, min_size, maxw, max_hfrac, lh = 128, 56, round(W * 0.64), 0.40, 1.30
+    elif layout == "poster":
+        words = line.upper().split() or ["♪"]
+        font_path = FONT_PATH
+        start_size, min_size, maxw, max_hfrac, lh = 210, 70, W - 110, 0.62, 1.12
+    else:                                              # side
+        words = line.upper().split() or ["♪"]
+        font_path = FONT_PATH
+        start_size, min_size, maxw, max_hfrac, lh = 118, 44, round(W * 0.55) - 55, 0.42, 1.12
+    size, rows, line_h = start_size, [words[0]], round(start_size * lh)
     while size > min_size:
-        font = ImageFont.truetype(FONT_PATH, size)
+        font = ImageFont.truetype(font_path, size)
         rows = _wrap_rows(words, probe, font, maxw)
-        line_h = round(size * 1.12)
+        line_h = round(size * lh)
         if (len(rows) * line_h <= H * max_hfrac
                 and all(probe.textlength(r, font=font) <= maxw for r in rows)):
             break
         size -= 10
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    if layout == "poster":
+    if layout == "top":
+        y = round(H * 0.07)
+        for r in rows:
+            rw = probe.textlength(r, font=font)
+            d.text(((W - rw) // 2, y), r, font=font, fill=fill)
+            y += line_h
+    elif layout == "poster":
         y = round(H * 0.06)
         for r in rows:
             d.text((55, y), r, font=font, fill=fill)
@@ -272,7 +289,7 @@ def _line_windows(lines_clip, duration):
 
 def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
                        progress_cb=None, mask_w=384, model=MASK_MODEL_BEST,
-                       layout="side"):
+                       layout="top"):
     """Composite faded lyric lines BEHIND the person. Streams rawvideo through
     two ffmpeg pipes; frames with no visible line pass through untouched (no
     segmentation cost). final = frame*mask + (line over frame)*(1-mask)."""

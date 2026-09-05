@@ -19,7 +19,7 @@ def test_side_layout_stays_in_dead_space():
     for side, ok_cols in (("left", slice(0, int(1080 * 0.60))),
                           ("right", slice(int(1080 * 0.40), 1080))):
         img = lyricmode.build_line_image("hold me closer till the morning light",
-                                         1080, 1920, "light", side=side)
+                                         1080, 1920, "light", layout="side", side=side)
         a = img[..., 3]
         assert a.max() > 0.2
         total, inside = float(a.sum()), float(a[:, ok_cols].sum())
@@ -27,7 +27,8 @@ def test_side_layout_stays_in_dead_space():
     # side text is genuinely smaller than poster text (fewer ink pixels per char)
     poster = lyricmode.build_line_image("hold me closer", 1080, 1920, "light",
                                         layout="poster")
-    side_img = lyricmode.build_line_image("hold me closer", 1080, 1920, "light")
+    side_img = lyricmode.build_line_image("hold me closer", 1080, 1920, "light",
+                                          layout="side")
     assert float(side_img[..., 3].sum()) < 0.6 * float(poster[..., 3].sum())
 
 def test_pick_side():
@@ -35,6 +36,17 @@ def test_pick_side():
     assert lyricmode._pick_side(m) == "left"
     m2 = np.zeros((100, 100), np.float32); m2[:, :40] = 1.0
     assert lyricmode._pick_side(m2) == "right"
+
+
+def test_top_layout_centered_upper():
+    img = lyricmode.build_line_image("Look, it's a new me", 1080, 1920, "light",
+                                     layout="top")
+    a = img[..., 3]
+    assert a.max() > 0.2
+    ys, xs = a.nonzero()
+    assert ys.max() < 1920 * 0.50, "top block escaped the upper zone"
+    cx = float(xs.mean())
+    assert abs(cx - 540) < 80, f"not centered (cx={cx:.0f})"
 
 def test_auto_tint():
     dark_bg = np.zeros((100, 100, 3), np.uint8)
@@ -47,5 +59,6 @@ if __name__ == "__main__":
     test_poster_layout_dims_and_wrap()
     test_side_layout_stays_in_dead_space()
     test_pick_side()
+    test_top_layout_centered_upper()
     test_auto_tint()
     print("PASS")

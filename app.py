@@ -1046,7 +1046,7 @@ def lyric_job(job_id):
                  else lyricmode.MASK_MODEL_BEST)
         lyricmode.render_lyric_video(
             job["input_path"], lines, out, job["tmpdir"], tint=s["tint"],
-            model=model, layout=s.get("text_layout", "side"),
+            model=model, layout=s.get("text_layout", "top"),
             progress_cb=lambda d, t: _stage(
                 job_id, stage=f"Rendering… frame {d}/{t}"))
         _stage(job_id, state="done", step=5, stage="Lyric video ready")
@@ -1077,7 +1077,7 @@ def lyric_run():
         "tint": pick("tint", {"auto", "light", "dark"}, "auto"),
         "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
         "quality": pick("quality", {"best", "fast"}, "best"),
-        "text_layout": pick("text_layout", {"side", "poster"}, "side"),
+        "text_layout": pick("text_layout", {"top", "side", "poster"}, "top"),
     }
     job_id = uuid.uuid4().hex[:12]
     jobdir = os.path.join(JOBS_DIR, job_id)
@@ -1243,7 +1243,8 @@ PAGE = r"""<!doctype html>
           <option value="best" selected>Best (slower, ~1s/frame)</option>
           <option value="fast">Fast (soft on motion blur)</option></select></div>
         <div class="field"><label>Text placement</label><select id="lyricLayout">
-          <option value="side" selected>Dead space (smaller, slight tuck)</option>
+          <option value="top" selected>Top center (clean lyric-edit look)</option>
+          <option value="side">Side dead space (smaller caps)</option>
           <option value="poster">Giant poster (full-width behind you)</option></select></div>
       </div>
       <div class="row mt">
