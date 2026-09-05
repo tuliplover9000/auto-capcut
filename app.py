@@ -1210,6 +1210,39 @@ PAGE = r"""<!doctype html>
   <div class="modesw">
     <button id="mode-edit" class="modebtn on">Edit a clip</button>
     <button id="mode-clip" class="modebtn">Auto-clip a long video</button>
+    <button id="mode-lyric" class="modebtn">Lyric video</button>
+  </div>
+
+  <div id="lyricMode" class="hide">
+    <div class="card">
+      <p class="sub">Drop a clip you filmed <b>with the song playing in the room</b>. It finds the song's synced lyrics, works out where in the song your clip starts, and renders the words giant and faded <b>behind you</b>. Nothing is cut — the clip passes through at full length.</p>
+      <div id="lyricDrop" class="drop">Drag the clip here, or click to choose</div>
+      <input id="lyricFile" type="file" accept="video/*,.mp4,.mov,.mkv,.webm,.m4v" style="display:none">
+      <div class="row mt">
+        <div class="field"><label>Song title</label>
+          <input id="lyricTrack" type="text" placeholder="Midnight Fire" style="width:100%;box-sizing:border-box"></div>
+        <div class="field"><label>Artist <span class="note">(optional)</span></label>
+          <input id="lyricArtist" type="text" placeholder="The Band" style="width:100%;box-sizing:border-box"></div>
+      </div>
+      <div class="row mt">
+        <div class="field"><label>Clip starts at (song time, optional — e.g. 0:42)</label>
+          <input id="lyricStart" type="text" placeholder="0:42" style="width:100%;box-sizing:border-box"></div>
+        <div class="field"><label>Text tint</label><select id="lyricTint">
+          <option value="auto" selected>Auto</option>
+          <option value="light">Faded white</option>
+          <option value="dark">Faded dark</option></select></div>
+      </div>
+      <div class="row mt">
+        <div class="field"><label>Whisper model</label><select id="lyricWhisper">
+          <option value="base" selected>base (fast)</option>
+          <option value="small">small</option>
+          <option value="medium">medium (best)</option></select></div>
+      </div>
+      <div class="note mt">Leave the start box empty and Whisper listens to the clip to sync it automatically. Fill it in if it can't hear enough of the song.</div>
+      <button id="lyricGo" class="go mt" disabled>Make lyric video</button>
+      <div id="lyricStage" class="note mt"></div>
+    </div>
+    <div id="lyricResult" class="mt"></div>
   </div>
 
   <div id="clipMode" class="hide">
@@ -1583,14 +1616,16 @@ $("#newvid").onclick=(e)=>{ e.preventDefault(); resetToUpload(); };
 // ── Auto-clip mode ──────────────────────────────────────────────
 let clipFileObj=null, clipJob=null, clipCands=[];
 const $c=s=>document.querySelector(s);
+const MODES=[["edit","#mode-edit","#editMode"],
+             ["clip","#mode-clip","#clipMode"],
+             ["lyric","#mode-lyric","#lyricMode"]];
 function setMode(m){
-  $c("#mode-edit").classList.toggle("on", m==="edit");
-  $c("#mode-clip").classList.toggle("on", m==="clip");
-  $c("#editMode").classList.toggle("hide", m!=="edit");
-  $c("#clipMode").classList.toggle("hide", m!=="clip");
+  MODES.forEach(([name,btn,sec])=>{
+    $c(btn).classList.toggle("on", m===name);
+    $c(sec).classList.toggle("hide", m!==name);
+  });
 }
-$c("#mode-edit").onclick=()=>setMode("edit");
-$c("#mode-clip").onclick=()=>setMode("clip");
+MODES.forEach(([name,btn])=>{ $c(btn).onclick=()=>setMode(name); });
 const cdrop=$c("#clipDrop"), cfile=$c("#clipFile");
 cdrop.onclick=()=>cfile.click();
 cfile.onchange=()=>{ if(cfile.files[0]) pickClip(cfile.files[0]); };
@@ -1680,6 +1715,54 @@ async function clipRenderPoll(jid){
   });
   if(st.state==="done"||st.state==="error"){ $c("#clipRender").disabled=false; clipRendering=false; return; }
   setTimeout(()=>clipRenderPoll(jid), 1000);
+}
+
+// ── Lyric mode ──────────────────────────────────────────────────
+let lyricFileObj=null, lyricJob=null;
+const ldrop=$c("#lyricDrop"), lfile=$c("#lyricFile");
+ldrop.onclick=()=>lfile.click();
+lfile.onchange=()=>{ if(lfile.files[0]) pickLyric(lfile.files[0]); };
+["dragover","dragenter"].forEach(e=>ldrop.addEventListener(e,ev=>{ev.preventDefault();ldrop.classList.add("hot");}));
+["dragleave","drop"].forEach(e=>ldrop.addEventListener(e,ev=>{ev.preventDefault();ldrop.classList.remove("hot");}));
+ldrop.addEventListener("drop",ev=>{ if(ev.dataTransfer.files[0]) pickLyric(ev.dataTransfer.files[0]); });
+function lyricReady(){ return !!(lyricFileObj && $c("#lyricTrack").value.trim()); }
+function syncLyricBtn(){ $c("#lyricGo").disabled=!lyricReady(); }
+function pickLyric(f){ lyricFileObj=f; ldrop.textContent="✓ "+f.name; syncLyricBtn(); }
+$c("#lyricTrack").addEventListener("input", syncLyricBtn);
+
+$c("#lyricGo").onclick=async()=>{
+  if(!lyricReady()) return;
+  $c("#lyricGo").disabled=true; $c("#lyricResult").innerHTML="";
+  $c("#lyricStage").textContent="Uploading…";
+  const fd=new FormData();
+  fd.append("video",lyricFileObj);
+  fd.append("track",$c("#lyricTrack").value.trim());
+  fd.append("artist",$c("#lyricArtist").value.trim());
+  fd.append("start_at",$c("#lyricStart").value.trim());
+  fd.append("tint",$c("#lyricTint").value);
+  fd.append("whisper_model",$c("#lyricWhisper").value);
+  const r=await (await fetch("/lyric/run",{method:"POST",body:fd})).json();
+  if(r.error){ $c("#lyricStage").textContent=r.error; syncLyricBtn(); return; }
+  lyricJob=r.job_id; lyricPoll(lyricJob);
+};
+async function lyricPoll(jid){
+  if(jid!==lyricJob) return;                       // a newer job took over
+  const st=await (await fetch("/lyric/status/"+jid)).json();
+  if(jid!==lyricJob) return;
+  $c("#lyricStage").textContent=st.stage||"";
+  if(st.state==="done"){
+    $c("#lyricResult").innerHTML=`<div class="clipcard"><div class="meta">
+      <b>Lyric video</b> <span class="note">${Number(st.lines)||0} lines</span>
+      <video src="/lyric/video/${jid}" controls style="width:260px;border-radius:8px;display:block;margin-top:6px"></video>
+      <a class="dlbtn" href="/lyric/download/${jid}">Download</a></div></div>`;
+    syncLyricBtn(); return;
+  }
+  if(st.state==="error"){
+    $c("#lyricStage").textContent=st.error||"Lyric render failed.";
+    $c("#lyricResult").innerHTML=`<p class="note err">Failed: ${esc(st.error||"unknown error")}</p>`;
+    syncLyricBtn(); return;
+  }
+  setTimeout(()=>lyricPoll(jid), 1000);
 }
 </script>
 </body></html>"""
