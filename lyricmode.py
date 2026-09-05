@@ -51,17 +51,34 @@ def _mask_session():
     return _SESSION
 
 
+def _dilate(m, iters=2):
+    """Cheap 3x3 max-filter dilation (numpy only) — grows the mask a couple of
+    small-res pixels so edges err toward covering the person."""
+    for _ in range(iters):
+        p = np.pad(m, 1, mode="edge")
+        m = np.maximum.reduce([p[y:y + m.shape[0], x:x + m.shape[1]]
+                               for y in range(3) for x in range(3)])
+    return m
+
+
 def person_mask(rgb, mask_w=384):
     """HxWx3 uint8 -> HxWx1 float32 person mask in [0,1] (1 = person).
     Segmentation runs at mask_w wide and is upscaled — plenty for text that is
-    deliberately faint."""
+    deliberately faint. The raw model output is HARDENED (smoothstep of the
+    0.30-0.60 band -> ~1) and slightly dilated: on motion-blurred frames the
+    model goes UNSURE (mid values) across the moving body, and the composite
+    would blend text onto the person proportionally — the "phasing into the
+    words" artifact seen on a real night yoyo clip."""
     from PIL import Image
     from rembg import remove
     h, w = rgb.shape[:2]
     small = Image.fromarray(rgb).resize(
         (mask_w, max(2, round(h * mask_w / w))), Image.BILINEAR)
     m = remove(small, session=_mask_session(), only_mask=True)
-    m = m.resize((w, h), Image.BILINEAR)
+    a = np.asarray(m, dtype=np.float32) / 255.0
+    a = np.clip((a - 0.30) / 0.30, 0.0, 1.0)          # harden uncertainty
+    a = _dilate(a, iters=2)
+    m = Image.fromarray((a * 255.0).astype(np.uint8)).resize((w, h), Image.BILINEAR)
     return (np.asarray(m, dtype=np.float32) / 255.0)[..., None]
 
 
@@ -248,6 +265,7 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
     line_cache = {}
     resolved_tint = tint
     n = 0
+    prev_mask = None
     pipe_broke = False
     try:
         while True:
@@ -258,9 +276,16 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
             win = next(((s, e, txt) for s, e, txt in wins if s <= t < e), None)
             if win is None:
                 data = buf
+                prev_mask = None               # gap: stale confidence expires
             else:
                 frame = np.frombuffer(buf, np.uint8).reshape(H, W, 3)
                 mask = person_mask(frame, mask_w=mask_w)
+                # Temporal backstop: a motion-blurred frame borrows (decayed)
+                # confidence from its predecessor, so the person never flickers
+                # translucent to the text mid-trick.
+                if prev_mask is not None:
+                    mask = np.maximum(mask, prev_mask * 0.85)
+                prev_mask = mask
                 if resolved_tint == "auto":
                     resolved_tint = auto_tint(frame, mask)
                 s, e, txt = win
