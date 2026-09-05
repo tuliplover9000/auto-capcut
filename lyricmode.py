@@ -87,40 +87,69 @@ def person_mask(rgb, mask_w=384, model=MASK_MODEL_BEST):
     return (np.asarray(m, dtype=np.float32) / 255.0)[..., None]
 
 
-def build_line_image(line, W, H, tint):
-    """Giant uppercase wrapped Anton line as an HxWx4 float32 RGBA layer in
-    [0,1]. Faded fill (the whole point); auto-shrinks font until the wrap fits
-    the width and <=62% of the height."""
+def _pick_side(mask):
+    """'left' or 'right' — whichever half of the frame holds LESS person."""
+    w = mask.shape[1]
+    return "left" if float(mask[:, : w // 2].mean()) <= float(mask[:, w // 2:].mean()) \
+        else "right"
+
+
+def _wrap_rows(words, probe, font, maxw):
+    rows, cur = [], ""
+    for wd in words:
+        t = (cur + " " + wd).strip()
+        if probe.textlength(t, font=font) <= maxw:
+            cur = t
+        else:
+            if cur:
+                rows.append(cur)
+            cur = wd
+    if cur:
+        rows.append(cur)
+    return rows
+
+
+def build_line_image(line, W, H, tint, layout="side", side="left"):
+    """One lyric line as an HxWx4 float32 RGBA layer in [0,1], faded fill.
+    layout="poster": the original giant full-width look (letters cross the
+      person — needs a near-perfect matte to hold up).
+    layout="side" (default): SMALLER text living in the frame's dead space —
+      anchored to `side`, width budget ~55% of the frame so its inner edge
+      only TUCKS slightly behind the person. Mask flaws barely matter because
+      most letters never touch the person at all (user-requested after mask
+      softness on fast tricks)."""
     from PIL import Image, ImageDraw, ImageFont
     fill = (255, 255, 255, 105) if tint == "light" else (25, 25, 30, 80)
     words = line.upper().split() or ["♪"]
     probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
-    size, rows, line_h = 210, [words[0]], 235
-    while size > 70:
+    if layout == "poster":
+        start_size, min_size, maxw, max_hfrac = 210, 70, W - 110, 0.62
+    else:
+        start_size, min_size, maxw, max_hfrac = 118, 44, round(W * 0.55) - 55, 0.42
+    size, rows, line_h = start_size, [words[0]], round(start_size * 1.12)
+    while size > min_size:
         font = ImageFont.truetype(FONT_PATH, size)
-        maxw = W - 110
-        rows, cur = [], ""
-        for wd in words:
-            t = (cur + " " + wd).strip()
-            if probe.textlength(t, font=font) <= maxw:
-                cur = t
-            else:
-                if cur:
-                    rows.append(cur)
-                cur = wd
-        if cur:
-            rows.append(cur)
+        rows = _wrap_rows(words, probe, font, maxw)
         line_h = round(size * 1.12)
-        if (len(rows) * line_h <= H * 0.62
+        if (len(rows) * line_h <= H * max_hfrac
                 and all(probe.textlength(r, font=font) <= maxw for r in rows)):
             break
-        size -= 15
+        size -= 10
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    y = round(H * 0.06)
-    for r in rows:
-        d.text((55, y), r, font=font, fill=fill)
-        y += line_h
+    if layout == "poster":
+        y = round(H * 0.06)
+        for r in rows:
+            d.text((55, y), r, font=font, fill=fill)
+            y += line_h
+    else:
+        block_h = len(rows) * line_h
+        y = max(round(H * 0.10), round(H * 0.34) - block_h // 2)
+        for r in rows:
+            rw = probe.textlength(r, font=font)
+            x = 55 if side == "left" else W - 55 - rw
+            d.text((x, y), r, font=font, fill=fill)
+            y += line_h
     return np.asarray(img, dtype=np.float32) / 255.0
 
 
@@ -231,7 +260,8 @@ def _line_windows(lines_clip, duration):
 
 
 def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
-                       progress_cb=None, mask_w=384, model=MASK_MODEL_BEST):
+                       progress_cb=None, mask_w=384, model=MASK_MODEL_BEST,
+                       layout="side"):
     """Composite faded lyric lines BEHIND the person. Streams rawvideo through
     two ffmpeg pipes; frames with no visible line pass through untouched (no
     segmentation cost). final = frame*mask + (line over frame)*(1-mask)."""
@@ -268,6 +298,7 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
         stdin=subprocess.PIPE, stderr=err_f)
 
     line_cache = {}
+    side_memo = {}
     resolved_tint = tint
     n = 0
     prev_mask = None
@@ -294,9 +325,14 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
                 if resolved_tint == "auto":
                     resolved_tint = auto_tint(frame, mask)
                 s, e, txt = win
-                if txt not in line_cache:
-                    line_cache[txt] = build_line_image(txt, W, H, resolved_tint)
-                layer = line_cache[txt]
+                if txt not in side_memo:            # side fixed per line: no hopping
+                    side_memo[txt] = _pick_side(mask[..., 0])
+                key = (txt, side_memo[txt])
+                if key not in line_cache:
+                    line_cache[key] = build_line_image(
+                        txt, W, H, resolved_tint, layout=layout,
+                        side=side_memo[txt])
+                layer = line_cache[key]
                 fade = min(1.0, (t - s) / LINE_FADE, max(0.0, (e - t) / LINE_FADE))
                 a = layer[..., 3:4] * fade
                 f32 = frame.astype(np.float32)

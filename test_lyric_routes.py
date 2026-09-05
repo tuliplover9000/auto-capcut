@@ -44,7 +44,7 @@ def _install_mocks(calls, lrc=LRC_AT_ZERO, segs=None):
     autoedit.extract_audio = lambda src, wav: open(wav, "wb").close() or True
 
     def fake_render(input_path, lines, out_mp4, tmpdir, tint="auto",
-                    progress_cb=None, mask_w=384, model=None):
+                    progress_cb=None, mask_w=384, model=None, layout=None):
         calls.render.append({"lines": list(lines), "tint": tint, "model": model})
         shutil.copyfile(input_path, out_mp4)          # a real, playable stub
         if progress_cb:

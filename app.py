@@ -1046,7 +1046,7 @@ def lyric_job(job_id):
                  else lyricmode.MASK_MODEL_BEST)
         lyricmode.render_lyric_video(
             job["input_path"], lines, out, job["tmpdir"], tint=s["tint"],
-            model=model,
+            model=model, layout=s.get("text_layout", "side"),
             progress_cb=lambda d, t: _stage(
                 job_id, stage=f"Rendering… frame {d}/{t}"))
         _stage(job_id, state="done", step=5, stage="Lyric video ready")
@@ -1077,6 +1077,7 @@ def lyric_run():
         "tint": pick("tint", {"auto", "light", "dark"}, "auto"),
         "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
         "quality": pick("quality", {"best", "fast"}, "best"),
+        "text_layout": pick("text_layout", {"side", "poster"}, "side"),
     }
     job_id = uuid.uuid4().hex[:12]
     jobdir = os.path.join(JOBS_DIR, job_id)
@@ -1241,6 +1242,9 @@ PAGE = r"""<!doctype html>
         <div class="field"><label>Cutout quality</label><select id="lyricQuality">
           <option value="best" selected>Best (slower, ~1s/frame)</option>
           <option value="fast">Fast (soft on motion blur)</option></select></div>
+        <div class="field"><label>Text placement</label><select id="lyricLayout">
+          <option value="side" selected>Dead space (smaller, slight tuck)</option>
+          <option value="poster">Giant poster (full-width behind you)</option></select></div>
       </div>
       <div class="row mt">
         <div class="field"><label>Whisper model</label><select id="lyricWhisper">
@@ -1751,6 +1755,7 @@ $c("#lyricGo").onclick=async()=>{
   fd.append("start_at",$c("#lyricStart").value.trim());
   fd.append("tint",$c("#lyricTint").value);
   fd.append("quality",$c("#lyricQuality").value);
+  fd.append("text_layout",$c("#lyricLayout").value);
   fd.append("whisper_model",$c("#lyricWhisper").value);
   const r=await (await fetch("/lyric/run",{method:"POST",body:fd})).json();
   if(r.error){ $c("#lyricStage").textContent=r.error; syncLyricBtn(); return; }
