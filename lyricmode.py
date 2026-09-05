@@ -133,7 +133,10 @@ def align_offset(lrc_lines, all_words, min_anchors=2):
     offsets.sort()
     med = offsets[len(offsets) // 2]
     close = [o for o in offsets if abs(o - med) <= 2.0]
-    if len(close) < min_anchors:
+    # The agreeing cluster must be a STRICT MAJORITY of all anchors — a 50/50
+    # split between two well-separated offsets is disagreement, not a winner
+    # (the median just happens to land in one of the camps).
+    if len(close) < min_anchors or len(close) <= len(offsets) - len(close):
         return None
     return sum(close) / len(close)
 
@@ -172,6 +175,11 @@ def _line_windows(lines_clip, duration):
     for i, (t, txt) in enumerate(lines_clip):
         end = lines_clip[i + 1][0] if i + 1 < len(lines_clip) else t + MAX_LINE_HOLD
         end = min(end, t + MAX_LINE_HOLD, duration)
+        # A window shorter than a full fade in+out never becomes readable —
+        # drop it rather than render a sub-25%-opacity flash (also covers two
+        # lines sharing a timestamp: the earlier zero-length one goes).
+        if end - t < 2 * LINE_FADE:
+            continue
         if end > t >= 0 and t < duration:
             wins.append((t, end, txt))
     return wins
@@ -200,17 +208,24 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
         [ff, "-i", os.path.abspath(input_path), "-f", "rawvideo",
          "-pix_fmt", "rgb24", "-vf", f"scale={W}:{H}", "-"],
         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    # Encoder stderr goes to a FILE, not DEVNULL: when it dies mid-stream
+    # (bad output path, disk full, permissions) the pipe write breaks and its
+    # stderr tail is the only actionable message we can give the user.
+    err_path = os.path.join(tmpdir or os.path.dirname(os.path.abspath(out_mp4))
+                            or ".", "lyric_enc_err.txt")
+    err_f = open(err_path, "wb")
     enc = subprocess.Popen(
         [ff, "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
          "-r", f"{fps}", "-i", "-", "-i", os.path.abspath(input_path),
          "-map", "0:v", "-map", "1:a?", "-c:v", "libx264", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-ar", "48000", "-shortest", "-movflags", "+faststart",
          os.path.abspath(out_mp4)],
-        stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        stdin=subprocess.PIPE, stderr=err_f)
 
     line_cache = {}
     resolved_tint = tint
     n = 0
+    pipe_broke = False
     try:
         while True:
             buf = dec.stdout.read(frame_bytes)
@@ -219,7 +234,7 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
             t = n / fps
             win = next(((s, e, txt) for s, e, txt in wins if s <= t < e), None)
             if win is None:
-                enc.stdin.write(buf)
+                data = buf
             else:
                 frame = np.frombuffer(buf, np.uint8).reshape(H, W, 3)
                 mask = person_mask(frame, mask_w=mask_w)
@@ -234,7 +249,12 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
                 f32 = frame.astype(np.float32)
                 text_over = f32 * (1 - a) + layer[..., :3] * 255.0 * a
                 outf = f32 * mask + text_over * (1 - mask)
-                enc.stdin.write(outf.clip(0, 255).astype(np.uint8).tobytes())
+                data = outf.clip(0, 255).astype(np.uint8).tobytes()
+            try:
+                enc.stdin.write(data)
+            except (BrokenPipeError, OSError):
+                pipe_broke = True          # encoder died; raise with its stderr below
+                break
             n += 1
             if progress_cb and (n % 30 == 0):
                 progress_cb(min(n, total), total)
@@ -246,7 +266,16 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
         dec.stdout.close()
         dec.wait(timeout=60)
         rc = enc.wait(timeout=300)
+        err_f.close()
+    if pipe_broke or rc != 0 or not (os.path.exists(out_mp4)
+                                     and os.path.getsize(out_mp4) > 0):
+        tail = ""
+        try:
+            with open(err_path, encoding="utf-8", errors="replace") as fh:
+                tail = fh.read()[-800:]
+        except OSError:
+            pass
+        raise RuntimeError(
+            f"lyric render failed (encoder exit {rc}).\nffmpeg stderr: {tail}")
     if progress_cb:
         progress_cb(total, total)
-    if rc != 0 or not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
-        raise RuntimeError(f"lyric render failed (encoder exit {rc})")
