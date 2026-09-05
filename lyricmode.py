@@ -38,6 +38,30 @@ def parse_lrc(text):
     return out
 
 
+def align_offset(lrc_lines, all_words, min_anchors=2):
+    """One constant offset (clip_time - song_time), or None.
+    Anchors only on lines whose TEXT is unique in the song — a repeated chorus
+    fuzzy-matches an arbitrary occurrence and would poison the offset. Needs
+    >= min_anchors offsets within 2s of their median; returns their mean."""
+    from collections import Counter
+    counts = Counter(ln.strip().lower() for _, ln in lrc_lines)
+    offsets = []
+    for t_song, line in lrc_lines:
+        if counts[line.strip().lower()] != 1:
+            continue
+        spans = autoedit._map_clean_to_spans([line], all_words, min_ratio=0.6)
+        if spans:
+            offsets.append(spans[0][0] - t_song)
+    if len(offsets) < min_anchors:
+        return None
+    offsets.sort()
+    med = offsets[len(offsets) // 2]
+    close = [o for o in offsets if abs(o - med) <= 2.0]
+    if len(close) < min_anchors:
+        return None
+    return sum(close) / len(close)
+
+
 def _http_json(url, timeout):
     req = urllib.request.Request(url, headers={
         "User-Agent": "capcut-autoedit (https://github.com/tuliplover9000/auto-capcut)"})
