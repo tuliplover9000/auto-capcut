@@ -37,6 +37,9 @@ def _install_mocks(calls, lrc=LRC_AT_ZERO, segs=None):
             return segs
         return [{"start": 1.0, "text": LINE_A, "words": _words(LINE_A, 1.0)},
                 {"start": 3.0, "text": LINE_B, "words": _words(LINE_B, 3.0)}]
+    # lyric_job listens via transcribe_song (no speech-VAD — it eats singing);
+    # mock BOTH so a regression to autoedit.transcribe can't silently pass.
+    lyricmode.transcribe_song = fake_transcribe
     autoedit.transcribe = fake_transcribe
     autoedit.extract_audio = lambda src, wav: open(wav, "wb").close() or True
 

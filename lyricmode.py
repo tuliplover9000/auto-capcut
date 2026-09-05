@@ -141,6 +141,29 @@ def align_offset(lrc_lines, all_words, min_anchors=2):
     return sum(close) / len(close)
 
 
+def transcribe_song(wav_path, model_size="base"):
+    """Whisper for SUNG vocals — deliberately WITHOUT the Silero VAD that
+    autoedit.transcribe uses for talking heads: that VAD classifies singing
+    over music as non-speech and drops it wholesale (a real clip produced 0
+    segments with VAD vs. audible lyrics without). Only a very loose
+    no-speech guard remains, since singing routinely scores high
+    no_speech_prob. Returns the same segment shape as autoedit.transcribe."""
+    from faster_whisper import WhisperModel
+    m = WhisperModel(model_size, device="cpu", compute_type="int8",
+                     cpu_threads=max(4, os.cpu_count() or 4))
+    segs, _info = m.transcribe(wav_path, word_timestamps=True,
+                               condition_on_previous_text=False)
+    out = []
+    for seg in segs:
+        if getattr(seg, "no_speech_prob", 0.0) > 0.98:
+            continue
+        words = [{"start": float(w.start), "end": float(w.end), "word": w.word}
+                 for w in (seg.words or [])]
+        out.append({"start": float(seg.start), "end": float(seg.end),
+                    "text": seg.text, "words": words})
+    return out
+
+
 def _http_json(url, timeout):
     req = urllib.request.Request(url, headers={
         "User-Agent": "capcut-autoedit (https://github.com/tuliplover9000/auto-capcut)"})

@@ -1014,7 +1014,10 @@ def lyric_job(job_id):
             _stage(job_id, step=3, stage="Listening for the song (Whisper)")
             if not autoedit.extract_audio(job["input_path"], wav):
                 raise RuntimeError("Audio extraction failed — no audio track?")
-            segs = autoedit.transcribe(wav, s["whisper_model"])
+            # NOT autoedit.transcribe: its Silero VAD is tuned to reject
+            # non-speech, and sung vocals over music ARE non-speech to it — a
+            # real clip went 0 segments with VAD vs hearing lyrics without.
+            segs = lyricmode.transcribe_song(wav, s["whisper_model"])
         if lrc and offset is None:
             all_words = [w for sg in segs for w in sg.get("words", [])]
             offset = lyricmode.align_offset(lrc, all_words)
