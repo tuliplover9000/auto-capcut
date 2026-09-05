@@ -38,17 +38,22 @@ def parse_lrc(text):
     return out
 
 
-_SESSION = None
+# Bake-off on real night-yoyo footage (2026-09-05, worst-blur frames, 384px):
+#   u2netp 183ms/frame mid-band 5.4% | isnet ~1.0s 1.1-2.8% | birefnet-lite
+#   ~6.8s 0.5% | bria ~13s 0.6%. birefnet/bria are HOURS per clip on CPU;
+#   isnet is the quality/speed sweet spot, u2netp stays as the "fast" option.
+MASK_MODEL_BEST = "isnet-general-use"
+MASK_MODEL_FAST = "u2netp"
+
+_SESSIONS = {}
 
 
-def _mask_session():
-    """Lazy shared rembg session. u2netp = the small fast model (~5MB) — the
-    default bria model is 1GB and ~10x slower, unusable per-frame."""
-    global _SESSION
-    if _SESSION is None:
+def _mask_session(model=MASK_MODEL_BEST):
+    """Lazy shared rembg session, one per model name."""
+    if model not in _SESSIONS:
         from rembg import new_session
-        _SESSION = new_session("u2netp")
-    return _SESSION
+        _SESSIONS[model] = new_session(model)
+    return _SESSIONS[model]
 
 
 def _dilate(m, iters=2):
@@ -61,7 +66,7 @@ def _dilate(m, iters=2):
     return m
 
 
-def person_mask(rgb, mask_w=384):
+def person_mask(rgb, mask_w=384, model=MASK_MODEL_BEST):
     """HxWx3 uint8 -> HxWx1 float32 person mask in [0,1] (1 = person).
     Segmentation runs at mask_w wide and is upscaled — plenty for text that is
     deliberately faint. The raw model output is HARDENED (smoothstep of the
@@ -74,7 +79,7 @@ def person_mask(rgb, mask_w=384):
     h, w = rgb.shape[:2]
     small = Image.fromarray(rgb).resize(
         (mask_w, max(2, round(h * mask_w / w))), Image.BILINEAR)
-    m = remove(small, session=_mask_session(), only_mask=True)
+    m = remove(small, session=_mask_session(model), only_mask=True)
     a = np.asarray(m, dtype=np.float32) / 255.0
     a = np.clip((a - 0.30) / 0.30, 0.0, 1.0)          # harden uncertainty
     a = _dilate(a, iters=2)
@@ -226,7 +231,7 @@ def _line_windows(lines_clip, duration):
 
 
 def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
-                       progress_cb=None, mask_w=384):
+                       progress_cb=None, mask_w=384, model=MASK_MODEL_BEST):
     """Composite faded lyric lines BEHIND the person. Streams rawvideo through
     two ffmpeg pipes; frames with no visible line pass through untouched (no
     segmentation cost). final = frame*mask + (line over frame)*(1-mask)."""
@@ -279,7 +284,7 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
                 prev_mask = None               # gap: stale confidence expires
             else:
                 frame = np.frombuffer(buf, np.uint8).reshape(H, W, 3)
-                mask = person_mask(frame, mask_w=mask_w)
+                mask = person_mask(frame, mask_w=mask_w, model=model)
                 # Temporal backstop: a motion-blurred frame borrows (decayed)
                 # confidence from its predecessor, so the person never flickers
                 # translucent to the text mid-trick.

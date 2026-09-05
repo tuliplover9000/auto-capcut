@@ -1042,8 +1042,11 @@ def lyric_job(job_id):
 
         _stage(job_id, step=4, stage="Rendering (this is the slow part)")
         out = os.path.join(job["outdir"], "lyric.mp4")
+        model = (lyricmode.MASK_MODEL_FAST if s.get("quality") == "fast"
+                 else lyricmode.MASK_MODEL_BEST)
         lyricmode.render_lyric_video(
             job["input_path"], lines, out, job["tmpdir"], tint=s["tint"],
+            model=model,
             progress_cb=lambda d, t: _stage(
                 job_id, stage=f"Rendering… frame {d}/{t}"))
         _stage(job_id, state="done", step=5, stage="Lyric video ready")
@@ -1073,6 +1076,7 @@ def lyric_run():
         "start_at": _parse_song_pos(request.form.get("start_at")),
         "tint": pick("tint", {"auto", "light", "dark"}, "auto"),
         "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
+        "quality": pick("quality", {"best", "fast"}, "best"),
     }
     job_id = uuid.uuid4().hex[:12]
     jobdir = os.path.join(JOBS_DIR, job_id)
@@ -1234,6 +1238,9 @@ PAGE = r"""<!doctype html>
           <option value="auto" selected>Auto</option>
           <option value="light">Faded white</option>
           <option value="dark">Faded dark</option></select></div>
+        <div class="field"><label>Cutout quality</label><select id="lyricQuality">
+          <option value="best" selected>Best (slower, ~1s/frame)</option>
+          <option value="fast">Fast (soft on motion blur)</option></select></div>
       </div>
       <div class="row mt">
         <div class="field"><label>Whisper model</label><select id="lyricWhisper">
@@ -1743,6 +1750,7 @@ $c("#lyricGo").onclick=async()=>{
   fd.append("artist",$c("#lyricArtist").value.trim());
   fd.append("start_at",$c("#lyricStart").value.trim());
   fd.append("tint",$c("#lyricTint").value);
+  fd.append("quality",$c("#lyricQuality").value);
   fd.append("whisper_model",$c("#lyricWhisper").value);
   const r=await (await fetch("/lyric/run",{method:"POST",body:fd})).json();
   if(r.error){ $c("#lyricStage").textContent=r.error; syncLyricBtn(); return; }
