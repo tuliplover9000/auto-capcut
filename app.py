@@ -27,6 +27,7 @@ for _s in (sys.stdout, sys.stderr):
 from flask import (Flask, request, jsonify, send_file,
                    render_template_string, abort)
 import autoedit
+import lyricmode
 import overlays
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -970,6 +971,163 @@ def clip_download(job_id, idx):
     try:
         return send_file(path, as_attachment=True,
                          download_name=f"clip_{idx}.mp4")
+    except (FileNotFoundError, OSError):
+        abort(404)
+
+
+# ── Lyric mode: one-shot render job ──────────────────────────────────────────
+
+def _parse_song_pos(s):
+    """'0:42' / '1:05.5' / '42' -> seconds; blank or junk -> None."""
+    s = (s or "").strip()
+    if not s:
+        return None
+    m = re.match(r"^(\d+):(\d{1,2}(?:\.\d+)?)$", s)
+    if m:
+        return int(m.group(1)) * 60 + float(m.group(2))
+    try:
+        return max(0.0, float(s))
+    except ValueError:
+        return None
+
+
+def lyric_job(job_id):
+    job = JOBS[job_id]
+    try:
+        _stage(job_id, state="running", step=1, stage="Probing video")
+        spec = autoedit.probe(job["input_path"])
+        if spec["duration"] <= 0:
+            raise RuntimeError("Couldn't read a valid duration.")
+        job["spec"] = spec
+        s = job["settings"]
+
+        _stage(job_id, step=2, stage="Fetching synced lyrics")
+        lrc_text = lyricmode.fetch_synced_lyrics(s["track"], s["artist"])
+        lrc = lyricmode.parse_lrc(lrc_text) if lrc_text else []
+
+        offset = None
+        if s["start_at"] is not None:
+            offset = -s["start_at"]            # clip t = song t - start_at
+        wav = os.path.join(job["tmpdir"], "audio.wav")
+        segs = []
+        if offset is None or not lrc:
+            _stage(job_id, step=3, stage="Listening for the song (Whisper)")
+            if not autoedit.extract_audio(job["input_path"], wav):
+                raise RuntimeError("Audio extraction failed — no audio track?")
+            segs = autoedit.transcribe(wav, s["whisper_model"])
+        if lrc and offset is None:
+            all_words = [w for sg in segs for w in sg.get("words", [])]
+            offset = lyricmode.align_offset(lrc, all_words)
+            if offset is None:
+                raise RuntimeError(
+                    "Couldn't hear enough of the song to sync the lyrics. "
+                    "Enter where the song starts (e.g. 0:42) and retry.")
+        if lrc:
+            lines = [(t + offset, ln) for t, ln in lrc
+                     if 0 <= t + offset < spec["duration"]]
+        else:                                   # lrclib miss -> Whisper's own lines
+            lines = [(float(sg.get("start", 0.0)), str(sg.get("text", "")).strip())
+                     for sg in segs
+                     if str(sg.get("text", "")).strip()
+                     and 0 <= float(sg.get("start", 0.0)) < spec["duration"]]
+            _stage(job_id, stage="No synced lyrics found — using what Whisper heard")
+        if not lines:
+            raise RuntimeError(
+                "No lyric lines land inside this clip — check the song "
+                "name/artist or the start position.")
+        job["lines"] = lines
+
+        _stage(job_id, step=4, stage="Rendering (this is the slow part)")
+        out = os.path.join(job["outdir"], "lyric.mp4")
+        lyricmode.render_lyric_video(
+            job["input_path"], lines, out, job["tmpdir"], tint=s["tint"],
+            progress_cb=lambda d, t: _stage(
+                job_id, stage=f"Rendering… frame {d}/{t}"))
+        _stage(job_id, state="done", step=5, stage="Lyric video ready")
+    except Exception as e:                                     # noqa: BLE001
+        _stage(job_id, state="error", error=str(e), stage="Failed")
+
+
+@app.route("/lyric/run", methods=["POST"])
+def lyric_run():
+    f = request.files.get("video")
+    if not f or not f.filename:
+        return jsonify(error="Upload the clip you filmed with the song playing."), 400
+    ext = os.path.splitext(f.filename)[1].lower()
+    if ext not in ALLOWED_EXT:
+        return jsonify(error=f"Unsupported type '{ext or '(none)'}'."), 400
+    track = (request.form.get("track") or "").strip()
+    if not track:
+        return jsonify(error="Type the song title so the lyrics can be looked up."), 400
+
+    def pick(name, allowed, default):
+        v = (request.form.get(name) or "").strip()
+        return v if v in allowed else default
+
+    settings = {
+        "track": track,
+        "artist": (request.form.get("artist") or "").strip(),
+        "start_at": _parse_song_pos(request.form.get("start_at")),
+        "tint": pick("tint", {"auto", "light", "dark"}, "auto"),
+        "whisper_model": pick("whisper_model", {"tiny", "base", "small", "medium"}, "base"),
+    }
+    job_id = uuid.uuid4().hex[:12]
+    jobdir = os.path.join(JOBS_DIR, job_id)
+    outdir = os.path.join(jobdir, "out"); os.makedirs(outdir, exist_ok=True)
+    tmpdir = os.path.join(jobdir, "tmp"); os.makedirs(tmpdir, exist_ok=True)
+    input_path = os.path.join(jobdir, "input" + ext)
+    f.save(input_path)
+    with LOCK:
+        JOBS[job_id] = {
+            "kind": "lyric", "input_path": input_path, "url": "",
+            "jobdir": jobdir, "outdir": outdir, "tmpdir": tmpdir,
+            "name": f.filename, "settings": settings, "chat": [],
+            "state": "queued", "step": 0, "stage": "Starting…", "error": "",
+            "spec": None, "lines": [],
+        }
+    threading.Thread(target=lyric_job, args=(job_id,), daemon=True).start()
+    return jsonify(job_id=job_id)
+
+
+@app.route("/lyric/status/<job_id>")
+def lyric_status(job_id):
+    with LOCK:
+        j = JOBS.get(job_id)
+        if not j or j.get("kind") != "lyric":
+            return jsonify(error="unknown job"), 404
+        out = os.path.join(j["outdir"], "lyric.mp4")
+        return jsonify(state=j["state"], step=j["step"], stage=j["stage"],
+                       error=j["error"], lines=len(j.get("lines") or []),
+                       has_mp4=os.path.exists(out))
+
+
+def _lyric_file(job_id):
+    with LOCK:
+        j = JOBS.get(job_id)
+    if not j or j.get("kind") != "lyric" or j["state"] != "done":
+        return None
+    p = os.path.join(j["outdir"], "lyric.mp4")
+    return p if os.path.exists(p) else None
+
+
+@app.route("/lyric/video/<job_id>")
+def lyric_video(job_id):
+    path = _lyric_file(job_id)
+    if not path:
+        abort(404)
+    try:
+        return send_file(path, mimetype="video/mp4", conditional=True, max_age=0)
+    except (FileNotFoundError, OSError):
+        abort(404)
+
+
+@app.route("/lyric/download/<job_id>")
+def lyric_download(job_id):
+    path = _lyric_file(job_id)
+    if not path:
+        abort(404)
+    try:
+        return send_file(path, as_attachment=True, download_name="lyric.mp4")
     except (FileNotFoundError, OSError):
         abort(404)
 
