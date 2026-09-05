@@ -163,3 +163,90 @@ def fetch_synced_lyrics(track, artist, timeout=15):
     except Exception:
         pass
     return None
+
+
+def _line_windows(lines_clip, duration):
+    """[(t_start, t_end, text)] — each line holds until the next line or
+    MAX_LINE_HOLD, clamped to the clip."""
+    wins = []
+    for i, (t, txt) in enumerate(lines_clip):
+        end = lines_clip[i + 1][0] if i + 1 < len(lines_clip) else t + MAX_LINE_HOLD
+        end = min(end, t + MAX_LINE_HOLD, duration)
+        if end > t >= 0 and t < duration:
+            wins.append((t, end, txt))
+    return wins
+
+
+def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
+                       progress_cb=None, mask_w=384):
+    """Composite faded lyric lines BEHIND the person. Streams rawvideo through
+    two ffmpeg pipes; frames with no visible line pass through untouched (no
+    segmentation cost). final = frame*mask + (line over frame)*(1-mask)."""
+    ff = autoedit.ff_exe()
+    if not ff:
+        raise RuntimeError("ffmpeg not found")
+    spec = autoedit.probe(input_path)
+    W = int(spec["disp_width"]) - int(spec["disp_width"]) % 2
+    H = int(spec["disp_height"]) - int(spec["disp_height"]) % 2
+    fps = float(spec.get("fps") or 30.0)
+    duration = float(spec.get("duration") or 0.0)
+    if W <= 0 or H <= 0 or duration <= 0:
+        raise RuntimeError(f"bad source: {W}x{H} {duration}s")
+    wins = _line_windows(sorted(lines_clip), duration)
+    frame_bytes = W * H * 3
+    total = max(1, round(duration * fps))
+
+    dec = subprocess.Popen(
+        [ff, "-i", os.path.abspath(input_path), "-f", "rawvideo",
+         "-pix_fmt", "rgb24", "-vf", f"scale={W}:{H}", "-"],
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    enc = subprocess.Popen(
+        [ff, "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
+         "-r", f"{fps}", "-i", "-", "-i", os.path.abspath(input_path),
+         "-map", "0:v", "-map", "1:a?", "-c:v", "libx264", "-pix_fmt", "yuv420p",
+         "-c:a", "aac", "-ar", "48000", "-shortest", "-movflags", "+faststart",
+         os.path.abspath(out_mp4)],
+        stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
+
+    line_cache = {}
+    resolved_tint = tint
+    n = 0
+    try:
+        while True:
+            buf = dec.stdout.read(frame_bytes)
+            if not buf or len(buf) < frame_bytes:
+                break
+            t = n / fps
+            win = next(((s, e, txt) for s, e, txt in wins if s <= t < e), None)
+            if win is None:
+                enc.stdin.write(buf)
+            else:
+                frame = np.frombuffer(buf, np.uint8).reshape(H, W, 3)
+                mask = person_mask(frame, mask_w=mask_w)
+                if resolved_tint == "auto":
+                    resolved_tint = auto_tint(frame, mask)
+                s, e, txt = win
+                if txt not in line_cache:
+                    line_cache[txt] = build_line_image(txt, W, H, resolved_tint)
+                layer = line_cache[txt]
+                fade = min(1.0, (t - s) / LINE_FADE, max(0.0, (e - t) / LINE_FADE))
+                a = layer[..., 3:4] * fade
+                f32 = frame.astype(np.float32)
+                text_over = f32 * (1 - a) + layer[..., :3] * 255.0 * a
+                outf = f32 * mask + text_over * (1 - mask)
+                enc.stdin.write(outf.clip(0, 255).astype(np.uint8).tobytes())
+            n += 1
+            if progress_cb and (n % 30 == 0):
+                progress_cb(min(n, total), total)
+    finally:
+        try:
+            enc.stdin.close()
+        except OSError:
+            pass
+        dec.stdout.close()
+        dec.wait(timeout=60)
+        rc = enc.wait(timeout=300)
+    if progress_cb:
+        progress_cb(total, total)
+    if rc != 0 or not (os.path.exists(out_mp4) and os.path.getsize(out_mp4) > 0):
+        raise RuntimeError(f"lyric render failed (encoder exit {rc})")
