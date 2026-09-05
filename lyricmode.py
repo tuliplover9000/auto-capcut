@@ -124,7 +124,7 @@ def _wrap_rows(words, probe, font, maxw):
     return rows
 
 
-def build_line_image(line, W, H, tint, layout="top", side="left"):
+def build_line_image(line, W, H, tint, layout="top", side="left", y_anchor=None):
     """One lyric line as an HxWx4 float32 RGBA layer in [0,1], faded fill.
     layout="top" (default): the clean lyric-edit reference look — light sans
       (Montserrat), SENTENCE CASE, short centered rows in the upper dead
@@ -151,6 +151,13 @@ def build_line_image(line, W, H, tint, layout="top", side="left"):
     size, rows, line_h = start_size, [words[0]], round(start_size * lh)
     while size > min_size:
         font = ImageFont.truetype(font_path, size)
+        if layout == "top":
+            # PIL renders a VARIABLE font at its default (thinnest) master —
+            # the text came out wispy. Pin the weight axis to semibold.
+            try:
+                font.set_variation_by_axes([600])
+            except Exception:
+                pass
         rows = _wrap_rows(words, probe, font, maxw)
         line_h = round(size * lh)
         if (len(rows) * line_h <= H * max_hfrac
@@ -160,7 +167,16 @@ def build_line_image(line, W, H, tint, layout="top", side="left"):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     if layout == "top":
-        y = round(H * 0.07)
+        block_h = len(rows) * line_h
+        if y_anchor is not None:
+            # Sit the block ABOVE the person's head (y_anchor = head-top
+            # fraction from the mask), with only ~the last row tucking behind —
+            # matches the reference; a fixed y plowed rows through the face
+            # whenever the subject stands tall in frame.
+            y = int(min(max(H * 0.03, y_anchor * H - block_h + 0.85 * line_h),
+                        H * 0.45))
+        else:
+            y = round(H * 0.07)
         for r in rows:
             rw = probe.textlength(r, font=font)
             d.text(((W - rw) // 2, y), r, font=font, fill=fill)
@@ -327,6 +343,7 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
 
     line_cache = {}
     side_memo = {}
+    anchor_memo = {}
     resolved_tint = tint
     n = 0
     prev_mask = None
@@ -355,11 +372,16 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
                 s, e, txt = win
                 if txt not in side_memo:            # side fixed per line: no hopping
                     side_memo[txt] = _pick_side(mask[..., 0])
-                key = (txt, side_memo[txt])
+                if txt not in anchor_memo:          # head-top at line start, held
+                    rowsum = mask[..., 0].sum(axis=1)
+                    idx = np.nonzero(rowsum > W * 0.02)[0]
+                    anchor_memo[txt] = (idx[0] / H) if idx.size else 0.5
+                key = (txt, side_memo[txt], round(anchor_memo[txt], 2))
                 if key not in line_cache:
                     line_cache[key] = build_line_image(
                         txt, W, H, resolved_tint, layout=layout,
-                        side=side_memo[txt])
+                        side=side_memo[txt],
+                        y_anchor=anchor_memo[txt] if layout == "top" else None)
                 layer = line_cache[key]
                 fade = min(1.0, (t - s) / LINE_FADE, max(0.0, (e - t) / LINE_FADE))
                 a = layer[..., 3:4] * fade
