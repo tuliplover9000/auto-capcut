@@ -19,7 +19,7 @@ def test_render_composites_only_during_lines():
     tmp = tempfile.mkdtemp()
     src = os.path.join(tmp, "s.mp4"); _src(src)
     real_mask = lyricmode.person_mask
-    lyricmode.person_mask = lambda rgb, mask_w=384: np.concatenate(
+    lyricmode.person_mask = lambda rgb, mask_w=384, model=None: np.concatenate(
         [np.zeros((rgb.shape[0], rgb.shape[1] // 2, 1), np.float32),
          np.ones((rgb.shape[0], rgb.shape[1] - rgb.shape[1] // 2, 1), np.float32)], axis=1)
     out = os.path.join(tmp, "o.mp4")
@@ -57,7 +57,7 @@ def test_silent_source_still_renders():
                   "-c:v", "libx264", "-pix_fmt", "yuv420p", src], timeout=120)
     assert not autoedit._has_audio(src)
     real_mask = lyricmode.person_mask
-    lyricmode.person_mask = lambda rgb, mask_w=384: np.zeros(
+    lyricmode.person_mask = lambda rgb, mask_w=384, model=None: np.zeros(
         (rgb.shape[0], rgb.shape[1], 1), np.float32)
     out = os.path.join(tmp, "o.mp4")
     try:
@@ -75,7 +75,7 @@ def test_auto_tint_resolves_once_and_sticks():
     autoedit.run([ff, "-y", "-f", "lavfi", "-i", "color=c=0x101010:size=160x240:rate=10:duration=2",
                   "-c:v", "libx264", "-pix_fmt", "yuv420p", src], timeout=120)
     real_mask, real_tint = lyricmode.person_mask, lyricmode.auto_tint
-    lyricmode.person_mask = lambda rgb, mask_w=384: np.zeros(
+    lyricmode.person_mask = lambda rgb, mask_w=384, model=None: np.zeros(
         (rgb.shape[0], rgb.shape[1], 1), np.float32)
     calls = []
     def spy(rgb, mask):
