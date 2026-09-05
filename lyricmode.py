@@ -38,6 +38,33 @@ def parse_lrc(text):
     return out
 
 
+_SESSION = None
+
+
+def _mask_session():
+    """Lazy shared rembg session. u2netp = the small fast model (~5MB) — the
+    default bria model is 1GB and ~10x slower, unusable per-frame."""
+    global _SESSION
+    if _SESSION is None:
+        from rembg import new_session
+        _SESSION = new_session("u2netp")
+    return _SESSION
+
+
+def person_mask(rgb, mask_w=384):
+    """HxWx3 uint8 -> HxWx1 float32 person mask in [0,1] (1 = person).
+    Segmentation runs at mask_w wide and is upscaled — plenty for text that is
+    deliberately faint."""
+    from PIL import Image
+    from rembg import remove
+    h, w = rgb.shape[:2]
+    small = Image.fromarray(rgb).resize(
+        (mask_w, max(2, round(h * mask_w / w))), Image.BILINEAR)
+    m = remove(small, session=_mask_session(), only_mask=True)
+    m = m.resize((w, h), Image.BILINEAR)
+    return (np.asarray(m, dtype=np.float32) / 255.0)[..., None]
+
+
 def build_line_image(line, W, H, tint):
     """Giant uppercase wrapped Anton line as an HxWx4 float32 RGBA layer in
     [0,1]. Faded fill (the whole point); auto-shrinks font until the wrap fits
