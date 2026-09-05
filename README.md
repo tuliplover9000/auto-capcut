@@ -8,7 +8,7 @@ bad takes removed — plus word-accurate captions.
 Import both into CapCut and refine from there.
 
 There's also a **localhost web UI** — run `python app.py`, open
-http://127.0.0.1:5000. It has two modes:
+http://127.0.0.1:5000. It has three modes:
 
 **Edit a clip** (your own talking-head footage): drag a clip in and edit it with
 a chat panel — "keep the intro", "cut the first 5 seconds", "make the captions
@@ -29,7 +29,24 @@ captions burned in. Clips are kept verbatim — precise in/out + a small tail,
 no internal re-cutting. Old job folders in `webjobs/` are swept automatically
 after 3 days (`AUTOEDIT_KEEP_JOBS_DAYS` to change).
 
-> **Note:** both modes call the `claude` CLI for editing decisions. If every
+**Lyric video** (a clip you filmed **with the song playing in the room** — yoyo
+tricks, dancing, b-boying): drop the clip in and type the song title/artist.
+It pulls the song's **synced lyrics from lrclib.net** (free, no key), has
+Whisper listen to the clip's own audio, fuzzy-matches the misheard sung words
+against the LRC to recover **one constant offset**, then renders the lyrics
+giant and faded **behind you** — per-frame person segmentation (rembg
+`u2netp`) so you occlude the letters, one line at a time with 0.2s fades.
+Nothing is cut and the audio is untouched; the clip passes through at full
+length. If it can't hear enough of the song to sync, there's a **"clip starts
+at (song time)"** box — type `0:42` and it skips Whisper entirely. No synced
+lyrics on lrclib? It falls back to Whisper's own lines and says so. Needs
+`rembg` (`pip install rembg onnxruntime`); the ~5MB `u2netp` model downloads
+itself on first use. Rendering is the slow part — segmentation runs at roughly
+5 frames/sec on lyric-visible frames, and frames with no line showing pass
+through untouched.
+
+> **Note:** the edit and auto-clip modes call the `claude` CLI for editing
+> decisions (lyric mode does not — it's Whisper + lrclib only). If every
 > analysis fails (or the UI says every Claude call errored), run `claude`
 > interactively and sign in again — an expired login surfaces as 401s.
 
