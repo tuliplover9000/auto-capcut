@@ -66,6 +66,32 @@ def test_silent_source_still_renders():
         lyricmode.person_mask = real_mask
     assert os.path.exists(out) and os.path.getsize(out) > 0
 
+def test_auto_tint_resolves_once_and_sticks():
+    """tint='auto' must be decided on the FIRST lyric frame only — re-deciding
+    per frame would flicker the text colour mid-line."""
+    ff = autoedit.ff_exe()
+    tmp = tempfile.mkdtemp()
+    src = os.path.join(tmp, "a.mp4")
+    autoedit.run([ff, "-y", "-f", "lavfi", "-i", "color=c=0x101010:size=160x240:rate=10:duration=2",
+                  "-c:v", "libx264", "-pix_fmt", "yuv420p", src], timeout=120)
+    real_mask, real_tint = lyricmode.person_mask, lyricmode.auto_tint
+    lyricmode.person_mask = lambda rgb, mask_w=384: np.zeros(
+        (rgb.shape[0], rgb.shape[1], 1), np.float32)
+    calls = []
+    def spy(rgb, mask):
+        calls.append(len(calls))
+        return "light" if not calls[:-1] else "dark"      # would flip if re-asked
+    lyricmode.auto_tint = spy
+    out = os.path.join(tmp, "o.mp4")
+    try:
+        # one line covering the whole 2s clip -> ~20 lyric frames
+        lyricmode.render_lyric_video(src, [(0.0, "STICKY")], out, tmp, tint="auto")
+    finally:
+        lyricmode.person_mask, lyricmode.auto_tint = real_mask, real_tint
+    assert os.path.exists(out) and os.path.getsize(out) > 0
+    assert len(calls) == 1, f"auto_tint ran {len(calls)}x — it must resolve once"
+
+
 def test_line_windows_clamped():
     w = lyricmode._line_windows([(1.0, "a"), (2.0, "b"), (100.0, "far")], 20.0)
     assert w[0] == (1.0, 2.0, "a")
@@ -77,4 +103,5 @@ if __name__ == "__main__":
     test_line_windows_clamped()
     test_render_composites_only_during_lines()
     test_silent_source_still_renders()
+    test_auto_tint_resolves_once_and_sticks()
     print("PASS")
