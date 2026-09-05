@@ -45,6 +45,16 @@ def parse_lrc(text):
 MASK_MODEL_BEST = "isnet-general-use"
 MASK_MODEL_FAST = "u2netp"
 
+# Mask post-processing dials (tuned on real fast-motion yoyo footage):
+# a whipping arm at 30fps is a HALF-TRANSPARENT smear the model only
+# half-claims, so letters ghost through the streak. Lower floor + longer
+# temporal carry + wider dilation claim more of the streak as person; the
+# faint text hides the slight halo this risks.
+MASK_HARDEN_LO = 0.18     # model confidence at/below this -> background
+MASK_HARDEN_HI = 0.50     # confidence at/above this -> fully person
+MASK_DILATE_ITERS = 3
+MASK_CARRY = 0.92         # per-frame decay of borrowed previous-frame mask
+
 _SESSIONS = {}
 
 
@@ -81,8 +91,9 @@ def person_mask(rgb, mask_w=384, model=MASK_MODEL_BEST):
         (mask_w, max(2, round(h * mask_w / w))), Image.BILINEAR)
     m = remove(small, session=_mask_session(model), only_mask=True)
     a = np.asarray(m, dtype=np.float32) / 255.0
-    a = np.clip((a - 0.30) / 0.30, 0.0, 1.0)          # harden uncertainty
-    a = _dilate(a, iters=2)
+    a = np.clip((a - MASK_HARDEN_LO) / (MASK_HARDEN_HI - MASK_HARDEN_LO),
+                0.0, 1.0)                              # harden uncertainty
+    a = _dilate(a, iters=MASK_DILATE_ITERS)
     m = Image.fromarray((a * 255.0).astype(np.uint8)).resize((w, h), Image.BILINEAR)
     return (np.asarray(m, dtype=np.float32) / 255.0)[..., None]
 
@@ -320,7 +331,7 @@ def render_lyric_video(input_path, lines_clip, out_mp4, tmpdir, tint="auto",
                 # confidence from its predecessor, so the person never flickers
                 # translucent to the text mid-trick.
                 if prev_mask is not None:
-                    mask = np.maximum(mask, prev_mask * 0.85)
+                    mask = np.maximum(mask, prev_mask * MASK_CARRY)
                 prev_mask = mask
                 if resolved_tint == "auto":
                     resolved_tint = auto_tint(frame, mask)
