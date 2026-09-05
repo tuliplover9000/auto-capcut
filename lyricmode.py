@@ -38,6 +38,55 @@ def parse_lrc(text):
     return out
 
 
+def build_line_image(line, W, H, tint):
+    """Giant uppercase wrapped Anton line as an HxWx4 float32 RGBA layer in
+    [0,1]. Faded fill (the whole point); auto-shrinks font until the wrap fits
+    the width and <=62% of the height."""
+    from PIL import Image, ImageDraw, ImageFont
+    fill = (255, 255, 255, 105) if tint == "light" else (25, 25, 30, 80)
+    words = line.upper().split() or ["♪"]
+    probe = ImageDraw.Draw(Image.new("RGB", (8, 8)))
+    size, rows, line_h = 210, [words[0]], 235
+    while size > 70:
+        font = ImageFont.truetype(FONT_PATH, size)
+        maxw = W - 110
+        rows, cur = [], ""
+        for wd in words:
+            t = (cur + " " + wd).strip()
+            if probe.textlength(t, font=font) <= maxw:
+                cur = t
+            else:
+                if cur:
+                    rows.append(cur)
+                cur = wd
+        if cur:
+            rows.append(cur)
+        line_h = round(size * 1.12)
+        if (len(rows) * line_h <= H * 0.62
+                and all(probe.textlength(r, font=font) <= maxw for r in rows)):
+            break
+        size -= 15
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    y = round(H * 0.06)
+    for r in rows:
+        d.text((55, y), r, font=font, fill=fill)
+        y += line_h
+    return np.asarray(img, dtype=np.float32) / 255.0
+
+
+def auto_tint(rgb, mask):
+    """Faded-white text on dark backgrounds, faded-dark on light ones. Samples
+    mean luminance of the top 55% of the frame excluding the person."""
+    h = rgb.shape[0]
+    top = rgb[: int(h * 0.55)].astype(np.float32)
+    m = 1.0 - mask[: int(h * 0.55), ..., 0]
+    if m.sum() < 1:
+        return "light"
+    lum = (0.299 * top[..., 0] + 0.587 * top[..., 1] + 0.114 * top[..., 2])
+    return "dark" if float((lum * m).sum() / m.sum()) > 140.0 else "light"
+
+
 def align_offset(lrc_lines, all_words, min_anchors=2):
     """One constant offset (clip_time - song_time), or None.
     Anchors only on lines whose TEXT is unique in the song — a repeated chorus
