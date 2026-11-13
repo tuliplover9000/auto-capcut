@@ -6,14 +6,14 @@ import {SpeedTrap} from './speedtrap/SpeedTrap';
 import {totalFrames, Episode} from './speedtrap/timeline';
 import animals from '../episodes/animals-speeding.json';
 
-const SHEET: ArtKey[] = ['human', 'bear', 'greyhound', 'pronghorn', 'cheetah', 'falcon'];
+const SHEET: ArtKey[] = ['human', 'bear', 'greyhound', 'pronghorn', 'cheetah', 'falcon', 'kangaroo', 'pigeon'];
 
 // Dev-only: every pictogram + an LED sample on one still, for art review.
 const ArtSheet: React.FC = () => (
-  <AbsoluteFill style={{background: '#6a6e76', padding: 40, display: 'flex', flexWrap: 'wrap', gap: 30, alignContent: 'flex-start'}}>
+  <AbsoluteFill style={{background: '#6a6e76', padding: 40, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 30, alignContent: 'flex-start'}}>
     {SHEET.map((a) => (
       <div key={a} style={{background: '#8a8e96', padding: 10}}>
-        <Pictogram art={a} color="#0d0f14" width={460} stride={0.6} />
+        <Pictogram art={a} color="#0d0f14" width={290} stride={0.6} />
       </div>
     ))}
     <div style={{background: '#0b0b0c', padding: 24}}>

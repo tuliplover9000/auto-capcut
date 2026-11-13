@@ -5,7 +5,7 @@ import React from 'react';
 // 400 x 260 box whose ground line is y = 250. `stride` (-1..1) swings the
 // legs so a 2-pose cycle reads as running.
 
-export type ArtKey = 'human' | 'bear' | 'greyhound' | 'pronghorn' | 'cheetah' | 'falcon';
+export type ArtKey = 'human' | 'bear' | 'greyhound' | 'pronghorn' | 'cheetah' | 'falcon' | 'kangaroo' | 'pigeon';
 
 type P = {color: string; stride?: number};
 
@@ -132,6 +132,75 @@ const Falcon: React.FC<P> = ({color}) => (
   </g>
 );
 
+// Kangaroo mid-bound, after the Australian yellow-diamond road sign: body
+// pitched forward, tiny forearms, tall ears, and the long tail + trailing
+// hind feet forming the "<" that reads as kangaroo even at chip size. Both
+// hind legs move together (it hops, it doesn't run): `stride` swings the
+// legs from tucked-forward (landing) to stretched-back (airborne) and lifts
+// the whole body on the push-off, with the tail counter-swinging for balance.
+type Pt = [number, number];
+const mix = (a: Pt[], b: Pt[], t: number): Pt[] => a.map(([x, y], i) => [x + (b[i][0] - x) * t, y + (b[i][1] - y) * t]);
+// 3-key pose blend on stride: -1 → lo, 0 → mid, +1 → hi
+const pose3 = (lo: Pt[], mid: Pt[], hi: Pt[], s: number) => (s < 0 ? mix(mid, lo, -s) : mix(mid, hi, s));
+
+// hind leg = hip, knee (juts forward), heel (points back), toe
+const K_LAND: Pt[] = [[160, 172], [214, 202], [184, 238], [246, 246]];
+const K_LAUNCH: Pt[] = [[160, 172], [206, 208], [154, 226], [96, 244]];
+const K_FLY: Pt[] = [[160, 172], [198, 206], [136, 222], [70, 238]];
+
+const Kangaroo: React.FC<P> = ({color, stride = 0}) => {
+  const lift = -(stride + 1) * 12;
+  const leg = pose3(K_LAND, K_LAUNCH, K_FLY, stride);
+  return (
+    <g transform={`translate(0 ${lift})`}>
+      <path
+        d="M144 154 C 100 180, 58 204, 16 222 C 62 218, 106 212, 148 200 Z"
+        fill={color}
+        stroke={color}
+        strokeWidth={10}
+        strokeLinejoin="round"
+        transform={`rotate(${stride * 6} 140 180)`}
+      />
+      <ellipse cx={166} cy={164} rx={50} ry={44} fill={color} />
+      <ellipse cx={214} cy={118} rx={60} ry={31} fill={color} transform="rotate(-50 214 118)" />
+      {limb([[238, 82], [266, 58]], 28, color, 'n')}
+      <circle cx={274} cy={50} r={18} fill={color} />
+      <ellipse cx={296} cy={60} rx={24} ry={12} fill={color} transform="rotate(26 296 60)" />
+      <ellipse cx={262} cy={18} rx={7.5} ry={21} fill={color} transform="rotate(-14 262 18)" />
+      <ellipse cx={251} cy={23} rx={7} ry={18} fill={color} transform="rotate(-32 251 23)" />
+      {limb([[244, 100], [270, 122], [284, 116]], 11, color, 'a1')}
+      {limb([[236, 110], [258, 134], [272, 132]], 10, color, 'a2')}
+      {limb(leg.slice(0, 3), 24, color, 'shin')}
+      {limb(leg.slice(2), 18, color, 'foot')}
+    </g>
+  );
+};
+
+// Racing pigeon in flapping flight: the plump breast, small round head, stub
+// beak and square fan tail are what separate it from the falcon's arrowhead.
+// `stride` drives the wingbeat — wings up in a V at 0 (the rest pose used in
+// the scale chips), sweeping down at ±1, so one stride cycle = two flaps.
+const Pigeon: React.FC<P> = ({color, stride = 0}) => {
+  const flap = stride * stride;
+  return (
+    <g transform="translate(-26 -27) scale(1.12)">
+      <path d="M156 124 L 88 112 Q 80 135, 88 158 L 156 146 Z" fill={color} />
+      <ellipse cx={198} cy={136} rx={66} ry={26} fill={color} transform="rotate(-4 198 136)" />
+      <ellipse cx={246} cy={136} rx={42} ry={33} fill={color} />
+      <ellipse cx={224} cy={120} rx={34} ry={14} fill={color} />
+      {limb([[262, 122], [292, 104]], 28, color, 'n')}
+      <circle cx={298} cy={98} r={18} fill={color} />
+      <polygon points="312,91 333,100 313,106" fill={color} />
+      <g transform={`rotate(${-flap * 150} 230 120)`}>
+        <path d="M244 120 Q 246 40, 200 -2 Q 206 64, 214 126 Z" fill={color} />
+      </g>
+      <g transform={`rotate(${-flap * 106} 236 120)`}>
+        <path d="M254 122 Q 220 34, 128 2 Q 170 70, 202 130 Z" fill={color} />
+      </g>
+    </g>
+  );
+};
+
 const ART: Record<ArtKey, React.FC<P>> = {
   human: Human,
   bear: Bear,
@@ -139,6 +208,8 @@ const ART: Record<ArtKey, React.FC<P>> = {
   pronghorn: Pronghorn,
   cheetah: Cheetah,
   falcon: Falcon,
+  kangaroo: Kangaroo,
+  pigeon: Pigeon,
 };
 
 export const Pictogram: React.FC<{art: ArtKey; color: string; stride?: number; width: number}> = ({

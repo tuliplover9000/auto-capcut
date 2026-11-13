@@ -38,8 +38,12 @@ A ~30s episode renders in under a minute.
 | `contenders[]` | ordered slowest → fastest. `name` (board lines), `speed`, `art` (pictogram key), `note` (small source line), `verdict` (board lines after the run), optional `motion: "dive"`, `fine`, `fineNote` (citation, only shown when over the limit) |
 
 Pictograms live in `src/art/Pictograms.tsx` (keys: `human bear greyhound
-pronghorn cheetah falcon`). New contenders need a new pictogram: thick round
+pronghorn cheetah falcon kangaroo pigeon`). New contenders need a new pictogram: thick round
 strokes + ellipses, one colour, facing right, 400x260 box, ground at y=250.
+`kangaroo` hops (both legs together, body lifts on the push-off); `pigeon` is
+drawn airborne mid-box and flaps its wings with `stride`, so it flies with the
+default run motion — no `motion` field needed. Both rest (stride 0) in their
+most legible pose, which is what the lineup chips show.
 
 ### Layout of the code
 
