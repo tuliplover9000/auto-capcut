@@ -7,7 +7,7 @@ import {LedText} from '../lib/LedText';
 import {Pictogram, ArtKey} from '../art/Pictograms';
 import {
   ART_W, DIVE_FROM, DIVE_TO, RUN_X0, RUN_X1, Beat, Episode, beatAt, buildBeats, citationIn, citationOut,
-  flashAmount, outroStart, radarText, radarValue, scaleMax, sfxEvents, vmsLines,
+  INTRO, flashAmount, outroStart, radarText, radarValue, scaleMax, sfxEvents, tickStep, vmsLines,
 } from './timeline';
 
 // "A highway speed-camera installation at night, made of asphalt, concrete and
@@ -182,8 +182,8 @@ const Contender: React.FC<{ep: Episode; b: Beat; frame: number}> = ({ep, b, fram
 const Scale: React.FC<{ep: Episode; beats: Beat[]; frame: number; fps: number}> = ({ep, beats, frame, fps}) => {
   const max = scaleMax(ep, frame);
   const xOf = (v: number) => SX0 + (Math.min(v, max) / max) * (SX1 - SX0);
-  const step = max > 150 ? 20 : 10;
-  const labelStep = max > 150 ? 50 : 20;
+  const step = tickStep(max);
+  const labelStep = step * 2;
   const zoomed = max > 100;
   return (
     <div style={{position: 'absolute', left: 0, top: 0, width: 1080, height: 1920}}>
@@ -191,7 +191,7 @@ const Scale: React.FC<{ep: Episode; beats: Beat[]; frame: number; fps: number}> 
       <div style={{position: 'absolute', left: SX0, top: SCALE_Y - 2, width: SX1 - SX0, height: 4, background: C.chrome}} />
       {Array.from({length: Math.floor(max / step) + 1}).map((_, i) => {
         const v = i * step;
-        const big = v % labelStep === 0;
+        const big = Math.abs(v / labelStep - Math.round(v / labelStep)) < 1e-6;
         return (
           <React.Fragment key={v}>
             <div style={{position: 'absolute', left: xOf(v) - 1, top: SCALE_Y + 4, width: 2, height: big ? 16 : 9, background: C.chrome}} />
@@ -296,11 +296,16 @@ export const SpeedTrap: React.FC<{episode: Episode}> = ({episode: ep}) => {
   const decay = ob ? 1 - (frame - ob.passFrame) / 26 : 0;
   const shakeX = ob ? Math.sin(frame * 2.7) * 18 * decay : 0;
   const shakeY = ob ? Math.cos(frame * 3.1) * 11 * decay : 0;
-  const note = frame >= outroStart(ep) ? 'Speeds are peak, approximate' : b ? ep.contenders[b.index].note : 'Posted limit · 65 mph';
+  const note = frame >= outroStart(ep) ? 'Speeds are peak, approximate'
+    : b ? ep.contenders[b.index].note : `Posted limit · ${ep.limit} ${ep.unit.toLowerCase()}`;
+  // The hook must MOVE, not just sit: a slow push-in over the intro (the
+  // question stays fully readable from frame 0), then it holds.
+  const push = 1 + 0.03 * interpolate(frame, [0, INTRO], [0, 1], {extrapolateRight: 'clamp',
+    easing: (t) => 1 - Math.pow(1 - t, 2)});
 
   return (
     <AbsoluteFill style={{background: C.ground}}>
-      <AbsoluteFill style={{transform: `translate(${shakeX}px, ${shakeY}px)`}}>
+      <AbsoluteFill style={{transform: `translate(${shakeX}px, ${shakeY}px) scale(${push})`, transformOrigin: '50% 40%'}}>
         <Sky />
         <Gantry />
         <Wall />

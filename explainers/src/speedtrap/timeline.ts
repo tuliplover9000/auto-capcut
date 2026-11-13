@@ -126,6 +126,15 @@ export const vmsLines = (ep: Episode, beats: Beat[], frame: number): string[] =>
   return c.verdict;
 };
 
+/** "Nice" tick spacing for a scale running 0..max: ~4-10 ticks whatever the
+ *  range (a fixed 10/20 step drew ~2,000 ticks for a 45,000 mph asteroid). */
+export const tickStep = (max: number) => {
+  const raw = max / 8;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const norm = raw / mag;
+  return (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+};
+
 /** Scale max: 0..SCALE_MAX until the outro, then zooms out to fit the fastest. */
 export const scaleMax = (ep: Episode, frame: number) => {
   const top = Math.max(SCALE_MAX, ...ep.contenders.map((c) => c.speed + 20));

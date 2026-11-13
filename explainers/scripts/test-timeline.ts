@@ -1,9 +1,9 @@
 // node scripts/test-timeline.ts  (Node >= 23 strips types natively)
-import {readFileSync} from 'node:fs';
+import {readFileSync, readdirSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {
   buildBeats, totalFrames, radarValue, radarText, vmsLines, scaleMax,
-  sfxEvents, crossFrames, passFraction, outroStart, flashAmount, flashPeaks,
+  sfxEvents, crossFrames, passFraction, outroStart, flashAmount, flashPeaks, tickStep,
   INTRO, FPS, OVERFLOW_REVEAL, type Episode,
 } from '../src/speedtrap/timeline.ts';
 
@@ -67,6 +67,32 @@ assert.ok(scaleMax(ep, total - 1) >= 240);
 
 // every sfx lands inside the video
 for (const e of sfxEvents(ep, beats)) assert.ok(e.frame >= 0 && e.frame < total, `${e.sfx}@${e.frame}`);
+
+// scale ticks stay sane at ANY range (a fixed step drew ~2,000 ticks at 45,000)
+for (const max of [80, 260, 864, 45000, 1e6]) {
+  const n = Math.floor(max / tickStep(max)) + 1;
+  assert.ok(n >= 4 && n <= 12, `tick count ${n} at max ${max}`);
+}
+
+// EVERY episode file must satisfy the format's invariants, not just ep 1
+const dir = new URL('../episodes/', import.meta.url);
+for (const f of readdirSync(dir).filter((x) => x.endsWith('.json'))) {
+  const e: Episode = JSON.parse(readFileSync(new URL(f, dir), 'utf8'));
+  const bs = buildBeats(e);
+  const tot = totalFrames(e);
+  for (const lines of [e.hook, e.outro, ...e.contenders.flatMap((c) => [c.name, c.verdict])]) {
+    assert.ok(lines.length <= 3, `${f}: board text max 3 lines`);
+    for (const l of lines) {
+      assert.ok(l.length <= 15, `${f}: "${l}" exceeds 15 board chars`);
+      for (const ch of l) assert.ok(/[A-Z0-9?!\-.,':/$+ ]/.test(ch), `${f}: "${ch}" not in the LED font`);
+    }
+  }
+  bs.forEach((b, i) => assert.equal(radarValue(e, bs, b.passFrame), e.contenders[i].speed, `${f} radar lock`));
+  const pk = flashPeaks(bs);
+  for (const p of pk) assert.ok(pk.filter((q) => q >= p && q < p + FPS).length <= 3, `${f} flash rate`);
+  for (const ev of sfxEvents(e, bs)) assert.ok(ev.frame >= 0 && ev.frame < tot, `${f} sfx in range`);
+  console.log(`  ${f}: ${(tot / FPS).toFixed(1)}s OK`);
+}
 
 console.log(`PASS — ${beats.length} beats, ${total} frames = ${(total / FPS).toFixed(1)}s`);
 console.log(beats.map((b) => `${ep.contenders[b.index].name.join(' ')}: ${((b.end - b.start) / FPS).toFixed(1)}s`).join(' | '));
