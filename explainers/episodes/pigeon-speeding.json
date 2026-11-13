@@ -1,0 +1,69 @@
+{
+  "id": "pigeon-speeding",
+  "limit": 65,
+  "unit": "MPH",
+  "hook": [
+    "",
+    "CAN A PIGEON",
+    "GET A TICKET?"
+  ],
+  "outro": [
+    "",
+    "HAD TAILWIND.",
+    "STILL COUNTS."
+  ],
+  "contenders": [
+    {
+      "name": [
+        "KANGAROO"
+      ],
+      "speed": 37,
+      "art": "kangaroo",
+      "note": "Red kangaroo · top speed ~37 mph",
+      "verdict": [
+        "28 UNDER"
+      ]
+    },
+    {
+      "name": [
+        "PRONGHORN"
+      ],
+      "speed": 55,
+      "art": "pronghorn",
+      "note": "Fastest land animal in the Americas",
+      "verdict": [
+        "10 UNDER"
+      ]
+    },
+    {
+      "name": [
+        "CHEETAH"
+      ],
+      "speed": 65,
+      "art": "cheetah",
+      "note": "Fastest reliably measured sprint",
+      "verdict": [
+        "",
+        "EXACTLY 65.",
+        "NO TICKET."
+      ]
+    },
+    {
+      "name": [
+        "",
+        "RACING",
+        "PIGEON"
+      ],
+      "speed": 110,
+      "art": "pigeon",
+      "note": "Guinness record race · England, 1965",
+      "verdict": [
+        "",
+        "FASTER THAN",
+        "A CHEETAH"
+      ],
+      "fine": "1 LOAF OF BREAD",
+      "fineNote": "PAYABLE IN CRUMBS"
+    }
+  ]
+}

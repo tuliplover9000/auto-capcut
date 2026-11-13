@@ -13,6 +13,7 @@ export type Contender = {
   motion?: Motion;
   fine?: string;
   fineNote?: string;
+  stamp?: string; // citation stamp text, default "SPEEDING"
 };
 
 export type Episode = {

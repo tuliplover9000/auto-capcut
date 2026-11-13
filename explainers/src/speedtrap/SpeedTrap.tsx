@@ -276,7 +276,7 @@ const Citation: React.FC<{ep: Episode; b: Beat; frame: number; fps: number}> = (
       {stamp > 0 ? (
         <div style={{position: 'absolute', left: 48, bottom: 34, transform: `rotate(-8deg) scale(${stamp})`, border: `7px solid ${C.stamp}`,
           borderRadius: 8, padding: '6px 22px', fontFamily: overpass, fontWeight: 900, fontSize: 64, letterSpacing: 4, color: C.stamp,
-          opacity: 0.88}}>{b.overflow ? 'REVOKED' : 'SPEEDING'}</div>
+          opacity: 0.88}}>{c.stamp ?? 'SPEEDING'}</div>
       ) : null}
     </div>
   );

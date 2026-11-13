@@ -15,8 +15,12 @@ for (const b of beats) {
   const c = ep.contenders[b.index];
   rows.push([b.runStart, `${c.name.join(' ')} enters (${c.speed} ${ep.unit})`]);
   if (b.ticket) rows.push([b.passFrame, b.overflow ? 'radar OVERFLOW + strobes' : 'FLASH (ticket)']);
-  rows.push([b.verdictStart, `verdict: ${c.verdict.join(' ')}`]);
-  if (b.overflow) rows.push([b.verdictStart + OVERFLOW_REVEAL, `REVEAL ${c.speed} ${ep.unit}`]);
+  if (b.overflow) {
+    rows.push([b.verdictStart + OVERFLOW_REVEAL, `REVEAL ${c.speed} ${ep.unit}`]);
+    rows.push([b.verdictStart + OVERFLOW_REVEAL + 50, `verdict: ${c.verdict.join(' ').trim()}`]);
+  } else {
+    rows.push([b.verdictStart, `verdict: ${c.verdict.join(' ').trim()}`]);
+  }
   if (b.ticket) rows.push([citationIn(b), 'citation prints']);
 }
 rows.push([outroStart(ep), `OUTRO ${ep.outro.join(' ')}`], [total, 'end (loops)']);

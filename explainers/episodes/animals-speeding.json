@@ -2,14 +2,92 @@
   "id": "animals-speeding",
   "limit": 65,
   "unit": "MPH",
-  "hook": ["WHICH ANIMAL", "GETS A SPEEDING", "TICKET?"],
-  "outro": ["WHO SHOULD", "WE CLOCK", "NEXT?"],
+  "hook": [
+    "WHICH ANIMAL",
+    "GETS A SPEEDING",
+    "TICKET?"
+  ],
+  "outro": [
+    "WHO SHOULD",
+    "WE CLOCK",
+    "NEXT?"
+  ],
   "contenders": [
-    {"name": ["USAIN BOLT"], "speed": 28, "art": "human", "note": "Fastest human ever · 100 m world record, 2009", "verdict": ["NOT EVEN", "CLOSE"]},
-    {"name": ["GRIZZLY", "BEAR"], "speed": 35, "art": "bear", "note": "In short bursts — faster than most people think", "verdict": ["NO TICKET"]},
-    {"name": ["GREYHOUND"], "speed": 45, "art": "greyhound", "note": "The fastest dog breed", "verdict": ["STILL LEGAL"]},
-    {"name": ["PRONGHORN"], "speed": 55, "art": "pronghorn", "note": "North America's fastest land animal", "verdict": ["10 UNDER"]},
-    {"name": ["CHEETAH"], "speed": 70, "art": "cheetah", "note": "Fastest land animal · peak sprint", "verdict": ["BUSTED!"], "fine": "$150", "fineNote": "OR 2 GAZELLES"},
-    {"name": ["PEREGRINE", "FALCON"], "speed": 240, "art": "falcon", "motion": "dive", "note": "Hunting dive · the fastest animal on Earth", "verdict": ["LICENSE", "REVOKED"], "fine": "LICENSE REVOKED", "fineNote": "RADAR DESTROYED"}
+    {
+      "name": [
+        "USAIN BOLT"
+      ],
+      "speed": 28,
+      "art": "human",
+      "note": "Fastest human ever · 100 m world record, 2009",
+      "verdict": [
+        "NOT EVEN",
+        "CLOSE"
+      ]
+    },
+    {
+      "name": [
+        "GRIZZLY",
+        "BEAR"
+      ],
+      "speed": 35,
+      "art": "bear",
+      "note": "In short bursts — faster than most people think",
+      "verdict": [
+        "NO TICKET"
+      ]
+    },
+    {
+      "name": [
+        "GREYHOUND"
+      ],
+      "speed": 45,
+      "art": "greyhound",
+      "note": "The fastest dog breed",
+      "verdict": [
+        "STILL LEGAL"
+      ]
+    },
+    {
+      "name": [
+        "PRONGHORN"
+      ],
+      "speed": 55,
+      "art": "pronghorn",
+      "note": "North America's fastest land animal",
+      "verdict": [
+        "10 UNDER"
+      ]
+    },
+    {
+      "name": [
+        "CHEETAH"
+      ],
+      "speed": 70,
+      "art": "cheetah",
+      "note": "Fastest land animal · peak sprint",
+      "verdict": [
+        "BUSTED!"
+      ],
+      "fine": "$150",
+      "fineNote": "OR 2 GAZELLES"
+    },
+    {
+      "name": [
+        "PEREGRINE",
+        "FALCON"
+      ],
+      "speed": 240,
+      "art": "falcon",
+      "motion": "dive",
+      "note": "Hunting dive · the fastest animal on Earth",
+      "verdict": [
+        "LICENSE",
+        "REVOKED"
+      ],
+      "fine": "LICENSE REVOKED",
+      "fineNote": "RADAR DESTROYED",
+      "stamp": "REVOKED"
+    }
   ]
 }
