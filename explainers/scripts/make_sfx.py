@@ -33,6 +33,13 @@ SFX = {
     "vms": ("sine=f=640:d=0.06", "afade=t=out:st=0.02:d=0.04,volume=0.7"),
     # night highway hum under everything
     "ambience": ("anoisesrc=d=40:c=brown:a=0.5", "lowpass=f=260,volume=0.5"),
+    # Wind Test: gusting wind bed (level is automated per frame by the scene)
+    "wind": ("anoisesrc=d=60:c=pink:a=0.8",
+             "bandpass=f=520:width_type=h:w=760,volume='0.55+0.45*sin(2*PI*0.21*t)*sin(2*PI*0.07*t)':eval=frame,volume=1.6"),
+    # tree snapping / roof tearing
+    "crack": ("anoisesrc=d=0.4:c=white:a=1.0", "highpass=f=900,afade=t=out:st=0.02:d=0.35,volume=1.4"),
+    # the 302 mph strike
+    "thunder": ("anoisesrc=d=3.6:c=brown:a=1.0", "lowpass=f=320,afade=t=in:d=0.04,afade=t=out:st=0.35:d=3.2,volume=3.0"),
 }
 
 for name, (src, af) in SFX.items():

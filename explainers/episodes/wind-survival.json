@@ -1,0 +1,31 @@
+{
+  "id": "wind-survival",
+  "voice": "en-US-AndrewNeural",
+  "rate": "-12%",
+  "title": "What survives the strongest wind ever recorded?",
+  "hook": "What if you stood in the strongest wind ever recorded? Let's turn it up.",
+  "contenders": [
+    {"art": "dandelion", "mph": 10, "fail": "seeds",
+     "line": "Ten miles an hour. The dandelion's already gone.", "cue": "ten",
+     "note": "Seeds let go in a light breeze · field observations"},
+    {"art": "person", "mph": 50, "fail": "tumble",
+     "line": "Fifty. You get knocked off your feet.", "cue": "fifty",
+     "note": "Gusts of ~46–55 mph blow people over · Land Beaufort scale"},
+    {"art": "tree", "mph": 110, "fail": "snap",
+     "line": "A hundred and ten. Big trees snap.", "cue": "a",
+     "note": "EF2 tornado winds (111–135 mph) snap large trees"},
+    {"art": "car", "mph": 140, "fail": "throw",
+     "line": "A hundred and forty. Cars get lifted and thrown.", "cue": "a",
+     "note": "EF3 winds (136–165 mph) lift and throw cars"},
+    {"art": "house", "mph": 200, "fail": "sweep",
+     "line": "Two hundred. Houses get swept off their foundations.", "cue": "two",
+     "note": "EF5 winds (200+ mph) sweep houses off foundations"}
+  ],
+  "finale": {
+    "mph": 302,
+    "line": "And the strongest wind ever recorded? Three hundred and two miles an hour, inside the 1999 Moore, Oklahoma tornado.",
+    "cue": "three",
+    "note": "Doppler radar estimate, ±20 mph · Guinness World Records"
+  },
+  "sting": {"line": "The only safe place? Underground.", "note": "National Weather Service: shelter below ground"}
+}

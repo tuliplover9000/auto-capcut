@@ -54,3 +54,20 @@ most legible pose, which is what the lineup chips show.
 - `src/speedtrap/SpeedTrap.tsx` — the scene (render only).
 - `src/lib/LedText.tsx` + `font5x7.ts` — real dot-matrix LED rendering.
 - `scripts/make_sfx.py` — every sound effect, synthesized with ffmpeg.
+
+## Wind Test (format 2) — narrated
+
+*"What survives the strongest wind ever recorded?"* — a storm gauge climbs
+while contenders fail one by one (dandelion → you → tree → car → house), then
+the record (302 mph, 1999 Moore tornado), then the sting underground. The
+sky drains from sunny to storm-violet as the wind rises. **Narration drives the
+clock:** the gauge lands on each number exactly as the voice says it.
+
+```bash
+python scripts/narrate.py episodes/wind-survival.json   # edge-tts lines + word timings -> <id>.timing.json
+node scripts/test-wind.ts                                # sync + caption invariants on the REAL timings
+npx remotion render WindTest out/wind-survival.mp4
+```
+
+Needs edge-tts >= 7.3 (7.2.x got HTTP 403) and retries built in (the free
+service drops requests). Every number in an episode needs a source in `note`.
