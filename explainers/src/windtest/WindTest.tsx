@@ -3,7 +3,7 @@ import {AbsoluteFill, Audio, Sequence, spring, staticFile, useCurrentFrame, useV
 import {loadFont as loadMontserrat} from '@remotion/google-fonts/Montserrat';
 import {ArtBox, Dandelion, Person, Tree, Car, House, Tornado} from './art';
 import {
-  BANDS, EXIT, FPS, Timing, WindEpisode, bandAt, buildPlan, captions, contenderAt, readoutAt, skyAt, windAt,
+  BANDS, EXIT, FPS, Timing, WindEpisode, activeContenders, bandAt, buildPlan, captions, contenderAt, readoutAt, skyAt, windAt,
 } from './timeline';
 
 // "A storm gauge on an open prairie, made of grass, sky and painted metal, lit
@@ -12,7 +12,7 @@ import {
 const heavy = loadMontserrat('normal', {weights: ['800', '900'], subsets: ['latin']}).fontFamily;
 
 const W = 1080;
-const GROUND = 1330; // world y of the ground line
+const GROUND = 1440; // world y of the ground line (low: the caption band above it stays clear)
 const PAN = 920; // how far the camera drops underground for the sting
 const GX = 540;
 const GY = 470;
@@ -105,11 +105,13 @@ const arcPath = (a: number, b: number, r: number) => {
   return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
 };
 
-const Gauge: React.FC<{mph: number; readout: number; crack: number}> = ({mph, readout, crack}) => {
+const Gauge: React.FC<{mph: number; readout: number; crack: number; pulse: number}> = ({mph, readout, crack, pulse}) => {
   const [, label, color] = bandAt(mph);
   const [nx, ny] = pt(mph, GR - 48);
   return (
     <svg width={W} height={760} style={{position: 'absolute', left: 0, top: 0, overflow: 'visible'}}>
+      {pulse > 0.02 ? <circle cx={GX} cy={GY} r={GR + 18 + (1 - pulse) * 40} fill="none" stroke={color} strokeWidth={14}
+        opacity={pulse * 0.9} /> : null}
       <circle cx={GX} cy={GY} r={GR + 14} fill="#1e2430" />
       <circle cx={GX} cy={GY} r={GR} fill="#fbfbf6" />
       {BANDS.map(([from, , col], i) => {
@@ -150,9 +152,16 @@ const Gauge: React.FC<{mph: number; readout: number; crack: number}> = ({mph, re
 
 /* ───────────── the contender on stage ───────────── */
 
-const Stage: React.FC<{ep: WindEpisode; plan: ReturnType<typeof buildPlan>; s: number; frame: number; fps: number}> = ({ep, plan, s, frame, fps}) => {
-  const b = contenderAt(plan, s);
-  if (!b || b.index < 0) return null;
+type Plan = ReturnType<typeof buildPlan>;
+type BeatT = Plan['beats'][number];
+
+// Several can be on stage at once: the next contender pops in while the last
+// one is still flying off (momentum — no dead gap between beats).
+const Stage: React.FC<{ep: WindEpisode; plan: Plan; s: number; frame: number; fps: number}> = ({ep, plan, s, frame, fps}) => (
+  <>{activeContenders(plan, s).map((b) => <OneContender key={b.index} ep={ep} b={b} s={s} frame={frame} fps={fps} />)}</>
+);
+
+const OneContender: React.FC<{ep: WindEpisode; b: BeatT; s: number; frame: number; fps: number}> = ({ep, b, s, frame, fps}) => {
   const c = ep.contenders[b.index];
   const strain = clamp01((s - b.rampStart) / Math.max(0.01, b.landing - b.rampStart));
   const f = clamp01((s - b.fail) / EXIT);
@@ -218,16 +227,36 @@ export const WindTest: React.FC<{episode: WindEpisode; timing: Timing}> = ({epis
   const flash = sinceStrike < 0 ? 0 : sinceStrike < 0.05 ? sinceStrike / 0.05 * 0.9 : Math.max(0, 0.9 * (1 - (sinceStrike - 0.05) / 0.35));
   const shake = sinceStrike > 0 && sinceStrike < 0.7 ? (1 - sinceStrike / 0.7) : 0;
   const pan = ease(clamp01((s - plan.panStart) / 0.8));
-  const cap = captions(ep, timing, plan).find((c) => s >= c.start && s < c.end);
-  const capPop = cap ? Math.min(1, 0.86 + (s - cap.start) * 1.4) : 1;
+  const caps = captions(ep, timing, plan);
+  const capIdx = caps.findIndex((c) => s >= c.start && s < c.end);
+  const cap = capIdx >= 0 ? caps[capIdx] : null;
+  // BIG captions: <=2 words, sized to fit 820px on one line (two lines for long
+  // chunks), springy overshoot pop, alternating tilt; numbers bigger + yellow.
+  let capSize = 0;
+  let capWrap = false;
+  if (cap) {
+    const base = cap.hot ? 172 : 144;
+    const one = 820 / (cap.text.length * 0.78);
+    const longest = Math.max(...cap.text.split(' ').map((w) => w.length));
+    capWrap = one < 100 && cap.n > 1;
+    capSize = Math.min(base, capWrap ? 820 / (longest * 0.78) : one);
+  }
+  const capPop = cap ? 0.55 + 0.45 * spring({frame: frame - Math.round(cap.start * fps), fps, config: {damping: 9, stiffness: 240}}) : 1;
+  // camera: punch-in + shake at every failure, gauge pulse at every landing
+  const punch = Math.max(0, ...plan.beats.filter((b) => b.index >= 0).map((b) => {
+    const d = s - b.fail;
+    return d < 0 ? 0 : d < 0.06 ? d / 0.06 : Math.exp(-(d - 0.06) * 4);
+  }));
+  const pulse = Math.max(0, ...plan.beats.map((b) => (s >= b.landing ? Math.exp(-(s - b.landing) * 7) : 0)));
+  const drift = 1 + 0.018 * Math.sin(s * 0.9);
   const cb = contenderAt(plan, s);
   const note = s >= plan.panStart ? ep.sting.note : s >= finale.rampStart ? ep.finale.note
     : cb && cb.index >= 0 ? ep.contenders[cb.index].note : ep.title;
 
   return (
     <AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
-      <div style={{position: 'absolute', left: 0, top: 0, width: W, height: 1920 + PAN,
-        transform: `translate(${Math.sin(frame * 2.1) * 16 * shake}px, ${-pan * PAN + Math.cos(frame * 2.7) * 10 * shake}px)`}}>
+      <div style={{position: 'absolute', left: 0, top: 0, width: W, height: 1920 + PAN, transformOrigin: '50% 1150px',
+        transform: `translate(${Math.sin(frame * 2.1) * (16 * shake + 12 * punch)}px, ${-pan * PAN + Math.cos(frame * 2.7) * (10 * shake + 8 * punch)}px) scale(${drift + 0.09 * punch})`}}>
         <Sky mph={mph} s={s} />
         {grow > 0 ? (
           <div style={{position: 'absolute', left: 300, top: 560}}>
@@ -238,23 +267,30 @@ export const WindTest: React.FC<{episode: WindEpisode; timing: Timing}> = ({epis
         <Ground mph={mph} s={s} />
         {sinceStrike > -0.01 && sinceStrike < 0.3 ? (
           <svg width={W} height={GROUND} style={{position: 'absolute', left: 0, top: 0}}>
-            <polyline points="770,560 720,760 790,800 700,1040 760,1060 690,1330" fill="none" stroke="#ffffff" strokeWidth={14}
+            <polyline points={`770,560 720,760 790,800 700,1040 760,1060 690,${GROUND}`} fill="none" stroke="#ffffff" strokeWidth={14}
               strokeLinejoin="round" style={{filter: 'drop-shadow(0 0 24px #cfe3ff)'}} />
           </svg>
         ) : null}
         <Stage ep={ep} plan={plan} s={s} frame={frame} fps={fps} />
-        <Gauge mph={mph} readout={readoutAt(plan, s)} crack={clamp01(sinceStrike * 6)} />
+        <div style={{position: 'absolute', left: 0, top: 0, width: W, height: 760, transformOrigin: `${GX}px ${GY}px`,
+          transform: `scale(${1 + 0.07 * pulse})`}}>
+          <Gauge mph={mph} readout={readoutAt(plan, s)} crack={clamp01(sinceStrike * 6)} pulse={pulse} />
+        </div>
         <div style={{position: 'absolute', top: 748, width: W, textAlign: 'center', fontFamily: heavy, fontWeight: 800,
           fontSize: 25, letterSpacing: 2, color: '#ffffff', textShadow: '0 2px 6px rgba(0,0,0,.7)', textTransform: 'uppercase'}}>{note}</div>
         <Shelter s={s} />
       </div>
+      <AbsoluteFill style={{pointerEvents: 'none',
+        background: `radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,${(0.42 * clamp01(mph / 302)).toFixed(3)}) 100%)`}} />
       {cap ? (
-        <div style={{position: 'absolute', top: 800, left: 120, width: 820, textAlign: 'center', fontFamily: heavy, fontWeight: 900,
-          fontSize: 88, lineHeight: 1.05, color: cap.hot ? '#ffd23f' : '#ffffff', WebkitTextStroke: '11px #111',
-          paintOrder: 'stroke fill', textShadow: '0 6px 0 rgba(0,0,0,.35)', transform: `scale(${capPop})`,
+        <div style={{position: 'absolute', top: 790, left: 120, width: 820, textAlign: 'center', fontFamily: heavy, fontWeight: 900,
+          fontSize: capSize, lineHeight: 1.0, color: cap.hot ? '#ffd23f' : '#ffffff', WebkitTextStroke: `${Math.round(capSize * 0.11)}px #111`,
+          paintOrder: 'stroke fill', textShadow: '0 8px 0 rgba(0,0,0,.35)', whiteSpace: capWrap ? 'normal' : 'nowrap',
+          transform: `scale(${capPop}) rotate(${capIdx % 2 ? 2.5 : -2.5}deg)`, transformOrigin: '50% 50%',
           textTransform: 'uppercase'}}>{cap.text}</div>
       ) : null}
       <AbsoluteFill style={{background: '#ffffff', opacity: flash, pointerEvents: 'none'}} />
+      <Audio src={staticFile(`music/${ep.id}.wav`)} volume={0.5} />
       {timing.lines.map((ln, i) => (
         <Sequence key={i} from={Math.round(plan.lineStarts[i] * FPS)}>
           <Audio src={staticFile(ln.file)} />
@@ -276,7 +312,7 @@ export const WindTest: React.FC<{episode: WindEpisode; timing: Timing}> = ({epis
         );
       })}
       <Sequence from={Math.round(finale.landing * FPS)} durationInFrames={110}>
-        <Audio src={staticFile('sfx/thunder.wav')} volume={0.9} />
+        <Audio src={staticFile('sfx/thunder.wav')} volume={0.6} />
       </Sequence>
     </AbsoluteFill>
   );

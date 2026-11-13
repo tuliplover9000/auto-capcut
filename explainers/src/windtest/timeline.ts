@@ -23,7 +23,10 @@ export const FPS = 30;
 export const IDLE_MPH = 3;
 export const RAMP = 0.8; // s — gauge climb before a number is spoken
 export const EXIT = 0.9; // s — failure / fly-off animation
-export const GAP = 0.15; // s — breath between beats
+export const GAP = 0.12; // s — breath between narration lines
+export const HOOK_RAMP_START = 0.35; // the gauge is already moving under the hook
+export const RAMP_AFTER_FAIL = 0.4;
+export const ENTER_AFTER_FAIL = 0.45; // next contender enters while the last flies off
 export const STING_PAUSE = 0.3;
 export const END_HOLD = 1.2;
 
@@ -71,24 +74,29 @@ export const buildPlan = (ep: WindEpisode, t: Timing): Plan => {
   const hookEnd = L[0].duration;
   const lineStarts = [0];
   const beats: Beat[] = [];
-  let cursor = hookEnd + GAP;
+  let prevLineEnd = hookEnd;
+  let prevFail = 0;
   let mph = IDLE_MPH;
   const specs = [
     ...ep.contenders.map((c, i) => ({index: i, mph: c.mph, cue: c.cue, text: c.line, line: L[i + 1]})),
     {index: -1, mph: ep.finale.mph, cue: ep.finale.cue, text: ep.finale.line, line: L[ep.contenders.length + 1]},
   ];
+  // OVERLAPPED for momentum: the gauge starts climbing during the hook, the
+  // next contender enters while the last is still flying off, and the next
+  // ramp starts right after a failure — narration lines never overlap.
   specs.forEach((s, k) => {
     const cue = cueOffset(s.line, s.cue);
-    const rampStart = cursor;
-    const lineStart = rampStart + Math.max(0, RAMP - cue);
+    const rampStart = k === 0 ? HOOK_RAMP_START : prevFail + RAMP_AFTER_FAIL;
+    const lineStart = Math.max(prevLineEnd + GAP, rampStart + RAMP - cue);
     const landing = lineStart + cue;
     const fail = s.index >= 0 ? lineStart + consequenceOffset(s.text, s.line) : landing;
     const lineEnd = lineStart + s.line.duration;
-    const enter = k === 0 ? 0 : Math.max(beats[k - 1].fail + EXIT * 0.6, rampStart - 0.35);
+    const enter = k === 0 ? 0 : prevFail + ENTER_AFTER_FAIL;
     beats.push({index: s.index, enter, rampStart, lineStart, landing, fail, lineEnd, from: mph, to: s.mph});
     lineStarts.push(lineStart);
     mph = s.mph;
-    cursor = Math.max(lineEnd, fail + EXIT) + GAP;
+    prevLineEnd = lineEnd;
+    prevFail = fail;
   });
   const finale = beats[beats.length - 1];
   const stingStart = finale.lineEnd + STING_PAUSE;
@@ -128,6 +136,10 @@ export const readoutAt = (p: Plan, s: number) => {
   }
   return Math.round(v);
 };
+
+/** Every contender visible at time s (entering, holding, or still flying off). */
+export const activeContenders = (p: Plan, s: number) =>
+  p.beats.filter((b) => b.index >= 0 && s >= b.enter && s < b.fail + EXIT);
 
 /** Which contender is on stage at time s (index), or null. */
 export const contenderAt = (p: Plan, s: number) => {
@@ -201,7 +213,8 @@ export const captions = (ep: WindEpisode, t: Timing, p: Plan): Chunk[] => {
     };
     ln.words.forEach((w, wi) => {
       cur.push(w);
-      if (cur.length >= 3 || sentenceEnds.has(wi) || w.text.length > 9) flush();
+      // <=2 words per chunk: punchier, and each can be set BIG
+      if (cur.length >= 2 || sentenceEnds.has(wi) || w.text.length > 8) flush();
     });
     flush();
   });
