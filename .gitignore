@@ -56,3 +56,8 @@ my_broll/*
 # user sound effects (keep the README/folder, ignore the media)
 my_sfx/*
 !my_sfx/README.md
+
+# explainers (Remotion) — deps, renders, generated sfx
+explainers/node_modules/
+explainers/out/
+explainers/public/sfx/

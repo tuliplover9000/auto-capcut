@@ -1,0 +1,24 @@
+{
+  "name": "explainers",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Data-driven animated explainer shorts (Remotion) for the faceless channel",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render",
+    "test": "node scripts/test-timeline.ts",
+    "sfx": "python scripts/make_sfx.py"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.543",
+    "@remotion/google-fonts": "^4.0.543",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "remotion": "^4.0.543"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "typescript": "^7.0.2"
+  },
+  "type": "module"
+}
