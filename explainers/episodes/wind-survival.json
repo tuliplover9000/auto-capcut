@@ -2,8 +2,8 @@
   "id": "wind-survival",
   "voice": "en-US-AndrewNeural",
   "rate": "-8%",
-  "title": "What survives the strongest wind ever recorded?",
-  "hook": "What survives the strongest wind ever recorded?",
+  "title": "Which of these survives the strongest wind ever recorded?",
+  "hook": "Which of these survives the strongest wind ever recorded?",
   "contenders": [
     {
       "art": "dandelion",
@@ -53,7 +53,7 @@
     "note": "1999 Moore, OK tornado · Doppler radar ±20 mph"
   },
   "sting": {
-    "line": "The only safe place? Underground.",
+    "line": "Only one makes it. The one that went underground.",
     "note": "National Weather Service: shelter below ground"
   }
 }

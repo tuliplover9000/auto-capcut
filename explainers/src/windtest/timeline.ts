@@ -219,6 +219,7 @@ export const captions = (ep: WindEpisode, t: Timing, p: Plan): Chunk[] => {
     flush();
   });
   // each chunk stays up until the next one starts (no flicker gaps)
+  if (out.length) out[0].start = 0; // a caption on frame 0: the hook is readable before the voice starts
   out.forEach((c, i) => (c.end = Math.max(c.end + 0.15, Math.min(out[i + 1]?.start ?? c.end + 0.6, c.end + 0.6))));
   return out;
 };

@@ -158,8 +158,59 @@ type BeatT = Plan['beats'][number];
 // Several can be on stage at once: the next contender pops in while the last
 // one is still flying off (momentum — no dead gap between beats).
 const Stage: React.FC<{ep: WindEpisode; plan: Plan; s: number; frame: number; fps: number}> = ({ep, plan, s, frame, fps}) => (
-  <>{activeContenders(plan, s).map((b) => <OneContender key={b.index} ep={ep} b={b} s={s} frame={frame} fps={fps} />)}</>
+  <>{activeContenders(plan, s).filter(() => s >= lineupEnd(plan)).map((b) =>
+    <OneContender key={b.index} ep={ep} b={b} s={s} frame={frame} fps={fps} />)}</>
 );
+
+/* ───────────── the hook: the whole lineup at frame 0 ─────────────
+   "Which of THESE survives…" — every contender stands on the prairie from the
+   first frame so the viewer picks one and stays to see if they were right.
+   When the hook line ends the others pop away and the first contender (centre
+   slot) grows into the stage. */
+const LINEUP_SLOTS = [150, 335, 540, 745, 930];
+const LINEUP_ORDER = [4, 1, 0, 2, 3]; // house, person, DANDELION (centre), tree, car
+const LINEUP_SIZE = 300;
+// top of each art inside its 400 box (for the ? badge): seeds, tumble, snap, throw, sweep
+const ART_TOP: Record<string, number> = {seeds: 80, tumble: 100, snap: 75, throw: 228, sweep: 136};
+const COLLAPSE = 0.4;
+const lineupEnd = (plan: Plan) => plan.hookEnd + COLLAPSE;
+
+const LineupArt: React.FC<{fail: string; s: number}> = ({fail, s}) =>
+  fail === 'seeds' ? <Dandelion sway={0.15 + 0.06 * Math.sin(s * 3)} seedsGone={0} t={s} />
+    : fail === 'tumble' ? <Person strain={0.1} t={s} />
+    : fail === 'snap' ? <Tree sway={0.15} snap={0} t={s} />
+    : fail === 'throw' ? <Car t={0} />
+    : <House roofLift={0} tear={0} />;
+
+const Lineup: React.FC<{ep: WindEpisode; plan: Plan; s: number; frame: number; fps: number}> = ({ep, plan, s, frame, fps}) => {
+  if (s >= lineupEnd(plan)) return null;
+  const k = ease(clamp01((s - plan.hookEnd) / COLLAPSE));
+  return (
+    <>
+      {LINEUP_ORDER.map((ci, slot) => {
+        const c = ep.contenders[ci];
+        if (!c) return null;
+        // staggered pop that is already mid-flight at frame 0 (motion from the first frame)
+        const pop = spring({frame: frame + 13 - slot * 2, fps, config: {damping: 10, stiffness: 190}});
+        const hop = Math.max(0, Math.sin((s * 5 + slot * 1.3))) * 10 * (1 - k);
+        const centre = slot === 2;
+        const size = centre ? LINEUP_SIZE + (STAGE - LINEUP_SIZE) * k : LINEUP_SIZE;
+        const x = centre ? LINEUP_SLOTS[slot] + (GX - LINEUP_SLOTS[slot]) * k : LINEUP_SLOTS[slot];
+        const sc = centre ? pop : pop * (1 - k);
+        return (
+          <div key={ci} style={{position: 'absolute', left: x - size / 2, top: GROUND - size * 0.95 - hop, width: size, height: size,
+            transform: `scale(${sc})`, transformOrigin: '50% 95%'}}>
+            <ArtBox size={size}><LineupArt fail={c.fail} s={s} /></ArtBox>
+            <div style={{position: 'absolute', left: size / 2 - 34, top: (ART_TOP[c.fail] / 400) * size - 92 + Math.sin(s * 6 + slot) * 8,
+              width: 68, height: 68, borderRadius: 34, background: '#ffd23f', border: '5px solid #111', boxSizing: 'border-box',
+              fontFamily: heavy, fontWeight: 900, fontSize: 46, lineHeight: '58px', textAlign: 'center', color: '#111',
+              opacity: 1 - k, transform: `rotate(${slot % 2 ? 8 : -8}deg)`}}>?</div>
+          </div>
+        );
+      })}
+    </>
+  );
+};
 
 const OneContender: React.FC<{ep: WindEpisode; b: BeatT; s: number; frame: number; fps: number}> = ({ep, b, s, frame, fps}) => {
   const c = ep.contenders[b.index];
@@ -250,7 +301,7 @@ export const WindTest: React.FC<{episode: WindEpisode; timing: Timing}> = ({epis
   const pulse = Math.max(0, ...plan.beats.map((b) => (s >= b.landing ? Math.exp(-(s - b.landing) * 7) : 0)));
   const drift = 1 + 0.018 * Math.sin(s * 0.9);
   const cb = contenderAt(plan, s);
-  const note = s >= plan.panStart ? ep.sting.note : s >= finale.rampStart ? ep.finale.note
+  const note = s < lineupEnd(plan) ? '' : s >= plan.panStart ? ep.sting.note : s >= finale.rampStart ? ep.finale.note
     : cb && cb.index >= 0 ? ep.contenders[cb.index].note : ep.title;
 
   return (
@@ -271,6 +322,7 @@ export const WindTest: React.FC<{episode: WindEpisode; timing: Timing}> = ({epis
               strokeLinejoin="round" style={{filter: 'drop-shadow(0 0 24px #cfe3ff)'}} />
           </svg>
         ) : null}
+        <Lineup ep={ep} plan={plan} s={s} frame={frame} fps={fps} />
         <Stage ep={ep} plan={plan} s={s} frame={frame} fps={fps} />
         <div style={{position: 'absolute', left: 0, top: 0, width: W, height: 760, transformOrigin: `${GX}px ${GY}px`,
           transform: `scale(${1 + 0.07 * pulse})`}}>
@@ -282,7 +334,14 @@ export const WindTest: React.FC<{episode: WindEpisode; timing: Timing}> = ({epis
       </div>
       <AbsoluteFill style={{pointerEvents: 'none',
         background: `radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,${(0.42 * clamp01(mph / 302)).toFixed(3)}) 100%)`}} />
-      {cap ? (
+      {s < plan.hookEnd ? (
+        // the hook gets ONE fixed headline, readable on frame 0 (viewers read faster than the voice)
+        <div style={{position: 'absolute', top: 800, left: 120, width: 820, textAlign: 'center', fontFamily: heavy, fontWeight: 900,
+          fontSize: 120, lineHeight: 1.0, WebkitTextStroke: '13px #111', paintOrder: 'stroke fill', textShadow: '0 8px 0 rgba(0,0,0,.35)',
+          textTransform: 'uppercase', transform: `scale(${0.92 + 0.08 * spring({frame: frame + 6, fps, config: {damping: 8, stiffness: 200}})}) rotate(-2deg)`}}>
+          <div style={{color: '#ffffff'}}>Which one</div><div style={{color: '#ffd23f', fontSize: 132}}>survives?</div>
+        </div>
+      ) : cap ? (
         <div style={{position: 'absolute', top: 790, left: 120, width: 820, textAlign: 'center', fontFamily: heavy, fontWeight: 900,
           fontSize: capSize, lineHeight: 1.0, color: cap.hot ? '#ffd23f' : '#ffffff', WebkitTextStroke: `${Math.round(capSize * 0.11)}px #111`,
           paintOrder: 'stroke fill', textShadow: '0 8px 0 rgba(0,0,0,.35)', whiteSpace: capWrap ? 'normal' : 'nowrap',

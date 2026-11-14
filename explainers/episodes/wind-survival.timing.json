@@ -2,42 +2,52 @@
  "lines": [
   {
    "file": "narration/wind-survival/line_0.mp3",
-   "duration": 3.43,
+   "duration": 3.82,
    "words": [
     {
-     "text": "What",
-     "start": 0.109,
-     "end": 0.231
+     "text": "Which",
+     "start": 0.122,
+     "end": 0.312
+    },
+    {
+     "text": "of",
+     "start": 0.326,
+     "end": 0.435
+    },
+    {
+     "text": "these",
+     "start": 0.448,
+     "end": 0.693
     },
     {
      "text": "survives",
-     "start": 0.245,
-     "end": 0.747
+     "start": 0.707,
+     "end": 1.277
     },
     {
      "text": "the",
-     "start": 0.761,
-     "end": 0.856
+     "start": 1.291,
+     "end": 1.386
     },
     {
      "text": "strongest",
-     "start": 0.87,
-     "end": 1.603
+     "start": 1.399,
+     "end": 2.092
     },
     {
      "text": "wind",
-     "start": 1.617,
-     "end": 2.038
+     "start": 2.106,
+     "end": 2.486
     },
     {
      "text": "ever",
-     "start": 2.215,
-     "end": 2.446
+     "start": 2.677,
+     "end": 2.867
     },
     {
      "text": "recorded",
-     "start": 2.459,
-     "end": 3.03
+     "start": 2.88,
+     "end": 3.41
     }
    ]
   },
@@ -334,32 +344,52 @@
   },
   {
    "file": "narration/wind-survival/line_7.mp3",
-   "duration": 2.78,
+   "duration": 3.17,
    "words": [
     {
-     "text": "The",
+     "text": "Only",
      "start": 0.109,
-     "end": 0.204
+     "end": 0.299
     },
     {
-     "text": "only",
-     "start": 0.217,
-     "end": 0.462
+     "text": "one",
+     "start": 0.312,
+     "end": 0.476
     },
     {
-     "text": "safe",
-     "start": 0.476,
+     "text": "makes",
+     "start": 0.489,
      "end": 0.788
     },
     {
-     "text": "place",
+     "text": "it",
      "start": 0.802,
-     "end": 1.332
+     "end": 0.965
     },
     {
-     "text": "Underground",
-     "start": 1.78,
-     "end": 2.378
+     "text": "The",
+     "start": 1.427,
+     "end": 1.508
+    },
+    {
+     "text": "one",
+     "start": 1.522,
+     "end": 1.753
+    },
+    {
+     "text": "that",
+     "start": 1.766,
+     "end": 1.916
+    },
+    {
+     "text": "went",
+     "start": 1.929,
+     "end": 2.106
+    },
+    {
+     "text": "underground",
+     "start": 2.12,
+     "end": 2.758
     }
    ]
   }
