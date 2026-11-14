@@ -1,0 +1,182 @@
+{
+  "id": "tulip-vs-sunflower",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+4%",
+  "title": "Tulip vs Sunflower: who wins?",
+  "fighters": {
+    "L": {
+      "name": "TULIP",
+      "color": "#ff4f7b"
+    },
+    "R": {
+      "name": "SUNFLOWER",
+      "color": "#ffc21a"
+    }
+  },
+  "lines": [
+    {
+      "text": "Tulip versus sunflower. A fight to the death. Nobody saw the winner coming.",
+      "note": "",
+      "events": [
+        {
+          "cue": "$end",
+          "kind": "fight"
+        }
+      ]
+    },
+    {
+      "text": "Sunflower strikes first. Solar beam. It's been charging all day.",
+      "note": "Young sunflowers really do track the sun across the sky",
+      "events": [
+        {
+          "cue": "solar",
+          "kind": "move",
+          "who": "R",
+          "name": "SOLAR BEAM"
+        },
+        {
+          "cue": "beam",
+          "kind": "beam",
+          "who": "R",
+          "dmg": 35
+        }
+      ],
+      "pause": 0.55
+    },
+    {
+      "text": "But in sixteen thirty-seven, one tulip bulb cost as much as a house. So tulip makes it rain.",
+      "note": "Dutch tulip mania, 1637: rare bulbs reportedly sold for the price of a canal house",
+      "events": [
+        {
+          "cue": "bulb",
+          "kind": "stat",
+          "text": "1 BULB = 1 HOUSE"
+        },
+        {
+          "cue": "so",
+          "kind": "move",
+          "who": "L",
+          "name": "TULIP MANIA"
+        },
+        {
+          "cue": "rain",
+          "kind": "coins",
+          "who": "L",
+          "dmg": 40
+        }
+      ]
+    },
+    {
+      "text": "Sunflower reloads. Two thousand seeds. Full auto.",
+      "note": "One sunflower head can hold up to ~2,000 seeds",
+      "events": [
+        {
+          "cue": "two",
+          "kind": "move",
+          "who": "R",
+          "name": "SEED BARRAGE"
+        },
+        {
+          "cue": "full",
+          "kind": "seeds",
+          "who": "R",
+          "dmg": 50
+        }
+      ]
+    },
+    {
+      "text": "Tulip should be dead. But cut tulips keep growing. So it just gets bigger.",
+      "note": "Cut tulips keep growing in the vase, often an inch or more",
+      "events": [
+        {
+          "cue": "but",
+          "kind": "move",
+          "who": "L",
+          "name": "STILL GROWING"
+        },
+        {
+          "cue": "growing",
+          "kind": "grow",
+          "who": "L"
+        },
+        {
+          "cue": "bigger",
+          "kind": "stomp",
+          "who": "L",
+          "dmg": 40
+        }
+      ]
+    },
+    {
+      "text": "Sunflower turns to the sun for one last blast. And the sun sets.",
+      "note": "No sun, no solar beam",
+      "pause": 0.2,
+      "events": [
+        {
+          "cue": "turns",
+          "kind": "shrink",
+          "who": "L"
+        },
+        {
+          "cue": "turns",
+          "kind": "charge",
+          "who": "R"
+        },
+        {
+          "cue": "sets",
+          "kind": "sunset"
+        }
+      ]
+    },
+    {
+      "text": "Then a deer walks in. Deer love tulips.",
+      "note": "Gardeners call tulips deer candy",
+      "pause": 0.5,
+      "events": [
+        {
+          "cue": "deer",
+          "kind": "deer"
+        },
+        {
+          "cue": "love",
+          "kind": "chomp",
+          "target": "L"
+        }
+      ]
+    },
+    {
+      "text": "Sunflower wins! Then the deer looks up.",
+      "note": "Deer eat sunflowers too",
+      "pause": 0.3,
+      "events": [
+        {
+          "cue": "sunflower",
+          "kind": "banner",
+          "text": "SUNFLOWER WINS!",
+          "who": "R"
+        },
+        {
+          "cue": "looks",
+          "kind": "deerTurn"
+        }
+      ]
+    },
+    {
+      "text": "Winner? The deer.",
+      "note": "",
+      "pause": 0.15,
+      "events": [
+        {
+          "cue": "winner",
+          "kind": "chomp",
+          "target": "R"
+        },
+        {
+          "cue": "deer",
+          "kind": "winner",
+          "text": "DEER"
+        }
+      ]
+    }
+  ]
+}

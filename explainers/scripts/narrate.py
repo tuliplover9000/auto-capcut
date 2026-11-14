@@ -22,6 +22,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def episode_lines(ep: dict) -> list[str]:
+    if "lines" in ep:  # generic episodes (e.g. Fight): an explicit list of narration lines
+        return [ln["text"] for ln in ep["lines"]]
     return [ep["hook"], *[c["line"] for c in ep["contenders"]], ep["finale"]["line"], ep["sting"]["line"]]
 
 

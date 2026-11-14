@@ -1,0 +1,523 @@
+{
+ "lines": [
+  {
+   "file": "narration/tulip-vs-sunflower/line_0.mp3",
+   "duration": 4.73,
+   "words": [
+    {
+     "text": "Tulip",
+     "start": 0.108,
+     "end": 0.421
+    },
+    {
+     "text": "versus",
+     "start": 0.481,
+     "end": 0.793
+    },
+    {
+     "text": "sunflower",
+     "start": 0.805,
+     "end": 1.418
+    },
+    {
+     "text": "A",
+     "start": 1.815,
+     "end": 1.875
+    },
+    {
+     "text": "fight",
+     "start": 1.887,
+     "end": 2.188
+    },
+    {
+     "text": "to",
+     "start": 2.2,
+     "end": 2.284
+    },
+    {
+     "text": "the",
+     "start": 2.296,
+     "end": 2.392
+    },
+    {
+     "text": "death",
+     "start": 2.404,
+     "end": 2.776
+    },
+    {
+     "text": "Nobody",
+     "start": 3.173,
+     "end": 3.522
+    },
+    {
+     "text": "saw",
+     "start": 3.534,
+     "end": 3.702
+    },
+    {
+     "text": "the",
+     "start": 3.714,
+     "end": 3.81
+    },
+    {
+     "text": "winner",
+     "start": 3.822,
+     "end": 4.062
+    },
+    {
+     "text": "coming",
+     "start": 4.074,
+     "end": 4.375
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_1.mp3",
+   "duration": 4.13,
+   "words": [
+    {
+     "text": "Sunflower",
+     "start": 0.108,
+     "end": 0.529
+    },
+    {
+     "text": "strikes",
+     "start": 0.541,
+     "end": 0.853
+    },
+    {
+     "text": "first",
+     "start": 0.865,
+     "end": 1.334
+    },
+    {
+     "text": "Solar",
+     "start": 1.731,
+     "end": 1.995
+    },
+    {
+     "text": "beam",
+     "start": 2.007,
+     "end": 2.272
+    },
+    {
+     "text": "It's",
+     "start": 2.668,
+     "end": 2.776
+    },
+    {
+     "text": "been",
+     "start": 2.788,
+     "end": 2.921
+    },
+    {
+     "text": "charging",
+     "start": 2.933,
+     "end": 3.329
+    },
+    {
+     "text": "all",
+     "start": 3.341,
+     "end": 3.462
+    },
+    {
+     "text": "day",
+     "start": 3.474,
+     "end": 3.774
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_2.mp3",
+   "duration": 6.22,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.108,
+     "end": 0.18
+    },
+    {
+     "text": "in",
+     "start": 0.192,
+     "end": 0.288
+    },
+    {
+     "text": "sixteen",
+     "start": 0.3,
+     "end": 0.793
+    },
+    {
+     "text": "thirty-seven",
+     "start": 0.805,
+     "end": 1.466
+    },
+    {
+     "text": "one",
+     "start": 1.767,
+     "end": 2.007
+    },
+    {
+     "text": "tulip",
+     "start": 2.019,
+     "end": 2.344
+    },
+    {
+     "text": "bulb",
+     "start": 2.356,
+     "end": 2.644
+    },
+    {
+     "text": "cost",
+     "start": 2.656,
+     "end": 3.077
+    },
+    {
+     "text": "as",
+     "start": 3.281,
+     "end": 3.389
+    },
+    {
+     "text": "much",
+     "start": 3.401,
+     "end": 3.666
+    },
+    {
+     "text": "as",
+     "start": 3.678,
+     "end": 3.762
+    },
+    {
+     "text": "a",
+     "start": 3.774,
+     "end": 3.81
+    },
+    {
+     "text": "house",
+     "start": 3.822,
+     "end": 4.363
+    },
+    {
+     "text": "So",
+     "start": 4.772,
+     "end": 4.904
+    },
+    {
+     "text": "tulip",
+     "start": 4.916,
+     "end": 5.252
+    },
+    {
+     "text": "makes",
+     "start": 5.264,
+     "end": 5.493
+    },
+    {
+     "text": "it",
+     "start": 5.505,
+     "end": 5.601
+    },
+    {
+     "text": "rain",
+     "start": 5.613,
+     "end": 5.865
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_3.mp3",
+   "duration": 3.84,
+   "words": [
+    {
+     "text": "Sunflower",
+     "start": 0.108,
+     "end": 0.577
+    },
+    {
+     "text": "reloads",
+     "start": 0.589,
+     "end": 1.178
+    },
+    {
+     "text": "Two",
+     "start": 1.587,
+     "end": 1.719
+    },
+    {
+     "text": "thousand",
+     "start": 1.731,
+     "end": 2.103
+    },
+    {
+     "text": "seeds",
+     "start": 2.115,
+     "end": 2.596
+    },
+    {
+     "text": "Full",
+     "start": 3.029,
+     "end": 3.161
+    },
+    {
+     "text": "auto",
+     "start": 3.173,
+     "end": 3.486
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_4.mp3",
+   "duration": 4.32,
+   "words": [
+    {
+     "text": "Tulip",
+     "start": 0.096,
+     "end": 0.337
+    },
+    {
+     "text": "should",
+     "start": 0.349,
+     "end": 0.505
+    },
+    {
+     "text": "be",
+     "start": 0.517,
+     "end": 0.601
+    },
+    {
+     "text": "dead",
+     "start": 0.613,
+     "end": 0.925
+    },
+    {
+     "text": "But",
+     "start": 1.334,
+     "end": 1.43
+    },
+    {
+     "text": "cut",
+     "start": 1.442,
+     "end": 1.647
+    },
+    {
+     "text": "tulips",
+     "start": 1.659,
+     "end": 2.043
+    },
+    {
+     "text": "keep",
+     "start": 2.055,
+     "end": 2.272
+    },
+    {
+     "text": "growing",
+     "start": 2.284,
+     "end": 2.644
+    },
+    {
+     "text": "So",
+     "start": 3.053,
+     "end": 3.161
+    },
+    {
+     "text": "it",
+     "start": 3.173,
+     "end": 3.233
+    },
+    {
+     "text": "just",
+     "start": 3.245,
+     "end": 3.389
+    },
+    {
+     "text": "gets",
+     "start": 3.401,
+     "end": 3.57
+    },
+    {
+     "text": "bigger",
+     "start": 3.582,
+     "end": 3.954
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_5.mp3",
+   "duration": 4.49,
+   "words": [
+    {
+     "text": "Sunflower",
+     "start": 0.108,
+     "end": 0.649
+    },
+    {
+     "text": "turns",
+     "start": 0.661,
+     "end": 0.974
+    },
+    {
+     "text": "to",
+     "start": 0.986,
+     "end": 1.07
+    },
+    {
+     "text": "the",
+     "start": 1.082,
+     "end": 1.166
+    },
+    {
+     "text": "sun",
+     "start": 1.178,
+     "end": 1.49
+    },
+    {
+     "text": "for",
+     "start": 1.502,
+     "end": 1.695
+    },
+    {
+     "text": "one",
+     "start": 1.707,
+     "end": 1.995
+    },
+    {
+     "text": "last",
+     "start": 2.007,
+     "end": 2.296
+    },
+    {
+     "text": "blast",
+     "start": 2.308,
+     "end": 2.812
+    },
+    {
+     "text": "And",
+     "start": 3.209,
+     "end": 3.269
+    },
+    {
+     "text": "the",
+     "start": 3.281,
+     "end": 3.353
+    },
+    {
+     "text": "sun",
+     "start": 3.365,
+     "end": 3.618
+    },
+    {
+     "text": "sets",
+     "start": 3.63,
+     "end": 4.135
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_6.mp3",
+   "duration": 2.83,
+   "words": [
+    {
+     "text": "Then",
+     "start": 0.096,
+     "end": 0.18
+    },
+    {
+     "text": "a",
+     "start": 0.192,
+     "end": 0.276
+    },
+    {
+     "text": "deer",
+     "start": 0.288,
+     "end": 0.529
+    },
+    {
+     "text": "walks",
+     "start": 0.541,
+     "end": 0.865
+    },
+    {
+     "text": "in",
+     "start": 0.877,
+     "end": 1.058
+    },
+    {
+     "text": "Deer",
+     "start": 1.454,
+     "end": 1.647
+    },
+    {
+     "text": "love",
+     "start": 1.659,
+     "end": 1.911
+    },
+    {
+     "text": "tulips",
+     "start": 1.923,
+     "end": 2.476
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_7.mp3",
+   "duration": 2.69,
+   "words": [
+    {
+     "text": "Sunflower",
+     "start": 0.096,
+     "end": 0.577
+    },
+    {
+     "text": "wins",
+     "start": 0.589,
+     "end": 0.998
+    },
+    {
+     "text": "Then",
+     "start": 1.406,
+     "end": 1.49
+    },
+    {
+     "text": "the",
+     "start": 1.502,
+     "end": 1.599
+    },
+    {
+     "text": "deer",
+     "start": 1.611,
+     "end": 1.851
+    },
+    {
+     "text": "looks",
+     "start": 1.863,
+     "end": 2.103
+    },
+    {
+     "text": "up",
+     "start": 2.115,
+     "end": 2.332
+    }
+   ]
+  },
+  {
+   "file": "narration/tulip-vs-sunflower/line_8.mp3",
+   "duration": 1.61,
+   "words": [
+    {
+     "text": "Winner",
+     "start": 0.108,
+     "end": 0.397
+    },
+    {
+     "text": "The",
+     "start": 0.805,
+     "end": 0.877
+    },
+    {
+     "text": "deer",
+     "start": 0.889,
+     "end": 1.238
+    }
+   ]
+  }
+ ]
+}
