@@ -1,0 +1,463 @@
+{
+ "lines": [
+  {
+   "file": "narration/pirate-token-odds/line_0.mp3",
+   "duration": 3.62,
+   "words": [
+    {
+     "text": "Is",
+     "start": 0.095,
+     "end": 0.202
+    },
+    {
+     "text": "Fortnite's",
+     "start": 0.214,
+     "end": 0.738
+    },
+    {
+     "text": "pirate",
+     "start": 0.75,
+     "end": 1.214
+    },
+    {
+     "text": "token",
+     "start": 1.226,
+     "end": 1.631
+    },
+    {
+     "text": "rarer",
+     "start": 1.643,
+     "end": 1.976
+    },
+    {
+     "text": "than",
+     "start": 1.988,
+     "end": 2.119
+    },
+    {
+     "text": "getting",
+     "start": 2.131,
+     "end": 2.357
+    },
+    {
+     "text": "struck",
+     "start": 2.369,
+     "end": 2.702
+    },
+    {
+     "text": "by",
+     "start": 2.714,
+     "end": 2.833
+    },
+    {
+     "text": "lightning",
+     "start": 2.845,
+     "end": 3.262
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_1.mp3",
+   "duration": 3.38,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.095,
+     "end": 0.119
+    },
+    {
+     "text": "shiny",
+     "start": 0.131,
+     "end": 0.452
+    },
+    {
+     "text": "Pok\u00e9mon",
+     "start": 0.464,
+     "end": 0.988
+    },
+    {
+     "text": "One",
+     "start": 1.393,
+     "end": 1.56
+    },
+    {
+     "text": "in",
+     "start": 1.571,
+     "end": 1.679
+    },
+    {
+     "text": "4,096",
+     "start": 1.69,
+     "end": 3.036
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_2.mp3",
+   "duration": 3.05,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.095,
+     "end": 0.131
+    },
+    {
+     "text": "hole-in-one",
+     "start": 0.143,
+     "end": 0.667
+    },
+    {
+     "text": "One",
+     "start": 1.071,
+     "end": 1.25
+    },
+    {
+     "text": "in",
+     "start": 1.262,
+     "end": 1.369
+    },
+    {
+     "text": "12,500",
+     "start": 1.381,
+     "end": 2.69
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_3.mp3",
+   "duration": 4.63,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.107,
+     "end": 0.155
+    },
+    {
+     "text": "pirate",
+     "start": 0.167,
+     "end": 0.5
+    },
+    {
+     "text": "token",
+     "start": 0.512,
+     "end": 0.869
+    },
+    {
+     "text": "One",
+     "start": 1.274,
+     "end": 1.417
+    },
+    {
+     "text": "in",
+     "start": 1.429,
+     "end": 1.536
+    },
+    {
+     "text": "137,500",
+     "start": 1.548,
+     "end": 3.714
+    },
+    {
+     "text": "chests",
+     "start": 3.726,
+     "end": 4.286
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_4.mp3",
+   "duration": 4.66,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.095,
+     "end": 0.155
+    },
+    {
+     "text": "royal",
+     "start": 0.167,
+     "end": 0.429
+    },
+    {
+     "text": "flush",
+     "start": 0.44,
+     "end": 0.929
+    },
+    {
+     "text": "One",
+     "start": 1.333,
+     "end": 1.512
+    },
+    {
+     "text": "in",
+     "start": 1.524,
+     "end": 1.643
+    },
+    {
+     "text": "649,740",
+     "start": 1.655,
+     "end": 4.309
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_5.mp3",
+   "duration": 6.1,
+   "words": [
+    {
+     "text": "Lightning",
+     "start": 0.095,
+     "end": 0.488
+    },
+    {
+     "text": "in",
+     "start": 0.667,
+     "end": 0.738
+    },
+    {
+     "text": "a",
+     "start": 0.75,
+     "end": 0.786
+    },
+    {
+     "text": "whole",
+     "start": 0.798,
+     "end": 1.012
+    },
+    {
+     "text": "year",
+     "start": 1.024,
+     "end": 1.274
+    },
+    {
+     "text": "One",
+     "start": 1.667,
+     "end": 1.821
+    },
+    {
+     "text": "in",
+     "start": 1.833,
+     "end": 1.94
+    },
+    {
+     "text": "1.2",
+     "start": 1.952,
+     "end": 2.512
+    },
+    {
+     "text": "million",
+     "start": 2.524,
+     "end": 2.893
+    },
+    {
+     "text": "So",
+     "start": 3.286,
+     "end": 3.405
+    },
+    {
+     "text": "no",
+     "start": 3.417,
+     "end": 3.679
+    },
+    {
+     "text": "Lightning",
+     "start": 4.071,
+     "end": 4.464
+    },
+    {
+     "text": "is",
+     "start": 4.583,
+     "end": 4.69
+    },
+    {
+     "text": "nine",
+     "start": 4.702,
+     "end": 5.012
+    },
+    {
+     "text": "times",
+     "start": 5.024,
+     "end": 5.321
+    },
+    {
+     "text": "rarer",
+     "start": 5.333,
+     "end": 5.738
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_6.mp3",
+   "duration": 5.74,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.107,
+     "end": 0.179
+    },
+    {
+     "text": "here's",
+     "start": 0.19,
+     "end": 0.393
+    },
+    {
+     "text": "the",
+     "start": 0.405,
+     "end": 0.488
+    },
+    {
+     "text": "catch",
+     "start": 0.5,
+     "end": 0.952
+    },
+    {
+     "text": "For",
+     "start": 1.381,
+     "end": 1.464
+    },
+    {
+     "text": "a",
+     "start": 1.476,
+     "end": 1.524
+    },
+    {
+     "text": "coin-flip",
+     "start": 1.536,
+     "end": 1.964
+    },
+    {
+     "text": "shot",
+     "start": 1.976,
+     "end": 2.238
+    },
+    {
+     "text": "at",
+     "start": 2.25,
+     "end": 2.345
+    },
+    {
+     "text": "one",
+     "start": 2.357,
+     "end": 2.559
+    },
+    {
+     "text": "token",
+     "start": 2.571,
+     "end": 2.952
+    },
+    {
+     "text": "you'd",
+     "start": 3.321,
+     "end": 3.417
+    },
+    {
+     "text": "need",
+     "start": 3.429,
+     "end": 3.571
+    },
+    {
+     "text": "about",
+     "start": 3.583,
+     "end": 3.821
+    },
+    {
+     "text": "95,000",
+     "start": 3.833,
+     "end": 4.833
+    },
+    {
+     "text": "chests",
+     "start": 4.845,
+     "end": 5.381
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_7.mp3",
+   "duration": 3.67,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.095,
+     "end": 0.155
+    },
+    {
+     "text": "the",
+     "start": 0.167,
+     "end": 0.238
+    },
+    {
+     "text": "Powerball",
+     "start": 0.25,
+     "end": 0.738
+    },
+    {
+     "text": "jackpot",
+     "start": 0.75,
+     "end": 1.286
+    },
+    {
+     "text": "One",
+     "start": 1.69,
+     "end": 1.857
+    },
+    {
+     "text": "in",
+     "start": 1.869,
+     "end": 1.988
+    },
+    {
+     "text": "292",
+     "start": 2.0,
+     "end": 2.905
+    },
+    {
+     "text": "million",
+     "start": 2.917,
+     "end": 3.321
+    }
+   ]
+  },
+  {
+   "file": "narration/pirate-token-odds/line_8.mp3",
+   "duration": 3.0,
+   "words": [
+    {
+     "text": "You'd",
+     "start": 0.095,
+     "end": 0.202
+    },
+    {
+     "text": "find",
+     "start": 0.214,
+     "end": 0.452
+    },
+    {
+     "text": "over",
+     "start": 0.464,
+     "end": 0.667
+    },
+    {
+     "text": "2,000",
+     "start": 0.679,
+     "end": 1.381
+    },
+    {
+     "text": "pirate",
+     "start": 1.393,
+     "end": 1.75
+    },
+    {
+     "text": "tokens",
+     "start": 1.762,
+     "end": 2.143
+    },
+    {
+     "text": "first",
+     "start": 2.155,
+     "end": 2.643
+    }
+   ]
+  }
+ ]
+}

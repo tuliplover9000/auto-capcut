@@ -17,6 +17,10 @@ import tulipEp from '../episodes/tulip-vs-sunflower.json';
 import tulipTiming from '../episodes/tulip-vs-sunflower.timing.json';
 import jensenEp from '../episodes/jensen-vs-edison.json';
 import jensenTiming from '../episodes/jensen-vs-edison.timing.json';
+import {Odds} from './odds/Odds';
+import {totalFrames as oddsFrames, OddsEpisode, Timing as OddsTiming} from './odds/timeline';
+import pirateEp from '../episodes/pirate-token-odds.json';
+import pirateTiming from '../episodes/pirate-token-odds.timing.json';
 
 // Dev-only: Fight art review — every face + key poses.
 const FightArtSheet: React.FC = () => (
@@ -94,6 +98,16 @@ export const RemotionRoot: React.FC = () => (
       defaultProps={{episode: jensenEp as FightEpisode, timing: jensenTiming as FightTiming}}
       durationInFrames={fightFrames(jensenEp as FightEpisode, jensenTiming as FightTiming)}
       calculateMetadata={({props}) => ({durationInFrames: fightFrames(props.episode, props.timing)})}
+    />
+    <Composition
+      id="OddsPirate"
+      component={Odds}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: pirateEp as OddsEpisode, timing: pirateTiming as OddsTiming}}
+      durationInFrames={oddsFrames(pirateEp as OddsEpisode, pirateTiming as OddsTiming)}
+      calculateMetadata={({props}) => ({durationInFrames: oddsFrames(props.episode, props.timing)})}
     />
     <Composition
       id="WindTest"

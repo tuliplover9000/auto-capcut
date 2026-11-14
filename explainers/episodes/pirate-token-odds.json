@@ -1,0 +1,57 @@
+{
+  "id": "pirate-token-odds",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+5%",
+  "title": "Fortnite pirate token odds vs real life odds",
+  "headline": ["RARER THAN", "LIGHTNING?"],
+  "hot": ["pirate", "token", "lightning", "powerball", "jackpot", "rarer", "catch", "coin-flip", "chests", "no"],
+  "lines": [
+    {
+      "text": "Is Fortnite's pirate token rarer than getting struck by lightning?",
+      "note": ""
+    },
+    {
+      "text": "A shiny Pokémon? One in 4,096.",
+      "note": "Full odds, Pokémon X/Y onward",
+      "pause": 0.15,
+      "item": {"art": "shiny", "odds": 4096, "cue": "4,096"}
+    },
+    {
+      "text": "A hole-in-one? One in 12,500.",
+      "note": "Average amateur, per par 3 · common estimate",
+      "item": {"art": "golf", "odds": 12500, "cue": "12,500"}
+    },
+    {
+      "text": "The pirate token? One in 137,500 chests.",
+      "note": "Epic's official rate, per chest · Nov 2026",
+      "item": {"art": "token", "odds": 137500, "cue": "137,500"}
+    },
+    {
+      "text": "A royal flush? One in 649,740.",
+      "note": "Dealt in a 5-card hand",
+      "item": {"art": "flush", "odds": 649740, "cue": "649,740"}
+    },
+    {
+      "text": "Lightning, in a whole year? One in 1.2 million. So no. Lightning is nine times rarer.",
+      "note": "US odds of being struck in a given year · NWS: 1 in 1,222,000",
+      "item": {"art": "bolt", "odds": 1222000, "cue": "1.2"}
+    },
+    {
+      "text": "But here's the catch. For a coin-flip shot at one token, you'd need about 95,000 chests.",
+      "note": "Chance of at least one token hits 50% at ~95,300 chests",
+      "pause": 0.2,
+      "item": {"art": "chest", "odds": 95309, "cue": "95,000", "mode": "count", "prefix": "OPEN", "pill": "CHESTS FOR A 50/50", "color": "#ffd23f"}
+    },
+    {
+      "text": "And the Powerball jackpot? One in 292 million.",
+      "note": "Official odds: 1 in 292,201,338",
+      "item": {"art": "powerball", "odds": 292201338, "cue": "292"}
+    },
+    {
+      "text": "You'd find over 2,000 pirate tokens first.",
+      "note": "292,201,338 ÷ 137,500 ≈ 2,125 tokens, on average",
+      "pause": 0.2,
+      "item": {"art": "pile", "odds": 2125, "cue": "2,000", "mode": "count", "prefix": "YOU'D FIND", "pill": "PIRATE TOKENS FIRST", "color": "#ffd23f"}
+    }
+  ]
+}
