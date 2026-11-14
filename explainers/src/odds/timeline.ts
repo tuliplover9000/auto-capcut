@@ -15,6 +15,7 @@ export type Item = {
   prefix?: string; // count mode: the small line above the number
   pill?: string; // count mode: the label under the number (odds mode uses the tier)
   color?: string; // count mode: the accent colour
+  suffix?: string; // shown after the number (e.g. '%')
 };
 export type OddsLine = {text: string; note: string; pause?: number; item?: Item};
 export type OddsEpisode = {
@@ -25,6 +26,7 @@ export type OddsEpisode = {
   headline: string[];
   hot?: string[];
   lines: OddsLine[];
+  sting?: {line: number; cue: string}; // a scripted moment in a line with no item (Lift: the balloons pop)
 };
 
 export const FPS = 30;

@@ -1,0 +1,392 @@
+{
+ "lines": [
+  {
+   "file": "narration/balloons-lift/line_0.mp3",
+   "duration": 2.54,
+   "words": [
+    {
+     "text": "How",
+     "start": 0.107,
+     "end": 0.214
+    },
+    {
+     "text": "many",
+     "start": 0.226,
+     "end": 0.417
+    },
+    {
+     "text": "balloons",
+     "start": 0.429,
+     "end": 0.905
+    },
+    {
+     "text": "does",
+     "start": 0.917,
+     "end": 1.06
+    },
+    {
+     "text": "it",
+     "start": 1.071,
+     "end": 1.155
+    },
+    {
+     "text": "take",
+     "start": 1.167,
+     "end": 1.393
+    },
+    {
+     "text": "to",
+     "start": 1.405,
+     "end": 1.476
+    },
+    {
+     "text": "lift",
+     "start": 1.488,
+     "end": 1.714
+    },
+    {
+     "text": "a",
+     "start": 1.726,
+     "end": 1.762
+    },
+    {
+     "text": "person",
+     "start": 1.774,
+     "end": 2.19
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_1.mp3",
+   "duration": 4.75,
+   "words": [
+    {
+     "text": "One",
+     "start": 0.107,
+     "end": 0.262
+    },
+    {
+     "text": "party",
+     "start": 0.274,
+     "end": 0.536
+    },
+    {
+     "text": "balloon",
+     "start": 0.548,
+     "end": 0.893
+    },
+    {
+     "text": "lifts",
+     "start": 0.905,
+     "end": 1.202
+    },
+    {
+     "text": "about",
+     "start": 1.214,
+     "end": 1.476
+    },
+    {
+     "text": "ten",
+     "start": 1.488,
+     "end": 1.702
+    },
+    {
+     "text": "grams",
+     "start": 1.714,
+     "end": 2.262
+    },
+    {
+     "text": "So",
+     "start": 2.655,
+     "end": 2.798
+    },
+    {
+     "text": "a",
+     "start": 2.81,
+     "end": 2.857
+    },
+    {
+     "text": "cat",
+     "start": 2.869,
+     "end": 3.19
+    },
+    {
+     "text": "450",
+     "start": 3.631,
+     "end": 4.405
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_2.mp3",
+   "duration": 2.11,
+   "words": [
+    {
+     "text": "You",
+     "start": 0.095,
+     "end": 0.31
+    },
+    {
+     "text": "About",
+     "start": 0.702,
+     "end": 0.952
+    },
+    {
+     "text": "7,000",
+     "start": 0.964,
+     "end": 1.762
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_3.mp3",
+   "duration": 2.81,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.083,
+     "end": 0.119
+    },
+    {
+     "text": "small",
+     "start": 0.131,
+     "end": 0.381
+    },
+    {
+     "text": "car",
+     "start": 0.393,
+     "end": 0.679
+    },
+    {
+     "text": "130,000",
+     "start": 1.083,
+     "end": 2.452
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_4.mp3",
+   "duration": 3.82,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.095,
+     "end": 0.155
+    },
+    {
+     "text": "blue",
+     "start": 0.167,
+     "end": 0.417
+    },
+    {
+     "text": "whale",
+     "start": 0.429,
+     "end": 0.798
+    },
+    {
+     "text": "the",
+     "start": 1.06,
+     "end": 1.155
+    },
+    {
+     "text": "biggest",
+     "start": 1.167,
+     "end": 1.536
+    },
+    {
+     "text": "animal",
+     "start": 1.548,
+     "end": 1.798
+    },
+    {
+     "text": "alive",
+     "start": 1.81,
+     "end": 2.274
+    },
+    {
+     "text": "15",
+     "start": 2.714,
+     "end": 3.071
+    },
+    {
+     "text": "million",
+     "start": 3.083,
+     "end": 3.452
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_5.mp3",
+   "duration": 3.17,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.107,
+     "end": 0.167
+    },
+    {
+     "text": "the",
+     "start": 0.179,
+     "end": 0.25
+    },
+    {
+     "text": "Titanic",
+     "start": 0.262,
+     "end": 0.869
+    },
+    {
+     "text": "Over",
+     "start": 1.262,
+     "end": 1.476
+    },
+    {
+     "text": "5",
+     "start": 1.488,
+     "end": 1.952
+    },
+    {
+     "text": "billion",
+     "start": 1.964,
+     "end": 2.262
+    },
+    {
+     "text": "balloons",
+     "start": 2.274,
+     "end": 2.821
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_6.mp3",
+   "duration": 5.02,
+   "words": [
+    {
+     "text": "Filling",
+     "start": 0.179,
+     "end": 0.417
+    },
+    {
+     "text": "them",
+     "start": 0.429,
+     "end": 0.571
+    },
+    {
+     "text": "takes",
+     "start": 0.583,
+     "end": 0.881
+    },
+    {
+     "text": "over",
+     "start": 0.893,
+     "end": 1.131
+    },
+    {
+     "text": "40 percent",
+     "start": 1.143,
+     "end": 2.0
+    },
+    {
+     "text": "of",
+     "start": 2.107,
+     "end": 2.226
+    },
+    {
+     "text": "all",
+     "start": 2.31,
+     "end": 2.488
+    },
+    {
+     "text": "the",
+     "start": 2.5,
+     "end": 2.571
+    },
+    {
+     "text": "helium",
+     "start": 2.583,
+     "end": 3.107
+    },
+    {
+     "text": "the",
+     "start": 3.119,
+     "end": 3.214
+    },
+    {
+     "text": "world",
+     "start": 3.226,
+     "end": 3.536
+    },
+    {
+     "text": "produces",
+     "start": 3.548,
+     "end": 4.06
+    },
+    {
+     "text": "in",
+     "start": 4.071,
+     "end": 4.226
+    },
+    {
+     "text": "a",
+     "start": 4.238,
+     "end": 4.262
+    },
+    {
+     "text": "year",
+     "start": 4.274,
+     "end": 4.667
+    }
+   ]
+  },
+  {
+   "file": "narration/balloons-lift/line_7.mp3",
+   "duration": 2.33,
+   "words": [
+    {
+     "text": "Which",
+     "start": 0.107,
+     "end": 0.214
+    },
+    {
+     "text": "is",
+     "start": 0.226,
+     "end": 0.31
+    },
+    {
+     "text": "why",
+     "start": 0.321,
+     "end": 0.452
+    },
+    {
+     "text": "the",
+     "start": 0.464,
+     "end": 0.548
+    },
+    {
+     "text": "Titanic",
+     "start": 0.56,
+     "end": 1.095
+    },
+    {
+     "text": "is",
+     "start": 1.107,
+     "end": 1.19
+    },
+    {
+     "text": "still",
+     "start": 1.202,
+     "end": 1.405
+    },
+    {
+     "text": "down",
+     "start": 1.417,
+     "end": 1.679
+    },
+    {
+     "text": "there",
+     "start": 1.69,
+     "end": 1.964
+    }
+   ]
+  }
+ ]
+}

@@ -23,7 +23,8 @@ ok(ladder.every((v, i) => !i || v > ladder[i - 1]), 'odds ladder strictly rises'
 ok(ladder[ladder.length - 1] / ladder[ladder.length - 2] >= 2, 'finale beats runner-up by >=2x');
 const fin = p.beats.filter((b) => b.odds).pop()!;
 const pos = fin.landing / p.end;
-ok(pos > 0.7 && pos < 0.95, `finale lands at ${(pos * 100).toFixed(0)}% (want 70–95%)`);
+// a story-shaped episode (payoff -> twist -> sting) lands its finale earlier on purpose
+if (!ep.sting) ok(pos > 0.7 && pos < 0.95, `finale lands at ${(pos * 100).toFixed(0)}% (want 70–95%)`);
 ok(markerAt(p, p.end) === fin.item.odds, 'marker ends on the finale');
 ok(tierOf(137500).name === 'LEGENDARY', 'token is legendary');
 // fact math

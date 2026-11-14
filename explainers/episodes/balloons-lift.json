@@ -1,0 +1,51 @@
+{
+  "id": "balloons-lift",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+5%",
+  "title": "How many balloons to lift a person",
+  "headline": ["HOW MANY BALLOONS", "TO LIFT A PERSON?"],
+  "hot": ["balloons", "cat", "car", "whale", "titanic", "helium", "still"],
+  "sting": {"line": 7, "cue": "still"},
+  "lines": [
+    {
+      "text": "How many balloons does it take to lift a person?",
+      "note": ""
+    },
+    {
+      "text": "One party balloon lifts about ten grams. So a cat? 450.",
+      "note": "Standard 11-inch latex balloon · about 10 g of lift (manufacturer chart) · 4.5 kg cat",
+      "item": {"art": "cat", "odds": 450, "cue": "450", "pill": "CAT · 4.5 KG"}
+    },
+    {
+      "text": "You? About 7,000.",
+      "note": "A 70 kg adult · bigger balloons lift more",
+      "item": {"art": "person", "odds": 7000, "cue": "7,000", "pill": "PERSON · 70 KG"}
+    },
+    {
+      "text": "A small car? 130,000.",
+      "note": "A 1,300 kg hatchback",
+      "item": {"art": "car", "odds": 130000, "cue": "130,000", "pill": "SMALL CAR · 1.3 TONNES"}
+    },
+    {
+      "text": "A blue whale, the biggest animal alive? 15 million.",
+      "note": "NOAA: blue whales weigh up to about 150 tonnes",
+      "item": {"art": "whale", "odds": 15000000, "cue": "15", "pill": "BLUE WHALE · 150 TONNES"}
+    },
+    {
+      "text": "And the Titanic? Over 5 billion balloons.",
+      "note": "52,310-ton displacement (1912 inquiry) ÷ 10 g per balloon",
+      "pause": 0.2,
+      "item": {"art": "titanic", "odds": 5300000000, "cue": "5", "pill": "TITANIC · 52,310 TONS"}
+    },
+    {
+      "text": "Filling them takes over 40 percent of all the helium the world produces in a year.",
+      "note": "About 75 million m³ of helium vs ~173 million m³ world output (USGS, 2023)",
+      "item": {"art": "helium", "odds": 43, "cue": "40 percent", "mode": "count", "prefix": "WORLD HELIUM USED", "suffix": "%", "pill": "OF A WHOLE YEAR'S SUPPLY", "color": "#7fd8ff"}
+    },
+    {
+      "text": "Which is why the Titanic is still down there.",
+      "note": "",
+      "pause": 0.35
+    }
+  ]
+}

@@ -18,6 +18,10 @@ import tulipTiming from '../episodes/tulip-vs-sunflower.timing.json';
 import jensenEp from '../episodes/jensen-vs-edison.json';
 import jensenTiming from '../episodes/jensen-vs-edison.timing.json';
 import {Odds} from './odds/Odds';
+import {LiftArtSheet} from './lift/Sheet';
+import {Lift} from './lift/Lift';
+import balloonsEp from '../episodes/balloons-lift.json';
+import balloonsTiming from '../episodes/balloons-lift.timing.json';
 import {totalFrames as oddsFrames, OddsEpisode, Timing as OddsTiming} from './odds/timeline';
 import pirateEp from '../episodes/pirate-token-odds.json';
 import pirateTiming from '../episodes/pirate-token-odds.timing.json';
@@ -78,6 +82,7 @@ export const RemotionRoot: React.FC = () => (
   <>
     <Composition id="ArtSheet" component={ArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="FightArtSheet" component={FightArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="LiftArtSheet" component={LiftArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="WindArtSheet" component={WindArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition
       id="Fight"
@@ -98,6 +103,16 @@ export const RemotionRoot: React.FC = () => (
       defaultProps={{episode: jensenEp as FightEpisode, timing: jensenTiming as FightTiming}}
       durationInFrames={fightFrames(jensenEp as FightEpisode, jensenTiming as FightTiming)}
       calculateMetadata={({props}) => ({durationInFrames: fightFrames(props.episode, props.timing)})}
+    />
+    <Composition
+      id="LiftBalloons"
+      component={Lift}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: balloonsEp as OddsEpisode, timing: balloonsTiming as OddsTiming}}
+      durationInFrames={oddsFrames(balloonsEp as OddsEpisode, balloonsTiming as OddsTiming)}
+      calculateMetadata={({props}) => ({durationInFrames: oddsFrames(props.episode, props.timing)})}
     />
     <Composition
       id="OddsPirate"
