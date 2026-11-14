@@ -62,8 +62,9 @@ vb = butter(2, [300, 4000], "band", fs=SR, output="sos")
 mb, vbv = sosfilt(vb, music), sosfilt(vb, voice)
 print(f"  voice band (300-4k): music under voice {db(mb[talk]) - db(vbv[talk]):+.1f} dB vs the voice  (want <= -9)")
 print(f"music in the gaps          {db(mw[gaps]):6.1f} dB   gap {db(mw[gaps]) - db(vw[talk]):+.1f} dB")
-fin = [b for b in plan["beats"] if b["odds"]][-1]
-for nm, a, z in [("hook", 0, plan["hookEnd"]), ("ladder", plan["hookEnd"], plan["lineStarts"][6]),
-                 ("catch", plan["lineStarts"][6], fin["landing"]), ("finale+sting", fin["landing"], plan["end"])]:
+ls = plan["lineStarts"]
+# per narration line (line 0 = the hook)
+for i, a in enumerate(ls):
+    z = ls[i + 1] if i + 1 < len(ls) else plan["end"]
     s = slice(int(a * SR), int(z * SR))
-    print(f"  {nm:13s} music {db(mw[s]):6.1f} dB")
+    print(f"  line {i:2d} ({a:5.1f}s) music {db(mw[s]):6.1f} dB")

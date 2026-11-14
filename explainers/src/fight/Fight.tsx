@@ -5,6 +5,7 @@ import {Deer, Edison, Face, FighterBox, Jensen, Sunflower, Tulip} from './art';
 import {
   ATTACK, EventKind, FPS, FightEpisode, Plan, Side, Timing, TimedEvent, buildPlan, captions, eventOf, ghostAt, hpAt, lineAt, other, recoilAt,
 } from './timeline';
+import {bigHits, buildShots, camAt, visTime} from './camera';
 
 // "A backyard garden bed lit like a fighting-game stage — saturated daylight
 //  that drops into a cricket-quiet night for the twist."
@@ -192,6 +193,84 @@ const Spark: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y
   </svg>
 );
 
+/* shockwave ring + flying debris streaks on every hit (0 <= k <= 1 over ~0.45 s) */
+const Shock: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y, k, color}) => (
+  <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
+    <circle cx={x} cy={y} r={40 + 260 * ease(k)} fill="none" stroke="#ffffff" strokeWidth={26 * (1 - k)} opacity={1 - k} />
+    <circle cx={x} cy={y} r={20 + 190 * ease(k)} fill="none" stroke={color} strokeWidth={14 * (1 - k)} opacity={1 - k} />
+    {Array.from({length: 10}).map((_, i) => {
+      const a = (i / 10) * Math.PI * 2 + i * 0.37;
+      const r0 = 60 + 300 * ease(k);
+      const r1 = r0 + 70 * (1 - k);
+      return <line key={i} x1={x + Math.cos(a) * r0} y1={y + Math.sin(a) * r0} x2={x + Math.cos(a) * r1} y2={y + Math.sin(a) * r1}
+        stroke={i % 2 ? color : '#fff'} strokeWidth={10 * (1 - k) + 2} strokeLinecap="round" />;
+    })}
+  </svg>
+);
+
+/* anime speed lines + colour wash behind a fighter during their special move */
+const SpeedLines: React.FC<{x: number; y: number; color: string; k: number; frame: number}> = ({x, y, color, k, frame}) => {
+  const op = Math.min(clamp01(k / 0.08), clamp01((1 - k) / 0.2));
+  const rnd = (i: number) => {
+    const v = Math.sin(i * 127.1 + Math.floor(frame / 2) * 311.7) * 43758.5453;
+    return v - Math.floor(v);
+  };
+  return (
+    <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0, opacity: op}}>
+      <defs>
+        <radialGradient id={`wash${Math.round(x)}`} cx={x} cy={y} r={1100} gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor={color} stopOpacity={0.85} />
+          <stop offset="0.6" stopColor={color} stopOpacity={0.35} />
+          <stop offset="1" stopColor="#000" stopOpacity={0.55} />
+        </radialGradient>
+      </defs>
+      <rect x={0} y={0} width={W} height={1920} fill={`url(#wash${Math.round(x)})`} />
+      {Array.from({length: 56}).map((_, i) => {
+        const a = (i / 56) * Math.PI * 2 + (rnd(i) - 0.5) * 0.08;
+        const r0 = 300 + rnd(i + 99) * 160;
+        const wdt = 4 + rnd(i + 7) * 12;
+        return <line key={i} x1={x + Math.cos(a) * r0} y1={y + Math.sin(a) * r0} x2={x + Math.cos(a) * 1800} y2={y + Math.sin(a) * 1800}
+          stroke="#ffffff" strokeWidth={wdt} opacity={0.55} />;
+      })}
+    </svg>
+  );
+};
+
+/* the background gags (people comment when they spot these) */
+const SignGag: React.FC<{s: number; text: string}> = ({s, text}) => {
+  const bob = Math.abs(Math.sin(s * 5)) * 10;
+  return (
+    <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
+      <g transform={`translate(540 ${850 - bob}) rotate(${Math.sin(s * 3) * 4})`}>
+        <rect x={-4} y={30} width={8} height={120} fill="#7a5a3a" />
+        <rect x={-118} y={-34} width={236} height={74} rx={6} fill="#fffbea" stroke="#111" strokeWidth={5} />
+        <text x={0} y={-6} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={25} fill="#d0282e">{text.split('|')[0]}</text>
+        <text x={0} y={26} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={25} fill="#d0282e">{text.split('|')[1] ?? ''}</text>
+      </g>
+    </svg>
+  );
+};
+
+const SnailGag: React.FC<{s: number; end: number; night: number}> = ({s, end, night}) => {
+  const x = 1120 - (s / end) * 1260; // crosses the whole fence over the whole video
+  const y = GROUND - 200 + 96;
+  const inch = Math.sin(s * 4) * 3;
+  return (
+    <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0, opacity: 1 - 0.4 * night}}>
+      <g transform={`translate(${x} ${y})`}>
+        <rect x={-6} y={-66} width={5} height={44} fill="#5b4632" />
+        <rect x={-58} y={-98} width={104} height={38} rx={5} fill="#fffbea" stroke="#111" strokeWidth={3} />
+        <text x={-6} y={-72} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={17} fill="#7a4a1a">TEAM DEER</text>
+        <ellipse cx={inch} cy={-6} rx={30} ry={7} fill="#c9b48a" />
+        <circle cx={6 + inch} cy={-22} r={17} fill="#b8743a" stroke="#7a4a1a" strokeWidth={3} />
+        <path d={`M ${6 + inch} -22 m -8 0 a 8 8 0 1 1 8 8`} fill="none" stroke="#7a4a1a" strokeWidth={3} />
+        <line x1={-24 + inch} y1={-8} x2={-32 + inch} y2={-26} stroke="#c9b48a" strokeWidth={3} />
+        <circle cx={-32 + inch} cy={-27} r={3} fill="#111" />
+      </g>
+    </svg>
+  );
+};
+
 /* banners: slanted band that slams in from the attacker's side */
 const Band: React.FC<{k: number; from: Side; color: string; label?: string; text: string; size?: number; top?: number}> =
   ({k, from, color, label, text, size = 104, top = 446}) => {
@@ -357,8 +436,10 @@ const Bulb: React.FC<{e: TimedEvent; s: number; ep: FightEpisode}> = ({e, s, ep}
 export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episode: ep, timing}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const s = frame / fps;
+  const sr = frame / fps; // real time (audio, captions)
   const plan = buildPlan(ep, timing);
+  const hitsBig = bigHits(plan);
+  const s = visTime(hitsBig, sr); // picture time (freezes for a beat on every big hit)
   const ev = (kind: Parameters<typeof eventOf>[1], side?: Side) => eventOf(plan, kind, side);
   const hookEnd = plan.lineEnds[0];
   const ring = ep.stage === 'ring';
@@ -455,15 +536,42 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
   const punch = Math.max(0, ...plan.hits.map((h) => (s >= h.t ? Math.exp(-(s - h.t) * 6) : 0)));
   const bigShake = Math.max(0, ...plan.events.filter((e) => e.kind === 'stomp' || e.kind === 'chomp' || e.kind === 'fight')
     .map((e) => { const d = s - e.t - (e.kind === 'fight' ? 0 : 0.3); return d >= 0 && d < 0.6 ? 1 - d / 0.6 : 0; }));
-  const lastHit = [...plan.hits].reverse().find((h) => h.t <= s);
-  const focusX = lastHit ? (lastHit.target === 'L' ? TX : SX) : 540;
   const shakeX = Math.sin(frame * 2.3) * (18 * bigShake + 6 * punch);
   const shakeY = Math.cos(frame * 2.9) * (14 * bigShake + 4 * punch);
+  // ── the director: shots from the story events
+  const shots = buildShots(plan, (sd) => headAt(ep, sd), hookEnd);
+  const cam = camAt(shots, s);
+  const camPrev = camAt(shots, s - 1 / fps);
+  const camSpeed = Math.hypot((cam.x - camPrev.x) * cam.z, (cam.y - camPrev.y) * cam.z, (cam.z - camPrev.z) * 900);
+  // impact frames (2 frames, anime style) on the knockout-class hits
+  const impactTs = plan.events.filter((e) => ['ko', 'chomp', 'beam', 'stomp'].includes(e.kind)).map((e) => e.t + ATTACK[e.kind]!.hits[0]);
+  const impactD = Math.min(9, ...impactTs.map((t) => (sr >= t ? sr - t : 9)));
+  const sceneFilter = impactD < 1 / 30 ? 'invert(1) saturate(0) contrast(2.4)' : impactD < 2 / 30 ? 'saturate(0) contrast(3) brightness(1.25)'
+    : camSpeed > 60 ? `blur(${Math.min(4, (camSpeed - 60) / 25).toFixed(1)}px)` : 'none';
+  // ── dashes: wind-up, lunge in, hold through the hit, slide back (+ squash/stretch)
+  const DASH: EventKind[] = ['beam', 'coins', 'seeds', 'volley', 'rain', 'flash'];
+  const dashAt = (side: Side, t: number) => {
+    let off = 0;
+    let sq = 0;
+    const dir = side === 'L' ? 1 : -1;
+    for (const e of plan.events) {
+      if (!DASH.includes(e.kind) || (e.who ?? 'L') !== side) continue;
+      const hit = ATTACK[e.kind]!.hits[0];
+      const d = t - e.t;
+      if (d < -0.24 || d > hit + 0.55) continue;
+      if (d < 0) { const k = ease((d + 0.24) / 0.24); off += -45 * k * dir; sq = k; }
+      else if (d < 0.13) { const k = ease(d / 0.13); off += (-45 + 175 * k) * dir; sq = -(1 - Math.abs(2 * k - 1)); }
+      else if (d < hit + 0.12) off += 130 * dir;
+      else off += 130 * (1 - ease((d - hit - 0.12) / 0.43)) * dir;
+    }
+    return {off, sq};
+  };
+  const moveOn = (side: Side) => plan.events.find((e) => e.kind === 'move' && e.who === side && win(s, e.t, 1.3));
   const flash = Math.max(0, ...plan.hits.map((h) => (s >= h.t && s < h.t + 0.1 ? 0.35 * (1 - (s - h.t) / 0.1) : 0)));
 
   // ── captions (big, <=2 words) — the hook gets a fixed headline instead
   const caps = captions(ep, timing, plan);
-  const capIdx = caps.findIndex((c) => s >= c.start && s < c.end);
+  const capIdx = caps.findIndex((c) => sr >= c.start && sr < c.end);
   const cap = capIdx >= 0 ? caps[capIdx] : null;
   let capSize = 0;
   let capWrap = false;
@@ -477,7 +585,7 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
   const firstKo = koOf('L') ?? koOf('R');
   const koOn = !!firstKo && win(s, firstKo.t + 0.45, 1.2);
   // a banner IS the caption while it's up (no doubled text)
-  const bannerUp = plan.events.some((e) => (e.kind === 'move' && win(s, e.t, 1.6)) || (e.kind === 'stat' && win(s, e.t, 1.7)) || (e.kind === 'fight' && win(s, e.t, 1.0)) || (e.kind === 'banner' && s >= e.t && s < e.t + 2.5));
+  const bannerUp = plan.events.some((e) => (e.kind === 'move' && win(s, e.t, 1.6)) || (e.kind === 'stat' && win(s, e.t, 1.7)) || (e.kind === 'fight' && win(s, e.t, 1.0)) || (e.kind === 'banner' && s >= e.t && s < e.t + 2.5) || (e.kind === 'chomp' && win(s, e.t + 0.2, 0.9)));
   const showCap = cap && s >= hookEnd && !(winnerE && s >= winnerE.t) && !koOn && !bannerUp;
 
   // damage numbers: one per attack, at the first hit
@@ -486,41 +594,79 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
     return {t0, side: (e.target ?? (e.who === 'L' ? 'R' : 'L')) as Side, dmg: e.dmg ?? 0};
   });
 
-  const tulipX = TX - FW / 2 - recL * 40 + (1 - introL) * -700;
-  const sunX = SX - FW / 2 + recR * 40 + (1 - introR) * 700;
+  const tulipX = TX - FW / 2 - recL * 90 + (1 - introL) * -700;
+  const sunX = SX - FW / 2 + recR * 90 + (1 - introR) * 700;
+
+  // one fighter, optionally as a fading afterimage at an earlier dash position
+  const fighter = (side: Side, t: number, op: number, key: string) => {
+    const {off, sq} = dashAt(side, t);
+    const sx = 1 + 0.09 * sq;
+    const sy = 1 - 0.09 * sq;
+    const ghostStyle: React.CSSProperties = op < 1 ? {opacity: op, filter: `drop-shadow(0 0 0 ${ep.fighters[side].color}) saturate(2) brightness(1.4)`} : {};
+    if (ring) {
+      const L = side === 'L';
+      return (
+        <div key={key} style={{position: 'absolute', left: (L ? tulipX : sunX) + off, top: GROUND - FW * 1.75 - idle(L ? 0 : 1.3) * (1 - fallOf(side)),
+          width: FW, height: FW * 1.75, transformOrigin: '50% 100%', transform: `rotate(${(L ? -recL : recR) * 8}deg) scale(${sx}, ${sy})`, ...ghostStyle}}>
+          <FighterBox w={FW}>{L ? <Jensen face={ringFace('L')} arm={ringArm('L')} t={s} fall={fallOf('L')} dir={-1} shine={shine} />
+            : <Edison face={ringFace('R')} arm={ringArm('R')} t={s} fall={fallOf('R')} dir={1} />}</FighterBox>
+        </div>
+      );
+    }
+    if (side === 'L') {
+      return (
+        <div key={key} style={{position: 'absolute', left: tulipX + off, top: GROUND - FW * 1.75 - idle(0), width: FW, height: FW * 1.75,
+          transformOrigin: '50% 100%', transform: `scale(${grow * sx}, ${grow * sy}) rotate(${stomp * 24 - recL * 8 + wobble}deg)`, ...ghostStyle}}>
+          <FighterBox w={FW}><Tulip face={faceL} arm={armL} t={s} bite={biteL} droop={biteL > 0 ? ease(clamp01((s - chompL!.t - 0.3) / 0.6)) : 0} /></FighterBox>
+        </div>
+      );
+    }
+    return (
+      <div key={key} style={{position: 'absolute', left: sunX + off, top: GROUND - FW * 1.75 - idle(1.3), width: FW, height: FW * 1.75,
+        transformOrigin: '50% 100%', transform: `rotate(${recR * 8}deg) scale(${sx}, ${sy})`, ...ghostStyle}}>
+        <FighterBox w={FW}>
+          <Sunflower face={faceR} arm={armR} t={s} glow={Math.max(charge, ev('beam') && win(s, ev('beam')!.t - 0.4, 1.3) ? 1 : 0)}
+            tilt={charge > 0 ? Math.min(1, charge * 2) : 0} bite={biteR}
+            droop={sunset && s > sunset.t + 0.3 && !(winsE && s > winsE.t) ? 0.35 : 0} />
+        </FighterBox>
+      </div>
+    );
+  };
+  const withGhosts = (side: Side) => {
+    const v = Math.abs(dashAt(side, s).off - dashAt(side, s - 0.04).off);
+    return [
+      ...(v > 10 ? [fighter(side, s - 0.1, 0.18, `${side}g2`), fighter(side, s - 0.05, 0.35, `${side}g1`)] : []),
+      fighter(side, s, 1, `${side}main`),
+    ];
+  };
+  const aura = (side: Side) => {
+    const m = moveOn(side);
+    if (!m) return null;
+    const k = (s - m.t) / 1.3;
+    const [hx, hy] = headAt(ep, side, side === 'L' ? grow : 1);
+    const op = Math.min(clamp01(k / 0.1), clamp01((1 - k) / 0.25)) * (0.75 + 0.25 * Math.sin(s * 30));
+    return <div key={`aura${side}`} style={{position: 'absolute', left: hx - 330, top: hy - 260, width: 660, height: 1000, borderRadius: '50%',
+      background: `radial-gradient(ellipse, ${ep.fighters[side].color} 0%, ${ep.fighters[side].color}88 35%, transparent 70%)`, opacity: op, filter: 'blur(18px)'}} />;
+  };
 
   return (
     <AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
-      <div style={{position: 'absolute', inset: 0, transformOrigin: `${focusX}px 1050px`,
-        transform: `translate(${shakeX}px, ${shakeY}px) scale(${1 + 0.06 * punch})`}}>
+      <div style={{position: 'absolute', inset: 0, transformOrigin: `${cam.x}px ${cam.y}px`, filter: sceneFilter,
+        transform: `translate(${540 - cam.x + shakeX}px, ${960 - cam.y + shakeY}px) rotate(${cam.r}deg) scale(${cam.z * (1 + 0.05 * punch)})`}}>
         {ring ? <RingBackdrop s={s} /> : <Backdrop night={night} sunY={sunY} s={s} />}
-        {ring ? (
-          <>
-            <div style={{position: 'absolute', left: tulipX, top: GROUND - FW * 1.75 - idle(0) * (1 - fallOf('L')), width: FW, height: FW * 1.75,
-              transformOrigin: '50% 100%', transform: `rotate(${-recL * 8}deg)`}}>
-              <FighterBox w={FW}><Jensen face={ringFace('L')} arm={ringArm('L')} t={s} fall={fallOf('L')} dir={-1} shine={shine} /></FighterBox>
-            </div>
-            <div style={{position: 'absolute', left: sunX, top: GROUND - FW * 1.75 - idle(1.3) * (1 - fallOf('R')), width: FW, height: FW * 1.75,
-              transformOrigin: '50% 100%', transform: `rotate(${recR * 8}deg)`}}>
-              <FighterBox w={FW}><Edison face={ringFace('R')} arm={ringArm('R')} t={s} fall={fallOf('R')} dir={1} /></FighterBox>
-            </div>
-          </>
-        ) : null}
+        {ring ? <SignGag s={s} text="TESLA WAS|ROBBED" /> : <SnailGag s={s} end={plan.end} night={night} />}
+        {(['L', 'R'] as Side[]).map((sd) => {
+          const m = moveOn(sd);
+          if (!m) return null;
+          const [hx, hy] = headAt(ep, sd, sd === 'L' ? grow : 1);
+          return <SpeedLines key={`sl${sd}`} x={hx} y={hy} color={ep.fighters[sd].color} k={(s - m.t) / 1.3} frame={frame} />;
+        })}
+        {aura('L')}
+        {aura('R')}
+        {ring ? <>{withGhosts('L')}{withGhosts('R')}</> : null}
         {ring ? null : <>
-        {/* tulip */}
-        <div style={{position: 'absolute', left: tulipX, top: GROUND - FW * 1.75 - idle(0), width: FW, height: FW * 1.75,
-          transformOrigin: '50% 100%', transform: `scale(${grow}) rotate(${stomp * 24 - recL * 8 + wobble}deg)`}}>
-          <FighterBox w={FW}><Tulip face={faceL} arm={armL} t={s} bite={biteL} droop={biteL > 0 ? ease(clamp01((s - chompL!.t - 0.3) / 0.6)) : 0} /></FighterBox>
-        </div>
-        {/* sunflower */}
-        <div style={{position: 'absolute', left: sunX, top: GROUND - FW * 1.75 - idle(1.3), width: FW, height: FW * 1.75,
-          transformOrigin: '50% 100%', transform: `rotate(${recR * 8}deg)`}}>
-          <FighterBox w={FW}>
-            <Sunflower face={faceR} arm={armR} t={s} glow={Math.max(charge, ev('beam') && win(s, ev('beam')!.t - 0.4, 1.3) ? 1 : 0)}
-              tilt={charge > 0 ? Math.min(1, charge * 2) : 0} bite={biteR}
-              droop={sunset && s > sunset.t + 0.3 && !(winsE && s > winsE.t) ? 0.35 : 0} />
-          </FighterBox>
-        </div>
+        {withGhosts('L')}
+        {withGhosts('R')}
         {/* deer */}
         {deerX > -899 ? (
           <svg width={500 * DS} height={400 * DS} viewBox="0 0 500 400" style={{position: 'absolute', left: deerX, top: DEER_TOP, overflow: 'visible'}}>
@@ -537,6 +683,10 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
             fontFamily: heavy, fontWeight: 900, fontSize: 74, color: '#a8ff3a', WebkitTextStroke: '10px #111', paintOrder: 'stroke fill',
             opacity: s > armorE.t + 1.3 ? (armorE.t + 1.6 - s) / 0.3 : 1, transform: `scale(${0.7 + 0.3 * clamp01((s - armorE.t) / 0.12)})`}}>{armorE.text}</div>
         ) : null}
+        {plan.hits.filter((h) => h.dmg > 0 && s >= h.t && s < h.t + 0.45).map((h, i) => {
+          const [x, y] = headAt(ep, h.target, grow);
+          return <Shock key={`sh${i}`} x={x + (h.target === 'L' ? 30 : -30)} y={y + 40} k={(s - h.t) / 0.45} color={h.dmg > 100 ? '#ff4f7b' : '#ffd23f'} />;
+        })}
         {plan.hits.filter((h) => h.dmg > 0 && s >= h.t && s < h.t + 0.3).map((h, i) => {
           const [x, y] = headAt(ep, h.target, grow);
           return <Spark key={i} x={x + (h.target === 'L' ? 30 : -30)} y={y} k={(s - h.t) / 0.3} color={h.dmg > 100 ? '#ff4f7b' : '#ffd23f'} />;
@@ -643,7 +793,7 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
       ) : null}
 
       {/* ── audio ── */}
-      <Audio src={staticFile(`music/${ep.id}.wav`)} volume={0.5} />
+      <Audio src={staticFile(`music/${ep.id}.wav`)} volume={0.55} />
       {timing.lines.map((ln, i) => (
         <Sequence key={i} from={Math.round(plan.lineStarts[i] * FPS)}><Audio src={staticFile(ln.file)} /></Sequence>
       ))}

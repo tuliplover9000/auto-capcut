@@ -2,57 +2,38 @@
 
     node scripts/fight-plan.ts episodes/tulip-vs-sunflower.json
     python scripts/fight_music.py episodes/tulip-vs-sunflower.json  -> public/music/<id>.wav
+    python scripts/mixcheck.py episodes/tulip-vs-sunflower.json 0.55
 
-E minor, 140 BPM, arranged to the story:
-  hook        pulsing bass + building toms + riser into the bell
-  FIGHT       full beat (kick, snare, hats, bass, saw stabs), a notch hotter each line
-  sunset      TAPE-STOP, then silence + crickets (the joke needs the quiet)
-  deer        sneaky pizzicato walk
-  "wins"      a victory stab, cut dead by the record scratch
-  winner      ta-da fanfare + bouncy outro
-Narration ducking baked in.
+v2 "fighting-game" arrangement, E minor, 155 BPM, loud from frame 0:
+  hook        IMPACT on frame 0, kick + driving bass + toms + riser, riff teaser -> the bell
+  FIGHT       full drop: 4-on-the-floor, snare 2+4, 16th hats, gallop bass, supersaw stabs,
+              the lead riff; a snare fill INTO every special move, a crash ON it
+  twist       TAPE-STOP (the joke needs the quiet) -> crickets/hum
+  deer        sneaky pizzicato bounce (garden) | blackout hum (ring)
+  "X wins!"   victory stab + a few bars of groove, cut dead by the reversal
+  drop        (ring) the power comes back: the biggest section of the track
+  winner      fanfare + upbeat outro, full drums
 """
 import json
 import os
 import sys
-import wave
 
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from music import SR, bp, clap, env, hat, hp, hz, kick, lp, saw  # noqa: E402
+from hype import (SR, add, bass_note, bell, brass, clap, crash, hat, hz, impact, kick, lp,  # noqa: E402
+                  master, noise_riser, pluck, rms_db, sidechain, snare, supersaw, tape_stop, tom)
 
-BPM = 140
+BPM = 155
 BEAT = 60 / BPM
+S16 = BEAT / 4
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-rng = np.random.default_rng(11)
-PROG = [[52, 55, 59], [48, 52, 55], [55, 59, 62], [50, 54, 57]]  # Em C G D
-BASS = [28, 24, 31, 26]
-
-
-def add(buf, t, x, g=1.0):
-    i = int(t * SR)
-    if i >= len(buf) or i + len(x) <= 0:
-        return
-    j = min(len(buf), i + len(x))
-    buf[max(0, i):j] += g * x[max(0, -i):j - i]
-
-
-def tom(f):
-    n = int(0.3 * SR)
-    t = np.arange(n) / SR
-    return np.sin(2 * np.pi * np.cumsum(f * (1 + 0.6 * np.exp(-t * 30))) / SR) * np.exp(-t * 9)
-
-
-def pluck(m, d=0.18):
-    n = int(d * SR)
-    return lp(saw(hz(m), n), 1800) * env(n, a=0.002, d=0.06, s=0.0)
-
-
-def brass(ms, d):
-    n = int(d * SR)
-    x = sum(saw(hz(m), n, detune=0.004) for m in ms) / len(ms)
-    return lp(x, 2600) * env(n, a=0.02, d=0.4, s=0.7, r=0.15, hold=d - 0.15)
+CHORDS = [[64, 67, 71], [60, 64, 67], [62, 67, 71], [62, 66, 69]]  # Em C G D
+ROOTS = [40, 36, 43, 38]
+RIFF = [76, None, 76, 79, None, 76, 74, None, 71, None, 74, None, 76, None, None, None,
+        76, None, 76, 79, None, 81, 79, None, 83, None, 81, None, 79, None, 76, None]
+WIN_CHORDS = [[60, 64, 67], [65, 69, 72], [67, 71, 74], [60, 64, 67]]  # C F G C — the victory lap
+WIN_ROOTS = [36, 41, 43, 36]
 
 
 def main() -> int:
@@ -62,158 +43,155 @@ def main() -> int:
     E = {}
     for e in plan["events"]:
         E.setdefault(e["kind"] + (e.get("target") or ""), e["t"])
+    moves = [e["t"] for e in plan["events"] if e["kind"] == "move"]
     end = plan["end"] + 0.5
     n = int(end * SR)
-    mus = np.zeros(n)
-    ring = "deer" not in E  # the ring story: blackout -> "X wins!" -> power back -> the real winner
+    drums, bass, chords, lead, fx = (np.zeros(n) for _ in range(5))
+    kicks = []
+    ring = "deer" not in E
     t_fight = E["fight"]
     t_stop = E["blackout"] if ring else E["sunset"] + 0.5
     t_win, t_winner = E["banner"], E["winner"]
-    if not ring:
-        t_deer, t_chompL, t_turn = E["deer"], E["chompL"], E["deerTurn"]
-
-    # ---- hook: bass pulse + toms building into the bell
-    t = 0.0
-    while t < t_fight:
-        k = t / t_fight
-        nn = int(BEAT / 2 * SR)
-        add(mus, t, lp(saw(hz(28), nn), 260) * env(nn, d=0.1, s=0.3), 0.5)
-        if k > 0.35 and int(round(t / (BEAT / 2))) % 2 == 0:
-            add(mus, t, tom(110 + 60 * k), 0.4 + 0.5 * k)
-        t += BEAT / 2
-    rn = int(min(2.0, t_fight) * SR)
-    tt = np.arange(rn) / SR
-    add(mus, t_fight - rn / SR, bp(rng.uniform(-1, 1, rn), 600, 5000) * (tt / tt[-1]) ** 2, 0.35)
-
-    # ---- the fight groove
+    t_cut = E["power"] if ring else E["deerTurn"]
     lines = plan["lineStarts"]
-    b = 0
-    t = t_fight
-    while t < t_stop:
-        bar, sub = divmod(b, 16)
-        beat, q = divmod(sub, 4)
-        lvl = sum(1 for s in lines if s <= t) / len(lines)
-        if q == 0:
-            add(mus, t, kick(1.0))
-        if q == 0 and beat in (1, 3):
-            add(mus, t, clap(), 0.8)
-        if q == 2:
-            add(mus, t, hat(open_=beat == 3), 0.5)
-        elif lvl > 0.4 and q in (1, 3):
-            add(mus, t, hat(), 0.25)
-        if q in (0, 2):
-            m = BASS[bar % 4] + (12 if q == 2 else 0)
-            nn = int(BEAT / 2 * SR)
-            add(mus, t, lp(saw(hz(m), nn), 500 + 600 * lvl) * env(nn, a=0.003, d=0.1, s=0.5, r=0.02), 0.5)
-        if q == 2 and beat in (0, 2):  # off-beat saw stabs
-            add(mus, t, brass(PROG[bar % 4], BEAT * 0.4), 0.22 + 0.1 * lvl)
-        b += 1
-        t = t_fight + b * BEAT / 4
-    # tape stop: the last 0.6 s of groove slows to a halt
-    i0, i1 = int((t_stop - 0.6) * SR), int(t_stop * SR)
-    seg = mus[i0:i1].copy()
-    m = len(seg)
-    pos = np.cumsum(np.linspace(1.0, 0.0, m))
-    pos = pos / pos[-1] * (m * 0.5)
-    mus[i0:i1] = np.interp(pos, np.arange(m), seg) * np.linspace(1, 0.2, m)
-    mus[i1:] = 0
+
+    def groove(a, z, energy, chord_set=CHORDS, root_set=ROOTS, riff_up=0, riff=True):
+        """16th-note grid from a to z. energy(t) in 0..1 opens filters and adds layers."""
+        s = 0
+        t = a
+        while t < z - 1e-6:
+            bar, sub = divmod(s, 16)
+            beat, q = divmod(sub, 4)
+            lv = energy(t)
+            ch, rt = chord_set[bar % 4], root_set[bar % 4]
+            if q == 0:
+                add(drums, t, kick(1.0))
+                kicks.append(t)
+            if q == 0 and beat in (1, 3):
+                add(drums, t, snare(0.55))
+                add(drums, t, clap(0.8))
+            add(drums, t, hat(open_=(q == 2), g=0.5 if q == 2 else 0.3 + 0.15 * lv))
+            if q in (0, 2, 3):  # gallop bass
+                add(bass, t, bass_note(rt - 12 + (12 if q == 2 else 0), S16 * 0.95, 500 + 900 * lv, drive=1.8), 0.55)
+            if q == 2:  # off-beat stabs
+                add(chords, t, supersaw(ch, BEAT * 0.4, 2000 + 4500 * lv), 0.3 + 0.12 * lv)
+            if riff and lv > 0.25:
+                m = RIFF[s % 32]
+                if m is not None:
+                    add(lead, t, pluck(m + riff_up, 0.2), 0.3)
+            s += 1
+            t = a + s * S16
+
+    # ---- hook: frame-0 impact, driving pulse, toms + riser into the bell
+    add(fx, 0.0, impact(1.2), 0.5)
+    t = 0.0
+    k = 0
+    while t < t_fight - 1e-6:
+        x = t / t_fight
+        if k % 4 == 0:
+            add(drums, t, kick(0.95))
+            kicks.append(t)
+        add(drums, t, hat(g=0.25 + 0.2 * x))
+        if k % 2 == 0:
+            add(bass, t, bass_note(28, S16 * 1.8, 400 + 500 * x, drive=1.6), 0.55)
+        if x > 0.45 and k % 2 == 0:
+            add(drums, t, tom(100 + 90 * x, 0.35 + 0.5 * x))
+        if x > 0.25:
+            m = RIFF[k % 32]
+            if m is not None:
+                add(lead, t, lp(pluck(m - 12, 0.18), 1800), 0.25)
+        t += S16
+        k += 1
+    rd = min(2.2, t_fight)
+    add(fx, t_fight - rd, noise_riser(rd), 0.45)
+    t = t_fight - 0.6  # snare roll into the bell
+    while t < t_fight - 0.02:
+        add(drums, t, snare(0.2 + 0.5 * (t - t_fight + 0.6) / 0.6))
+        t += S16 / 2
+    add(fx, t_fight, impact(1.6), 0.8)
+
+    # ---- the fight
+    groove(t_fight, t_stop, lambda tt: min(1.0, 0.35 + sum(1 for s in lines if s <= tt) / len(lines)))
+    for m in moves:  # a fill INTO every special move, a crash ON it
+        if not (t_fight + 0.6 < m < t_stop):
+            continue
+        t = m - 0.45
+        while t < m - 0.02:
+            add(drums, t, snare(0.25 + 0.5 * (t - m + 0.45) / 0.45))
+            t += S16 / 2
+        add(fx, m, crash(1.4), 0.55)
+        add(fx, m, impact(0.8), 0.35)
+    tape_stop(drums, t_stop - 0.6, t_stop)
+    tape_stop(bass, t_stop - 0.6, t_stop)
+    tape_stop(chords, t_stop - 0.6, t_stop)
+    tape_stop(lead, t_stop - 0.6, t_stop)
+    for b in (drums, bass, chords, lead):
+        b[int(t_stop * SR):] = 0
 
     if not ring:
+        t_deer, t_chomp = E["deer"], E["chompL"]
         # ---- night: crickets
         t = t_stop + 0.3
         while t < t_deer + 0.2:
             for c in range(3):
                 nn = int(0.03 * SR)
-                ch = np.sin(2 * np.pi * 4300 * np.arange(nn) / SR) * env(nn, a=0.002, d=0.012)
-                add(mus, t + c * 0.05, ch, 0.18)
+                ch = np.sin(2 * np.pi * 4300 * np.arange(nn) / SR) * np.exp(-np.arange(nn) / SR * 160)
+                add(fx, t + c * 0.05, ch, 0.3)
             t += 0.62
-
-        # ---- deer: sneaky pizzicato walk (E G A B . B A G E)
+        # ---- deer: sneaky pizzicato bounce (with a soft kick) until "Sunflower wins!"
         walk = [40, 43, 45, 47, 47, 45, 43, 40]
         t = t_deer + 0.3
         i = 0
-        while t < t_chompL:
-            add(mus, t, pluck(walk[i % 8] + 12), 0.5)
+        while t < t_win - 0.05:
+            add(lead, t, pluck(walk[i % 8] + 12, 0.16, 2600), 0.55)
             if i % 2 == 0:
-                add(mus, t, pluck(walk[i % 8] - 12, 0.25), 0.35)
+                add(bass, t, pluck(walk[i % 8] - 12, 0.25, 900), 0.5)
+                add(drums, t, kick(0.5))
+            add(drums, t + BEAT / 4, hat(g=0.2))
             t += BEAT / 2
             i += 1
-
-        # ---- "Sunflower wins!": a victory stab, cut dead at the turn
-        add(mus, t_win, brass([55, 59, 62, 67], 0.9), 0.55)
-        add(mus, t_win, kick(1.0))
-        add(mus, t_win + BEAT * 2, brass([57, 60, 64, 69], 1.6), 0.5)
-        mus[int(t_turn * SR):int(t_winner * SR)] *= 0
+        add(fx, t_chomp + 0.18, impact(1.0), 0.6)
     else:
-        # ---- blackout: a low hum in the dark
         nn = int(max(0.1, t_win - t_stop) * SR)
         tt = np.arange(nn) / SR
-        add(mus, t_stop + 0.2, np.sin(2 * np.pi * 55 * tt) * 0.12 * np.minimum(1, tt / 0.5), 1.0)
-        # ---- "Edison wins!": victory stab, cut dead when the power comes back
-        t_pow = E["power"]
-        add(mus, t_win, brass([55, 59, 62, 67], 0.9), 0.55)
-        add(mus, t_win, kick(1.0))
-        add(mus, t_win + BEAT * 2, brass([57, 60, 64, 69], 1.6), 0.5)
-        mus[int(t_pow * SR):] = 0
-        # ---- power back: the groove DROPS back in, full intensity, until the winner card
-        t = t_pow + 0.55
-        b = 0
-        while t < t_winner:
-            bar, sub = divmod(b, 16)
-            beat, q = divmod(sub, 4)
-            if q == 0:
-                add(mus, t, kick(1.1))
-            if q == 0 and beat in (1, 3):
-                add(mus, t, clap(), 0.9)
-            add(mus, t, hat(open_=q == 2), 0.35 if q % 2 else 0.5)
-            if q in (0, 2):
-                nn2 = int(BEAT / 2 * SR)
-                add(mus, t, lp(saw(hz(BASS[bar % 4] + (12 if q == 2 else 0)), nn2), 1300) * env(nn2, a=0.003, d=0.1, s=0.5, r=0.02), 0.6)
-            if q == 2:
-                add(mus, t, brass(PROG[bar % 4], BEAT * 0.4), 0.35)
-            b += 1
-            t = t_pow + 0.55 + b * BEAT / 4
-        mus[int(t_winner * SR):] = 0
+        add(fx, t_stop + 0.2, np.sin(2 * np.pi * 55 * tt) * 0.25 * np.minimum(1, tt / 0.5), 1.0)
 
-    # ---- winner: ta-da + bouncy outro
-    add(mus, t_winner, brass([48, 55, 60, 64], 0.18), 0.6)
-    add(mus, t_winner + 0.2, brass([48, 55, 60, 64, 67], 1.6), 0.7)
-    add(mus, t_winner + 0.2, kick(1.2))
-    t = t_winner + 0.2 + BEAT * 2
-    k = 0
-    while t < end - 0.3:
-        add(mus, t, kick(0.8) if k % 2 == 0 else clap() * 0.6)
-        add(mus, t, pluck([60, 64, 67, 72][k % 4], 0.2), 0.4)
-        t += BEAT
-        k += 1
+    # ---- "X wins!": victory stab + groove, cut dead at the reversal
+    add(fx, t_win, impact(1.0), 0.6)
+    add(chords, t_win, brass([55, 59, 62, 67], 0.6), 0.7)
+    groove(t_win + BEAT, t_cut, lambda _t: 0.7, WIN_CHORDS, WIN_ROOTS, riff=False)
+    for b in (drums, bass, chords, lead, fx):
+        b[int(t_cut * SR):int((t_cut + 0.02) * SR)] *= np.linspace(1, 0, int(0.02 * SR))
+        b[int((t_cut + 0.02) * SR):int(t_winner * SR)] = 0
 
-    # ---- duck under narration
-    duck = np.ones(n)
-    for w in plan["words"]:
-        a, z = int((w["start"] - 0.05) * SR), int((w["end"] + 0.15) * SR)
-        duck[max(0, a):max(0, z)] = 0.5
-    kk = int(0.05 * SR)
-    mus *= np.convolve(duck, np.ones(kk) / kk, mode="same")
-    mus = hp(mus, 30)
-    mus = mus / (np.max(np.abs(mus)) + 1e-9) * 0.89
-    st = np.stack([mus, np.roll(mus, int(0.011 * SR)) * 0.96], axis=1)
-    os.makedirs(os.path.join(ROOT, "public", "music"), exist_ok=True)
+    silences = []
+    if ring:
+        # ---- the power comes back: the biggest drop, riff an octave up
+        t_drop = t_cut + 0.55
+        add(fx, t_drop, impact(2.0), 0.95)
+        groove(t_drop, t_winner, lambda _t: 1.0, riff_up=12)
+        for b in (drums, bass, chords, lead):
+            b[int(t_winner * SR):] = 0
+    else:
+        silences.append((t_cut + 0.05, t_winner - 0.02))  # the record-scratch pause
+
+    # ---- winner: fanfare + upbeat outro
+    add(fx, t_winner, impact(1.4), 0.8)
+    add(chords, t_winner, brass([48, 55, 60, 64], 0.16), 0.8)
+    add(chords, t_winner + 0.18, supersaw([60, 64, 67, 72], 1.4, 7000), 0.6)
+    groove(t_winner + 0.18 + BEAT * 2, end, lambda _t: 0.9, WIN_CHORDS, WIN_ROOTS, riff_up=0)
+    for j, m in enumerate([72, 76, 79, 84]):
+        add(lead, t_winner + 0.18 + j * 0.09, bell(m), 0.35)
+
+    sc = sidechain(n, kicks)
+    mus = drums + (bass + chords) * sc + lead * (0.6 + 0.4 * sc) + fx
     path = os.path.join(ROOT, "public", "music", f"{ep['id']}.wav")
-    with wave.open(path, "wb") as wf:
-        wf.setnchannels(2)
-        wf.setsampwidth(2)
-        wf.setframerate(SR)
-        wf.writeframes((np.clip(st, -1, 1) * 32767).astype("<i2").tobytes())
-
-    def rms(a, z):
-        seg = mus[int(a * SR):int(z * SR)]
-        return 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-9)
+    out = master(mus, plan["words"], path, silences)
     print(f"-> {path} ({end:.1f}s)")
-    secs = [("hook", 0, t_fight), ("fight", t_fight, t_stop)]
-    secs += [("dark", t_stop, t_win), ("wins", t_win, E["power"]), ("drop", E["power"] + 0.55, t_winner)] if ring else [
-        ("night", t_stop, t_deer), ("deer", t_deer, t_chompL), ("wins", t_win, t_turn), ("silence", t_turn, t_winner)]
+    secs = [("hook", 0, t_fight), ("fight", t_fight, t_stop), ("twist", t_stop, t_win), ("wins", t_win, t_cut)]
+    secs += [("drop", t_cut + 0.55, t_winner)] if ring else []
     secs += [("winner", t_winner, end)]
-    print("  " + "  ".join(f"{nm}:{rms(a, z):.1f}dB" for nm, a, z in secs))
+    print("  " + "  ".join(f"{nm}:{rms_db(out, a, z):.1f}dB" for nm, a, z in secs))
     return 0
 
 
