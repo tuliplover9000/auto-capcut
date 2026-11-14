@@ -15,6 +15,8 @@ import {Fight} from './fight/Fight';
 import {totalFrames as fightFrames, FightEpisode, Timing as FightTiming} from './fight/timeline';
 import tulipEp from '../episodes/tulip-vs-sunflower.json';
 import tulipTiming from '../episodes/tulip-vs-sunflower.timing.json';
+import jensenEp from '../episodes/jensen-vs-edison.json';
+import jensenTiming from '../episodes/jensen-vs-edison.timing.json';
 
 // Dev-only: Fight art review — every face + key poses.
 const FightArtSheet: React.FC = () => (
@@ -81,6 +83,16 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: tulipEp as FightEpisode, timing: tulipTiming as FightTiming}}
       durationInFrames={fightFrames(tulipEp as FightEpisode, tulipTiming as FightTiming)}
+      calculateMetadata={({props}) => ({durationInFrames: fightFrames(props.episode, props.timing)})}
+    />
+    <Composition
+      id="FightJensen"
+      component={Fight}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: jensenEp as FightEpisode, timing: jensenTiming as FightTiming}}
+      durationInFrames={fightFrames(jensenEp as FightEpisode, jensenTiming as FightTiming)}
       calculateMetadata={({props}) => ({durationInFrames: fightFrames(props.episode, props.timing)})}
     />
     <Composition

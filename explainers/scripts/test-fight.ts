@@ -15,22 +15,29 @@ for (let i = 1; i < p.lineStarts.length; i++) assert.ok(p.lineStarts[i] >= p.lin
 for (const e of p.events) assert.ok(e.t >= p.lineStarts[e.line] - 1e-6 && e.t <= p.lineEnds[e.line] + 1e-6, `${e.kind} outside line`);
 // HP: 100 at start, never negative, both KO'd by the end (the deer eats everyone)
 assert.equal(hpAt(p, 'L', 0), 100); assert.equal(hpAt(p, 'R', 0), 100);
-assert.equal(hpAt(p, 'L', p.end), 0); assert.equal(hpAt(p, 'R', p.end), 0);
+const loser = ep.id === 'jensen-vs-edison' ? ['R'] as const : ['L', 'R'] as const;
+for (const l of loser) assert.equal(hpAt(p, l, p.end), 0, `${l} should be KO at the end`);
+if (ep.id === 'jensen-vs-edison') {
+  assert.equal(hpAt(p, 'L', p.end), 100, 'Jensen revives');
+  const bo = p.events.find((e) => e.kind === 'blackout')!; assert.equal(hpAt(p, 'L', bo.t + 1), 0, 'Jensen KO in the blackout');
+}
 for (let s = 0; s < p.end; s += 0.1) for (const side of ['L', 'R'] as const) {
   assert.ok(hpAt(p, side, s) >= 0); assert.ok(ghostAt(p, side, s) >= hpAt(p, side, s));
 }
+if (ep.id === 'tulip-vs-sunflower') {
 // the tulip is near death BEFORE "should be dead" (line 4) — the script says so
 const dead = p.lineStarts[4];
 assert.ok(hpAt(p, 'L', dead) <= 35, `tulip HP at "should be dead" = ${hpAt(p, 'L', dead)}`);
 // sunflower survives until the deer: alive at the "Sunflower wins" line
 assert.ok(hpAt(p, 'R', p.lineStarts[7] + 0.5) > 0, 'sunflower must be alive when it "wins"');
 assert.equal(hpAt(p, 'L', p.lineStarts[7]), 0, 'tulip must be KO before "Sunflower wins"');
+}
 // captions: ordered, and cover every word token
 const caps = captions(ep, t, p);
 for (let i = 1; i < caps.length; i++) assert.ok(caps[i].start >= caps[i - 1].start);
 assert.equal(caps.reduce((a, c) => a + c.n, 0), t.lines.reduce((a, l) => a + l.words.length, 0));
 // twist position: the deer lands in the story's back half (story hits: twist 54-76%)
-const deer = p.events.find((e) => e.kind === 'deer')!;
+const deer = p.events.find((e) => e.kind === 'deer' || e.kind === 'blackout')!;
 const pct = (deer.t / p.end) * 100;
-console.log(`PASS — ${p.end.toFixed(1)}s = ${Math.ceil(p.end * 30)} frames; deer twist @${deer.t.toFixed(1)}s (${pct.toFixed(0)}%); ` +
+console.log(`PASS — ${p.end.toFixed(1)}s = ${Math.ceil(p.end * 30)} frames; twist @${deer.t.toFixed(1)}s (${pct.toFixed(0)}%); ` +
   `HP after each line L/R: ${p.lineEnds.map((e) => `${Math.round(hpAt(p, 'L', e + 1.5))}/${Math.round(hpAt(p, 'R', e + 1.5))}`).join(' ')}`);

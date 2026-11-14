@@ -1,9 +1,9 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {loadFont as loadMontserrat} from '@remotion/google-fonts/Montserrat';
-import {Deer, Face, FighterBox, Sunflower, Tulip} from './art';
+import {Deer, Edison, Face, FighterBox, Jensen, Sunflower, Tulip} from './art';
 import {
-  ATTACK, FPS, FightEpisode, Plan, Side, Timing, TimedEvent, buildPlan, captions, eventOf, ghostAt, hpAt, lineAt, recoilAt, since,
+  ATTACK, EventKind, FPS, FightEpisode, Plan, Side, Timing, TimedEvent, buildPlan, captions, eventOf, ghostAt, hpAt, lineAt, other, recoilAt,
 } from './timeline';
 
 // "A backyard garden bed lit like a fighting-game stage — saturated daylight
@@ -104,20 +104,28 @@ const Hud: React.FC<{ep: FightEpisode; plan: Plan; s: number}> = ({ep, plan, s})
 
 /* ───────────── effects ───────────── */
 
-const headOf = (side: Side, grow: number): [number, number] =>
-  side === 'L' ? [TX, GROUND - (GROUND - TULIP_HEAD_Y) * grow] : [SX, SUN_HEAD_Y];
+const ART_HEAD: Record<string, number> = {tulip: 255, sunflower: 215, jensen: 200, edison: 200};
+const artOf = (ep: FightEpisode, side: Side) => ep.fighters[side].art ?? (side === 'L' ? 'tulip' : 'sunflower');
+/** world position of a fighter's head (L can be scaled by the grow move) */
+const headAt = (ep: FightEpisode, side: Side, grow = 1): [number, number] =>
+  [side === 'L' ? TX : SX, GROUND - (700 - (ART_HEAD[artOf(ep, side)] ?? 220)) * K * (side === 'L' ? grow : 1)];
 
-const Beam: React.FC<{e: TimedEvent; s: number}> = ({e, s}) => {
+const Beam: React.FC<{e: TimedEvent; s: number; ep: FightEpisode}> = ({e, s, ep}) => {
   const k = (s - e.t) / ATTACK.beam!.dur;
   if (k < 0 || k > 1) return null;
   const grow = clamp01(k / 0.2);
   const w = (60 + 20 * Math.sin(s * 60)) * (k > 0.8 ? (1 - k) / 0.2 : 1);
-  const [x1, y1] = [SX - 70, SUN_HEAD_Y];
-  const [x2, y2] = [TX + (SX - 70 - TX) * (1 - grow) + 30, TULIP_HEAD_Y];
+  const from = e.who ?? 'R';
+  const dir = from === 'R' ? -1 : 1;
+  const [ax, ay] = headAt(ep, from);
+  const [bx, by] = headAt(ep, other(from));
+  const [x1, y1] = [ax + dir * 70, ay];
+  const [x2, y2] = [x1 + (bx - dir * 30 - x1) * grow, y1 + (by - y1) * grow];
+  const col = e.color ?? '#ffe24a';
   return (
     <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
-      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ffe24a" strokeWidth={w * 1.7} strokeLinecap="round" opacity={0.55} style={{filter: 'blur(10px)'}} />
-      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#fff58a" strokeWidth={w} strokeLinecap="round" />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={col} strokeWidth={w * 1.7} strokeLinecap="round" opacity={0.55} style={{filter: 'blur(10px)'}} />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={e.color ? col : '#fff58a'} strokeWidth={w} strokeLinecap="round" />
       <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ffffff" strokeWidth={w * 0.4} strokeLinecap="round" />
       {grow >= 1 ? <circle cx={x2} cy={y2} r={70 + 20 * Math.sin(s * 50)} fill="#fff7b0" opacity={0.85} style={{filter: 'blur(6px)'}} /> : null}
     </svg>
@@ -194,7 +202,7 @@ const Band: React.FC<{k: number; from: Side; color: string; label?: string; text
     <div style={{position: 'absolute', left: -40, top, width: W + 80, height: 150, background: color, transform: `translateX(${dx}px) skewY(-5deg)`,
       boxShadow: '0 10px 0 rgba(0,0,0,.35)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'}}>
       {label ? <div style={{fontFamily: heavy, fontWeight: 900, fontSize: 30, letterSpacing: 6, color: '#111', marginBottom: -6}}>{label}</div> : null}
-      <div style={{fontFamily: heavy, fontWeight: 900, fontSize: size, color: '#fff', WebkitTextStroke: `${Math.round(size * 0.12)}px #111`,
+      <div style={{fontFamily: heavy, fontWeight: 900, fontSize: Math.min(size, 960 / (text.length * 0.7)), color: '#fff', WebkitTextStroke: `${Math.round(Math.min(size, 960 / (text.length * 0.7)) * 0.12)}px #111`,
         paintOrder: 'stroke fill', lineHeight: 1, fontStyle: 'italic', whiteSpace: 'nowrap'}}>{text}</div>
     </div>
   );
@@ -209,6 +217,141 @@ const Slam: React.FC<{k: number; text: string; color: string; size: number; top:
   );
 };
 
+/* ───────────── the ring (human fighters) + generic attacks ───────────── */
+
+const RingBackdrop: React.FC<{s: number}> = ({s}) => {
+  const crowd = ['#24143f', '#1c1034', '#150b29'];
+  return (
+    <>
+      <div style={{position: 'absolute', inset: 0, background: 'linear-gradient(#3a1d6b, #160b2c 75%)'}} />
+      <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
+        {[[170, -0.35], [540, 0], [910, 0.35]].map(([x, sk], i) => (
+          <polygon key={i} points={`${x - 40},380 ${x + 40},380 ${x + 280 + sk * 260},${GROUND} ${x - 280 + sk * 260},${GROUND}`}
+            fill="#fff4c8" opacity={0.08 + 0.03 * Math.sin(s * 2 + i)} />
+        ))}
+        {[0, 1, 2].map((row) => Array.from({length: 15}).map((_, i) => {
+          const x = i * 78 + (row % 2) * 39 - 20;
+          const y = 1010 + row * 68 + Math.abs(Math.sin(s * 6 + i * 1.7 + row)) * 9;
+          return (
+            <g key={`${row}-${i}`}>
+              <circle cx={x} cy={y} r={28} fill={crowd[row]} />
+              <rect x={x - 34} y={y + 20} width={68} height={70} rx={20} fill={crowd[row]} />
+            </g>
+          );
+        }))}
+        {Array.from({length: 7}).map((_, i) => (Math.floor(s * 6 + i * 3.7) % 11 === 0 ? (
+          <circle key={i} cx={(i * 331 + 60) % W} cy={1000 + ((i * 53) % 150)} r={15} fill="#fff" opacity={0.95} style={{filter: 'blur(3px)'}} />
+        ) : null))}
+        {([[GROUND - 330, '#e8392f'], [GROUND - 240, '#f4f1ea'], [GROUND - 150, '#2f6fd8']] as Array<[number, string]>).map(([y, c], i) => (
+          <rect key={i} x={0} y={y} width={W} height={12} rx={6} fill={c} />
+        ))}
+        <rect x={10} y={GROUND - 360} width={40} height={360} rx={8} fill="#c8c8d0" />
+        <rect x={W - 50} y={GROUND - 360} width={40} height={360} rx={8} fill="#c8c8d0" />
+      </svg>
+      <div style={{position: 'absolute', left: 0, top: GROUND - 8, width: W, height: 64, background: '#ebe6da'}} />
+      <div style={{position: 'absolute', left: 0, top: GROUND + 56, width: W, height: 1920 - GROUND - 56, background: 'linear-gradient(#2453c9, #15348f)'}} />
+    </>
+  );
+};
+
+const Sprite: React.FC<{kind?: string; x: number; y: number; rot: number; t: number}> = ({kind, x, y, rot, t}) => {
+  if (kind === 'paper') {
+    return (
+      <g transform={`translate(${x} ${y}) rotate(${rot})`}>
+        <rect x={-32} y={-40} width={64} height={80} rx={4} fill="#fbfaf2" />
+        <rect x={-24} y={-32} width={34} height={9} fill="#c0392b" />
+        {[-14, -2, 10, 22].map((yy) => <rect key={yy} x={-24} y={yy} width={48} height={4} fill="#b9b6aa" />)}
+      </g>
+    );
+  }
+  if (kind === 'pancake') {
+    return (
+      <g transform={`translate(${x} ${y}) rotate(${rot * 0.3})`}>
+        {[18, 4, -10].map((yy, i) => <ellipse key={i} cx={0} cy={yy} rx={48} ry={15} fill={i % 2 ? '#c27f33' : '#d9984a'} />)}
+        <rect x={-12} y={-30} width={24} height={14} rx={3} fill="#ffe27a" />
+        <path d="M -40 -8 Q -46 14, -38 22" fill="none" stroke="#8a4b12" strokeWidth={6} strokeLinecap="round" />
+      </g>
+    );
+  }
+  if (kind === 'gpu') {
+    return (
+      <g transform={`translate(${x} ${y}) rotate(${rot * 0.25})`}>
+        <rect x={-78} y={-34} width={156} height={68} rx={8} fill="#24262c" />
+        <rect x={-78} y={-34} width={156} height={10} rx={4} fill="#76b900" />
+        {[-36, 36].map((fx) => (
+          <g key={fx}>
+            <circle cx={fx} cy={6} r={24} fill="#3a3d46" />
+            {[0, 1, 2].map((b) => <line key={b} x1={fx} y1={6} x2={fx + Math.cos(t * 30 + b * 2.1) * 20} y2={6 + Math.sin(t * 30 + b * 2.1) * 20} stroke="#8a8f9c" strokeWidth={5} />)}
+          </g>
+        ))}
+        <rect x={-60} y={34} width={120} height={8} fill="#c9a640" />
+      </g>
+    );
+  }
+  return <ellipse cx={x} cy={y} rx={28} ry={28} fill="#f2b81a" />;
+};
+
+const Volley: React.FC<{e: TimedEvent; s: number; ep: FightEpisode}> = ({e, s, ep}) => {
+  if (!win(s, e.t, ATTACK.volley!.dur + 0.5)) return null;
+  const from = e.who ?? 'L';
+  const to = other(from);
+  const dir = to === 'R' ? 1 : -1;
+  const [ax, ay] = headAt(ep, from);
+  const [bx, by] = headAt(ep, to);
+  return (
+    <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
+      {Array.from({length: 11}).map((_, i) => {
+        const k = (s - e.t - i * 0.07) / 0.4;
+        if (k < 0 || k > 1) return null;
+        const sx = ax + dir * 80;
+        const sy = ay + 60;
+        const tx = bx - dir * 20 + (((i * 37) % 80) - 40);
+        const ty = by + (((i * 53) % 140) - 50);
+        return <Sprite key={i} kind={e.sprite} x={sx + (tx - sx) * k} y={sy + (ty - sy) * k - Math.sin(k * Math.PI) * 150}
+          rot={k * 540 * dir + i * 30} t={s} />;
+      })}
+    </svg>
+  );
+};
+
+const Rain: React.FC<{e: TimedEvent; s: number; ep: FightEpisode}> = ({e, s, ep}) => {
+  if (!win(s, e.t, ATTACK.rain!.dur + 0.6)) return null;
+  const to = other(e.who ?? 'L');
+  const [bx, by] = headAt(ep, to);
+  return (
+    <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
+      {Array.from({length: 14}).map((_, i) => {
+        const k = (s - e.t - i * 0.07) / 0.5;
+        if (k < 0 || k > 2) return null;
+        const side = i % 2 ? 1 : -1;
+        const x = bx + (((i * 73) % 240) - 120) + (k > 1 ? (k - 1) * side * 320 : 0);
+        const y = k <= 1 ? 420 + k * k * (by - 420 + ((i * 37) % 160) - 40) : by + 60 - Math.sin(Math.min(1, k - 1) * Math.PI) * 140 + (k - 1) * 420;
+        return <Sprite key={i} kind={e.sprite} x={x} y={y} rot={k * 200 * side + i * 25} t={s} />;
+      })}
+    </svg>
+  );
+};
+
+const Bulb: React.FC<{e: TimedEvent; s: number; ep: FightEpisode}> = ({e, s, ep}) => {
+  if (!win(s, e.t, 1.3)) return null;
+  const [hx, hy] = headAt(ep, e.who ?? 'R');
+  const pop = spring({frame: Math.round((s - e.t) * 30), fps: 30, config: {damping: 9, stiffness: 200}});
+  const on = clamp01((s - e.t - 0.25) / 0.12);
+  const fade = s > e.t + 1.0 ? 1 - (s - e.t - 1.0) / 0.3 : 1;
+  const glass = on > 0 ? '#fff7c4' : '#e6f2f7';
+  return (
+    <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
+      <g transform={`translate(${hx} ${hy - 300}) scale(${pop * 1.3})`} opacity={fade}>
+        {on > 0 ? <circle cx={0} cy={0} r={150 + 30 * Math.sin(s * 40)} fill="#fff6b0" opacity={0.7 * on} style={{filter: 'blur(20px)'}} /> : null}
+        <circle cx={0} cy={0} r={74} fill={glass} opacity={0.95} />
+        <path d="M -28 54 L 28 54 L 22 88 L -22 88 Z" fill={glass} />
+        <path d="M -20 20 Q -10 -14, 0 18 Q 10 -14, 20 20" fill="none" stroke={on > 0 ? '#ff9a1a' : '#8a8f9c'} strokeWidth={6} />
+        {[96, 112, 128].map((y) => <rect key={y} x={-26} y={y - 8} width={52} height={12} rx={5} fill="#9aa0a8" />)}
+      </g>
+    </svg>
+  );
+};
+
 /* ───────────── composition ───────────── */
 
 export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episode: ep, timing}) => {
@@ -218,6 +361,19 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
   const plan = buildPlan(ep, timing);
   const ev = (kind: Parameters<typeof eventOf>[1], side?: Side) => eventOf(plan, kind, side);
   const hookEnd = plan.lineEnds[0];
+  const ring = ep.stage === 'ring';
+  const blackoutE = ev('blackout');
+  const powerE = ev('power');
+  const koOf = (side: Side) => plan.events.find((e) => (e.kind === 'ko' || e.kind === 'chomp') && e.target === side);
+  const reviveOf = (side: Side) => plan.events.find((e) => e.kind === 'revive' && e.target === side);
+  const fallOf = (side: Side) => {
+    const ko = koOf(side);
+    if (!ko || ko.kind === 'chomp') return 0;
+    const rv = reviveOf(side);
+    return ease(clamp01((s - ko.t - 0.45) / 0.45)) * (rv ? 1 - ease(clamp01((s - rv.t - 0.3) / 0.4)) : 1);
+  };
+  const ownWin = (side: Side, kinds: EventKind[], pre: number, dur: number) =>
+    plan.events.some((e) => kinds.includes(e.kind) && (e.who ?? e.target) === side && win(s, e.t - pre, dur));
 
   // ── world state from the events
   const sunset = ev('sunset');
@@ -271,6 +427,23 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
     : sunset && s > sunset.t + 0.2 ? 'sad' : deerE && s > deerE.t ? 'smug' : 'angry';
   const armL = coinsE && win(s, coinsE.t - 0.3, ATTACK.coins!.dur + 0.5) ? 1 : growE && win(s, growE.t, 0.9) ? 1 : 0;
   const armR = winsE && turnE && win(s, winsE.t, turnE.t - winsE.t) ? 1 : chargeE && charge > 0 ? 0.6 : 0;
+  // ring (humans): faces + arms derived from the generic events
+  const winnerSide: Side | null = winnerE ? (ep.fighters.L.name === winnerE.text ? 'L' : 'R') : null;
+  const bannerOn = (side: Side) => !!winsE && winsE.who === side && s >= winsE.t && !(powerE && s >= powerE.t);
+  const ringFace = (side: Side): Face => {
+    if (fallOf(side) > 0.3) return 'hurt';
+    if (winnerSide === side && winnerE && s >= winnerE.t) return 'happy';
+    if (bannerOn(side)) return 'happy';
+    if (recoilAt(plan, side, s) > 0.25) return 'hurt';
+    if (blackoutE && s > blackoutE.t && !(powerE && s >= powerE.t)) return 'shock';
+    if (plan.events.some((e) => e.kind === 'move' && e.who === other(side) && win(s, e.t, 1.0))) return 'shock';
+    if (ownWin(side, ['volley', 'rain', 'flash', 'armor'], 0, 2.4)) return 'smug';
+    return 'angry';
+  };
+  const ringArm = (side: Side) => (ownWin(side, ['volley', 'rain', 'flash'], 0.15, 1.3) || bannerOn(side) ||
+    (winnerSide === side && !!winnerE && s >= winnerE.t) ? 1 : ownWin(side, ['armor'], 0, 1.4) ? 0.35 : 0);
+  const armorE = ev('armor');
+  const shine = armorE ? clamp01((s - armorE.t) / 0.2) * (1 - clamp01((s - armorE.t - 1.6) / 0.5)) : 0;
 
   // ── intro: fighters slide in from the sides (mid-flight at frame 0)
   const introL = spring({frame: frame + 9, fps, config: {damping: 12, stiffness: 140}});
@@ -301,13 +474,14 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
     capSize = Math.min(cap.hot ? 150 : 128, capWrap ? 820 / (longest * 0.78) : one);
   }
   const capPop = cap ? 0.55 + 0.45 * spring({frame: frame - Math.round(cap.start * fps), fps, config: {damping: 9, stiffness: 240}}) : 1;
-  const koOn = !!chompL && win(s, chompL.t + 0.45, 1.2);
+  const firstKo = koOf('L') ?? koOf('R');
+  const koOn = !!firstKo && win(s, firstKo.t + 0.45, 1.2);
   // a banner IS the caption while it's up (no doubled text)
-  const bannerUp = plan.events.some((e) => (e.kind === 'move' && win(s, e.t, 1.6)) || (e.kind === 'stat' && win(s, e.t, 1.7)) || (e.kind === 'fight' && win(s, e.t, 1.0)));
+  const bannerUp = plan.events.some((e) => (e.kind === 'move' && win(s, e.t, 1.6)) || (e.kind === 'stat' && win(s, e.t, 1.7)) || (e.kind === 'fight' && win(s, e.t, 1.0)) || (e.kind === 'banner' && s >= e.t && s < e.t + 2.5));
   const showCap = cap && s >= hookEnd && !(winnerE && s >= winnerE.t) && !koOn && !bannerUp;
 
   // damage numbers: one per attack, at the first hit
-  const dmgPops = plan.events.filter((e) => ATTACK[e.kind] && e.kind !== 'chomp').map((e) => {
+  const dmgPops = plan.events.filter((e) => ATTACK[e.kind] && e.kind !== 'chomp' && e.kind !== 'ko' && (e.dmg ?? 0) > 0).map((e) => {
     const t0 = e.t + ATTACK[e.kind]!.hits[0];
     return {t0, side: (e.target ?? (e.who === 'L' ? 'R' : 'L')) as Side, dmg: e.dmg ?? 0};
   });
@@ -319,7 +493,20 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
     <AbsoluteFill style={{background: '#000', overflow: 'hidden'}}>
       <div style={{position: 'absolute', inset: 0, transformOrigin: `${focusX}px 1050px`,
         transform: `translate(${shakeX}px, ${shakeY}px) scale(${1 + 0.06 * punch})`}}>
-        <Backdrop night={night} sunY={sunY} s={s} />
+        {ring ? <RingBackdrop s={s} /> : <Backdrop night={night} sunY={sunY} s={s} />}
+        {ring ? (
+          <>
+            <div style={{position: 'absolute', left: tulipX, top: GROUND - FW * 1.75 - idle(0) * (1 - fallOf('L')), width: FW, height: FW * 1.75,
+              transformOrigin: '50% 100%', transform: `rotate(${-recL * 8}deg)`}}>
+              <FighterBox w={FW}><Jensen face={ringFace('L')} arm={ringArm('L')} t={s} fall={fallOf('L')} dir={-1} shine={shine} /></FighterBox>
+            </div>
+            <div style={{position: 'absolute', left: sunX, top: GROUND - FW * 1.75 - idle(1.3) * (1 - fallOf('R')), width: FW, height: FW * 1.75,
+              transformOrigin: '50% 100%', transform: `rotate(${recR * 8}deg)`}}>
+              <FighterBox w={FW}><Edison face={ringFace('R')} arm={ringArm('R')} t={s} fall={fallOf('R')} dir={1} /></FighterBox>
+            </div>
+          </>
+        ) : null}
+        {ring ? null : <>
         {/* tulip */}
         <div style={{position: 'absolute', left: tulipX, top: GROUND - FW * 1.75 - idle(0), width: FW, height: FW * 1.75,
           transformOrigin: '50% 100%', transform: `scale(${grow}) rotate(${stomp * 24 - recL * 8 + wobble}deg)`}}>
@@ -340,11 +527,18 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
             <Deer walk={walking ? s * 2.2 : 0} reach={reach} chew={chew} crown={crown} />
           </svg>
         ) : null}
+        </>}
         {/* attacks */}
-        {plan.events.map((e, i) => e.kind === 'beam' ? <Beam key={i} e={e} s={s} /> : e.kind === 'coins' ? <Coins key={i} e={e} s={s} />
-          : e.kind === 'seeds' ? <Seeds key={i} e={e} s={s} /> : null)}
-        {plan.hits.filter((h) => s >= h.t && s < h.t + 0.3).map((h, i) => {
-          const [x, y] = headOf(h.target, h.target === 'L' ? grow : 1);
+        {plan.events.map((e, i) => e.kind === 'beam' ? <Beam key={i} e={e} s={s} ep={ep} /> : e.kind === 'coins' ? <Coins key={i} e={e} s={s} />
+          : e.kind === 'seeds' ? <Seeds key={i} e={e} s={s} /> : e.kind === 'volley' ? <Volley key={i} e={e} s={s} ep={ep} />
+          : e.kind === 'rain' ? <Rain key={i} e={e} s={s} ep={ep} /> : e.kind === 'flash' ? <Bulb key={i} e={e} s={s} ep={ep} /> : null)}
+        {armorE && win(s, armorE.t, 1.6) ? (
+          <div style={{position: 'absolute', left: TX - 260, top: headAt(ep, armorE.who ?? 'L')[1] + 120 - (s - armorE.t) * 40, width: 520, textAlign: 'center',
+            fontFamily: heavy, fontWeight: 900, fontSize: 74, color: '#a8ff3a', WebkitTextStroke: '10px #111', paintOrder: 'stroke fill',
+            opacity: s > armorE.t + 1.3 ? (armorE.t + 1.6 - s) / 0.3 : 1, transform: `scale(${0.7 + 0.3 * clamp01((s - armorE.t) / 0.12)})`}}>{armorE.text}</div>
+        ) : null}
+        {plan.hits.filter((h) => h.dmg > 0 && s >= h.t && s < h.t + 0.3).map((h, i) => {
+          const [x, y] = headAt(ep, h.target, grow);
           return <Spark key={i} x={x + (h.target === 'L' ? 30 : -30)} y={y} k={(s - h.t) / 0.3} color={h.dmg > 100 ? '#ff4f7b' : '#ffd23f'} />;
         })}
         {[chompL, chompR].map((c, i) => c && win(s, c.t + 0.2, 0.9) ? (
@@ -354,7 +548,7 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
         ) : null)}
         {dmgPops.filter((d) => win(s, d.t0, 1.0)).map((d, i) => {
           const k = (s - d.t0) / 1.0;
-          const [x, y] = headOf(d.side, d.side === 'L' ? grow : 1);
+          const [x, y] = headAt(ep, d.side, grow);
           return (
             <div key={i} style={{position: 'absolute', left: x - 120 + (d.side === 'L' ? -150 : 150), top: y - 130 - k * 90, width: 240, textAlign: 'center', fontFamily: heavy,
               fontWeight: 900, fontSize: 84, color: '#ff3b3b', WebkitTextStroke: '10px #111', paintOrder: 'stroke fill',
@@ -370,7 +564,19 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
 
       {/* vignette (deeper at night) */}
       <AbsoluteFill style={{background: `radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(0,0,0,${(0.25 + 0.3 * night).toFixed(2)}) 100%)`}} />
-      <AbsoluteFill style={{background: '#fff', opacity: flash}} />
+      <AbsoluteFill style={{background: '#fff', opacity: Math.max(flash, ...plan.events.filter((e) => e.kind === 'flash').map((e) => {
+        const d = s - e.t - ATTACK.flash!.hits[0]; return d >= 0 && d < 0.6 ? 0.9 * (1 - d / 0.6) : 0; }))}} />
+      {blackoutE && s >= blackoutE.t + 0.08 ? (() => {
+        const d = powerE ? s - powerE.t : -1;
+        const dark = d < 0 ? 0.9 : d < 0.5 ? (Math.floor(d * 14) % 2 ? 0.9 : 0.15) : 0;
+        if (dark <= 0) return null;
+        const spotSide = winsE && winsE.who && bannerOn(winsE.who) ? winsE.who : null;
+        const cx = spotSide === 'L' ? TX : SX;
+        return <AbsoluteFill style={{background: spotSide ? `radial-gradient(circle at ${cx}px 1150px, rgba(0,0,0,0) 0, rgba(0,0,0,0) 190px, rgba(0,0,0,${dark}) 330px)` : `rgba(0,0,0,${dark})`}} />;
+      })() : null}
+      {powerE && win(s, powerE.t + 0.5, 1.6) ? (
+        <AbsoluteFill style={{background: `radial-gradient(ellipse at 50% 100%, rgba(118,185,0,${(0.55 * (1 - (s - powerE.t - 0.5) / 1.6)).toFixed(2)}) 0, transparent 70%)`}} />
+      ) : null}
 
       <Hud ep={ep} plan={plan} s={s} />
 
@@ -379,24 +585,31 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
         const fc = e.who ? ep.fighters[e.who].color : '#ffd23f';
         if (e.kind === 'move' && win(s, e.t, 1.6)) return <Band key={i} k={(s - e.t) / 1.6} from={e.who!} color={fc} label="SPECIAL MOVE" text={e.name!} />;
         if (e.kind === 'stat' && win(s, e.t, 1.7)) return <Band key={i} k={(s - e.t) / 1.7} from="L" color="#ffffff" text={e.text!} size={92} />;
-        if (e.kind === 'banner' && turnE && win(s, e.t, turnE.t - e.t + 0.25)) {
-          const cut = clamp01((s - turnE.t) / 0.25);
+        const cutE = turnE ?? powerE;
+        if (e.kind === 'banner' && cutE && win(s, e.t, cutE.t - e.t + 0.25)) {
+          const cut = clamp01((s - cutE.t) / 0.25);
           return <div key={i} style={{transform: `translateY(${cut * 900}px) rotate(${cut * 25}deg)`}}>
-            <Band k={Math.min(0.5, (s - e.t) / 1.6)} from="R" color={fc} text={e.text!} size={96} /></div>;
+            <Band k={Math.min(0.5, (s - e.t) / 1.6)} from={e.who ?? 'R'} color={fc} text={e.text!} size={96} /></div>;
         }
         if (e.kind === 'fight' && win(s, e.t, 1.0)) return <Slam key={i} k={(s - e.t) / 1.0} text="FIGHT!" color="#ffd23f" size={230} top={560} />;
         return null;
       })}
-      {koOn ? <Slam k={(s - chompL!.t - 0.45) / 1.2} text="K.O." color="#ff3b3b" size={260} top={560} /> : null}
+      {koOn ? <Slam k={(s - firstKo!.t - 0.45) / 1.2} text="K.O." color="#ff3b3b" size={260} top={560} /> : null}
 
       {/* hook headline */}
       {s < hookEnd ? (
         <div style={{position: 'absolute', top: 440, left: 120, width: 840, textAlign: 'center', fontFamily: heavy, fontWeight: 900, lineHeight: 0.95,
           WebkitTextStroke: '14px #111', paintOrder: 'stroke fill', textShadow: '0 10px 0 rgba(0,0,0,.35)', fontStyle: 'italic',
           transform: `scale(${0.9 + 0.1 * spring({frame: frame + 5, fps, config: {damping: 8, stiffness: 200}})}) rotate(-3deg)`}}>
-          <div style={{fontSize: 150, color: ep.fighters.L.color}}>{ep.fighters.L.name}</div>
-          <div style={{fontSize: 96, color: '#ffffff'}}>VS</div>
-          <div style={{fontSize: 128, color: ep.fighters.R.color}}>{ep.fighters.R.name}</div>
+          {(['L', 'R'] as Side[]).map((sd, i) => {
+            const nm = ep.fighters[sd].name;
+            return (
+              <React.Fragment key={sd}>
+                {i === 1 ? <div style={{fontSize: 96, color: '#ffffff'}}>VS</div> : null}
+                <div style={{fontSize: Math.min(i ? 128 : 150, 840 / (nm.length * 0.8)), color: ep.fighters[sd].color, whiteSpace: 'nowrap'}}>{nm}</div>
+              </React.Fragment>
+            );
+          })}
         </div>
       ) : null}
 
@@ -448,6 +661,13 @@ export const Fight: React.FC<{episode: FightEpisode; timing: Timing}> = ({episod
         if (e.kind === 'chomp') fx.push(['sfx/chomp.wav', 0.18, 0.95]);
         if (e.kind === 'chomp' && e.target === 'L') fx.push(['sfx/boom.wav', 0.45, 0.8]);
         if (e.kind === 'beam' || e.kind === 'coins' || e.kind === 'stomp') fx.push(['sfx/punch.wav', ATTACK[e.kind]!.hits[0], 0.8]);
+        if (e.kind === 'volley') fx.push(['sfx/whoosh.wav', 0, 0.7], ['sfx/punch.wav', 0.4, 0.8], ['sfx/punch.wav', 0.7, 0.6]);
+        if (e.kind === 'rain') fx.push(['sfx/clank.wav', 0.5, 0.8], ['sfx/punch.wav', 0.6, 0.7]);
+        if (e.kind === 'flash') fx.push(['sfx/ding.wav', 0.25, 0.8], ['sfx/punch.wav', 0.4, 0.7]);
+        if (e.kind === 'armor') fx.push(['sfx/shine.wav', 0, 0.75]);
+        if (e.kind === 'blackout') fx.push(['sfx/powerdown.wav', 0, 0.9]);
+        if (e.kind === 'power') fx.push(['sfx/powerup.wav', 0, 0.9]);
+        if (e.kind === 'ko') fx.push(['sfx/boom.wav', 0.45, 0.8]);
         return fx.map(([f, off, v], j) => (
           <Sequence key={`${i}-${j}`} from={Math.max(0, Math.round((e.t + off) * FPS))} durationInFrames={90}><Audio src={staticFile(f)} volume={v} /></Sequence>
         ));

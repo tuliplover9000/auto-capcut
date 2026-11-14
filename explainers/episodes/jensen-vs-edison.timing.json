@@ -1,0 +1,574 @@
+{
+ "lines": [
+  {
+   "file": "narration/jensen-vs-edison/line_0.mp3",
+   "duration": 5.5,
+   "words": [
+    {
+     "text": "Jensen",
+     "start": 0.104,
+     "end": 0.495
+    },
+    {
+     "text": "Huang",
+     "start": 0.508,
+     "end": 0.911
+    },
+    {
+     "text": "versus",
+     "start": 0.924,
+     "end": 1.354
+    },
+    {
+     "text": "Thomas",
+     "start": 1.367,
+     "end": 1.771
+    },
+    {
+     "text": "Edison",
+     "start": 1.784,
+     "end": 2.201
+    },
+    {
+     "text": "A",
+     "start": 2.63,
+     "end": 2.682
+    },
+    {
+     "text": "hundred",
+     "start": 2.695,
+     "end": 2.982
+    },
+    {
+     "text": "and",
+     "start": 2.995,
+     "end": 3.06
+    },
+    {
+     "text": "fifty",
+     "start": 3.073,
+     "end": 3.398
+    },
+    {
+     "text": "years",
+     "start": 3.411,
+     "end": 3.659
+    },
+    {
+     "text": "apart",
+     "start": 3.672,
+     "end": 4.089
+    },
+    {
+     "text": "One",
+     "start": 4.518,
+     "end": 4.675
+    },
+    {
+     "text": "fight",
+     "start": 4.688,
+     "end": 5.104
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_1.mp3",
+   "duration": 4.18,
+   "words": [
+    {
+     "text": "Edison",
+     "start": 0.104,
+     "end": 0.469
+    },
+    {
+     "text": "strikes",
+     "start": 0.482,
+     "end": 0.846
+    },
+    {
+     "text": "first",
+     "start": 0.859,
+     "end": 1.419
+    },
+    {
+     "text": "One",
+     "start": 1.862,
+     "end": 2.083
+    },
+    {
+     "text": "thousand",
+     "start": 2.096,
+     "end": 2.552
+    },
+    {
+     "text": "and",
+     "start": 2.565,
+     "end": 2.63
+    },
+    {
+     "text": "ninety-three",
+     "start": 2.643,
+     "end": 3.125
+    },
+    {
+     "text": "patents",
+     "start": 3.138,
+     "end": 3.789
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_2.mp3",
+   "duration": 4.73,
+   "words": [
+    {
+     "text": "Jensen",
+     "start": 0.104,
+     "end": 0.456
+    },
+    {
+     "text": "planned",
+     "start": 0.469,
+     "end": 0.794
+    },
+    {
+     "text": "Nvidia",
+     "start": 0.807,
+     "end": 1.341
+    },
+    {
+     "text": "in",
+     "start": 1.576,
+     "end": 1.654
+    },
+    {
+     "text": "a",
+     "start": 1.667,
+     "end": 1.771
+    },
+    {
+     "text": "Denny's",
+     "start": 1.784,
+     "end": 2.122
+    },
+    {
+     "text": "booth",
+     "start": 2.135,
+     "end": 2.565
+    },
+    {
+     "text": "So",
+     "start": 2.995,
+     "end": 3.112
+    },
+    {
+     "text": "he",
+     "start": 3.125,
+     "end": 3.229
+    },
+    {
+     "text": "throws",
+     "start": 3.242,
+     "end": 3.516
+    },
+    {
+     "text": "a",
+     "start": 3.529,
+     "end": 3.581
+    },
+    {
+     "text": "Grand",
+     "start": 3.594,
+     "end": 3.932
+    },
+    {
+     "text": "Slam",
+     "start": 3.945,
+     "end": 4.336
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_3.mp3",
+   "duration": 4.08,
+   "words": [
+    {
+     "text": "Edison",
+     "start": 0.104,
+     "end": 0.482
+    },
+    {
+     "text": "flips",
+     "start": 0.495,
+     "end": 0.898
+    },
+    {
+     "text": "on",
+     "start": 0.911,
+     "end": 0.99
+    },
+    {
+     "text": "the",
+     "start": 1.003,
+     "end": 1.094
+    },
+    {
+     "text": "light",
+     "start": 1.107,
+     "end": 1.38
+    },
+    {
+     "text": "bulb",
+     "start": 1.393,
+     "end": 1.745
+    },
+    {
+     "text": "Which",
+     "start": 2.188,
+     "end": 2.318
+    },
+    {
+     "text": "he",
+     "start": 2.331,
+     "end": 2.409
+    },
+    {
+     "text": "didn't",
+     "start": 2.422,
+     "end": 2.669
+    },
+    {
+     "text": "technically",
+     "start": 2.682,
+     "end": 3.203
+    },
+    {
+     "text": "invent",
+     "start": 3.216,
+     "end": 3.698
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_4.mp3",
+   "duration": 3.05,
+   "words": [
+    {
+     "text": "Jensen's",
+     "start": 0.091,
+     "end": 0.404
+    },
+    {
+     "text": "hurt",
+     "start": 0.417,
+     "end": 0.755
+    },
+    {
+     "text": "So",
+     "start": 1.198,
+     "end": 1.302
+    },
+    {
+     "text": "he",
+     "start": 1.315,
+     "end": 1.406
+    },
+    {
+     "text": "zips",
+     "start": 1.419,
+     "end": 1.706
+    },
+    {
+     "text": "up",
+     "start": 1.719,
+     "end": 1.836
+    },
+    {
+     "text": "the",
+     "start": 1.849,
+     "end": 1.94
+    },
+    {
+     "text": "leather",
+     "start": 1.953,
+     "end": 2.188
+    },
+    {
+     "text": "jacket",
+     "start": 2.201,
+     "end": 2.656
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_5.mp3",
+   "duration": 3.89,
+   "words": [
+    {
+     "text": "Then",
+     "start": 0.117,
+     "end": 0.195
+    },
+    {
+     "text": "his",
+     "start": 0.208,
+     "end": 0.352
+    },
+    {
+     "text": "famous",
+     "start": 0.365,
+     "end": 0.755
+    },
+    {
+     "text": "line",
+     "start": 0.768,
+     "end": 1.133
+    },
+    {
+     "text": "The",
+     "start": 1.562,
+     "end": 1.615
+    },
+    {
+     "text": "more",
+     "start": 1.628,
+     "end": 1.81
+    },
+    {
+     "text": "you",
+     "start": 1.823,
+     "end": 1.927
+    },
+    {
+     "text": "buy",
+     "start": 1.94,
+     "end": 2.292
+    },
+    {
+     "text": "the",
+     "start": 2.669,
+     "end": 2.747
+    },
+    {
+     "text": "more",
+     "start": 2.76,
+     "end": 2.969
+    },
+    {
+     "text": "you",
+     "start": 2.982,
+     "end": 3.06
+    },
+    {
+     "text": "save",
+     "start": 3.073,
+     "end": 3.503
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_6.mp3",
+   "duration": 4.87,
+   "words": [
+    {
+     "text": "Edison",
+     "start": 0.104,
+     "end": 0.521
+    },
+    {
+     "text": "is",
+     "start": 0.625,
+     "end": 0.742
+    },
+    {
+     "text": "on",
+     "start": 0.755,
+     "end": 0.846
+    },
+    {
+     "text": "his",
+     "start": 0.859,
+     "end": 0.964
+    },
+    {
+     "text": "last",
+     "start": 0.977,
+     "end": 1.302
+    },
+    {
+     "text": "breath",
+     "start": 1.315,
+     "end": 1.771
+    },
+    {
+     "text": "And",
+     "start": 2.201,
+     "end": 2.266
+    },
+    {
+     "text": "a",
+     "start": 2.279,
+     "end": 2.318
+    },
+    {
+     "text": "museum",
+     "start": 2.331,
+     "end": 2.891
+    },
+    {
+     "text": "test",
+     "start": 2.904,
+     "end": 3.255
+    },
+    {
+     "text": "tube",
+     "start": 3.268,
+     "end": 3.568
+    },
+    {
+     "text": "claims",
+     "start": 3.581,
+     "end": 3.919
+    },
+    {
+     "text": "to",
+     "start": 3.932,
+     "end": 4.01
+    },
+    {
+     "text": "hold",
+     "start": 4.023,
+     "end": 4.297
+    },
+    {
+     "text": "it",
+     "start": 4.31,
+     "end": 4.479
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_7.mp3",
+   "duration": 3.38,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.117,
+     "end": 0.182
+    },
+    {
+     "text": "one",
+     "start": 0.195,
+     "end": 0.404
+    },
+    {
+     "text": "thing",
+     "start": 0.417,
+     "end": 0.664
+    },
+    {
+     "text": "that",
+     "start": 0.677,
+     "end": 0.833
+    },
+    {
+     "text": "beats",
+     "start": 0.846,
+     "end": 1.081
+    },
+    {
+     "text": "a",
+     "start": 1.094,
+     "end": 1.146
+    },
+    {
+     "text": "GPU",
+     "start": 1.159,
+     "end": 1.719
+    },
+    {
+     "text": "He",
+     "start": 2.161,
+     "end": 2.227
+    },
+    {
+     "text": "pulls",
+     "start": 2.24,
+     "end": 2.474
+    },
+    {
+     "text": "the",
+     "start": 2.487,
+     "end": 2.578
+    },
+    {
+     "text": "plug",
+     "start": 2.591,
+     "end": 2.982
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_8.mp3",
+   "duration": 1.87,
+   "words": [
+    {
+     "text": "Edison",
+     "start": 0.104,
+     "end": 0.443
+    },
+    {
+     "text": "wins",
+     "start": 0.456,
+     "end": 0.911
+    }
+   ]
+  },
+  {
+   "file": "narration/jensen-vs-edison/line_9.mp3",
+   "duration": 3.86,
+   "words": [
+    {
+     "text": "Then",
+     "start": 0.117,
+     "end": 0.208
+    },
+    {
+     "text": "the",
+     "start": 0.221,
+     "end": 0.313
+    },
+    {
+     "text": "backup",
+     "start": 0.326,
+     "end": 0.807
+    },
+    {
+     "text": "generators",
+     "start": 0.82,
+     "end": 1.38
+    },
+    {
+     "text": "kick",
+     "start": 1.393,
+     "end": 1.641
+    },
+    {
+     "text": "in",
+     "start": 1.654,
+     "end": 1.914
+    },
+    {
+     "text": "Winner",
+     "start": 2.357,
+     "end": 2.669
+    },
+    {
+     "text": "Jensen",
+     "start": 3.086,
+     "end": 3.477
+    }
+   ]
+  }
+ ]
+}

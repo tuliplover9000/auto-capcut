@@ -1,0 +1,222 @@
+{
+  "id": "jensen-vs-edison",
+  "voice": "en-US-AndrewNeural",
+  "rate": "-4%",
+  "title": "Jensen Huang vs Thomas Edison: who wins?",
+  "stage": "ring",
+  "fighters": {
+    "L": {
+      "name": "JENSEN",
+      "full": "JENSEN HUANG",
+      "color": "#76b900",
+      "art": "jensen"
+    },
+    "R": {
+      "name": "EDISON",
+      "full": "THOMAS EDISON",
+      "color": "#ffb21a",
+      "art": "edison"
+    }
+  },
+  "hot": [
+    "one",
+    "thousand",
+    "ninety-three",
+    "patents",
+    "denny's",
+    "slam",
+    "bulb",
+    "jacket",
+    "buy",
+    "save",
+    "breath",
+    "plug",
+    "generators",
+    "jensen",
+    "edison",
+    "wins"
+  ],
+  "lines": [
+    {
+      "text": "Jensen Huang versus Thomas Edison. A hundred and fifty years apart. One fight.",
+      "note": "Cartoon parody · every move is a real fact",
+      "events": [
+        {
+          "cue": "$end",
+          "kind": "fight"
+        }
+      ]
+    },
+    {
+      "text": "Edison strikes first. One thousand and ninety-three patents.",
+      "note": "Edison held 1,093 U.S. patents",
+      "pause": 0.55,
+      "events": [
+        {
+          "cue": "one",
+          "kind": "move",
+          "who": "R",
+          "name": "PATENT STORM"
+        },
+        {
+          "cue": "patents",
+          "kind": "volley",
+          "who": "R",
+          "sprite": "paper",
+          "dmg": 30
+        }
+      ]
+    },
+    {
+      "text": "Jensen planned Nvidia in a Denny's booth. So he throws a Grand Slam.",
+      "note": "Nvidia was planned at a San Jose Denny's in 1993",
+      "events": [
+        {
+          "cue": "so",
+          "kind": "move",
+          "who": "L",
+          "name": "GRAND SLAM"
+        },
+        {
+          "cue": "slam",
+          "kind": "volley",
+          "who": "L",
+          "sprite": "pancake",
+          "dmg": 30
+        }
+      ]
+    },
+    {
+      "text": "Edison flips on the light bulb. Which he didn't technically invent.",
+      "note": "Earlier bulbs existed · Edison's 1879 bulb was the first practical one",
+      "events": [
+        {
+          "cue": "flips",
+          "kind": "move",
+          "who": "R",
+          "name": "LIGHT BULB"
+        },
+        {
+          "cue": "bulb",
+          "kind": "flash",
+          "who": "R",
+          "dmg": 35
+        }
+      ]
+    },
+    {
+      "text": "Jensen's hurt. So he zips up the leather jacket.",
+      "note": "His keynote uniform",
+      "events": [
+        {
+          "cue": "so",
+          "kind": "move",
+          "who": "L",
+          "name": "LEATHER JACKET"
+        },
+        {
+          "cue": "jacket",
+          "kind": "armor",
+          "who": "L",
+          "text": "DEFENSE +100"
+        }
+      ]
+    },
+    {
+      "text": "Then his famous line. The more you buy, the more you save.",
+      "note": "A real Jensen keynote line (SIGGRAPH 2018, GTC 2024)",
+      "events": [
+        {
+          "cue": "the",
+          "kind": "move",
+          "who": "L",
+          "name": "THE MORE YOU BUY"
+        },
+        {
+          "cue": "save",
+          "kind": "rain",
+          "who": "L",
+          "sprite": "gpu",
+          "dmg": 60
+        }
+      ]
+    },
+    {
+      "text": "Edison is on his last breath. And a museum test tube claims to hold it.",
+      "note": "The Henry Ford museum, Michigan · its label: \"Edison's Last Breath?\"",
+      "events": [
+        {
+          "cue": "test",
+          "kind": "stat",
+          "text": "EDISON'S LAST BREATH?"
+        }
+      ]
+    },
+    {
+      "text": "The one thing that beats a GPU? He pulls the plug.",
+      "note": "No power, no GPUs",
+      "events": [
+        {
+          "cue": "the",
+          "kind": "move",
+          "who": "R",
+          "name": "PULL THE PLUG"
+        },
+        {
+          "cue": "plug",
+          "kind": "blackout"
+        },
+        {
+          "cue": "plug",
+          "kind": "ko",
+          "target": "L"
+        }
+      ]
+    },
+    {
+      "text": "Edison wins!",
+      "note": "",
+      "pause": 0.3,
+      "events": [
+        {
+          "cue": "edison",
+          "kind": "banner",
+          "who": "R",
+          "text": "EDISON WINS!"
+        }
+      ]
+    },
+    {
+      "text": "Then the backup generators kick in. Winner? Jensen.",
+      "note": "Data centers run on backup power",
+      "pause": 0.3,
+      "events": [
+        {
+          "cue": "generators",
+          "kind": "power"
+        },
+        {
+          "cue": "generators",
+          "kind": "revive",
+          "target": "L"
+        },
+        {
+          "cue": "kick",
+          "kind": "beam",
+          "who": "L",
+          "color": "#76b900"
+        },
+        {
+          "cue": "kick",
+          "kind": "ko",
+          "target": "R"
+        },
+        {
+          "cue": "jensen",
+          "kind": "winner",
+          "text": "JENSEN"
+        }
+      ]
+    }
+  ]
+}

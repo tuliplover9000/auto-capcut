@@ -65,8 +65,12 @@ def main() -> int:
     end = plan["end"] + 0.5
     n = int(end * SR)
     mus = np.zeros(n)
-    t_fight, t_stop, t_deer = E["fight"], E["sunset"] + 0.5, E["deer"]
-    t_chompL, t_win, t_turn, t_winner = E["chompL"], E["banner"], E["deerTurn"], E["winner"]
+    ring = "deer" not in E  # the ring story: blackout -> "X wins!" -> power back -> the real winner
+    t_fight = E["fight"]
+    t_stop = E["blackout"] if ring else E["sunset"] + 0.5
+    t_win, t_winner = E["banner"], E["winner"]
+    if not ring:
+        t_deer, t_chompL, t_turn = E["deer"], E["chompL"], E["deerTurn"]
 
     # ---- hook: bass pulse + toms building into the bell
     t = 0.0
@@ -114,31 +118,62 @@ def main() -> int:
     mus[i0:i1] = np.interp(pos, np.arange(m), seg) * np.linspace(1, 0.2, m)
     mus[i1:] = 0
 
-    # ---- night: crickets
-    t = t_stop + 0.3
-    while t < t_deer + 0.2:
-        for c in range(3):
-            nn = int(0.03 * SR)
-            ch = np.sin(2 * np.pi * 4300 * np.arange(nn) / SR) * env(nn, a=0.002, d=0.012)
-            add(mus, t + c * 0.05, ch, 0.18)
-        t += 0.62
+    if not ring:
+        # ---- night: crickets
+        t = t_stop + 0.3
+        while t < t_deer + 0.2:
+            for c in range(3):
+                nn = int(0.03 * SR)
+                ch = np.sin(2 * np.pi * 4300 * np.arange(nn) / SR) * env(nn, a=0.002, d=0.012)
+                add(mus, t + c * 0.05, ch, 0.18)
+            t += 0.62
 
-    # ---- deer: sneaky pizzicato walk (E G A B . B A G E)
-    walk = [40, 43, 45, 47, 47, 45, 43, 40]
-    t = t_deer + 0.3
-    i = 0
-    while t < t_chompL:
-        add(mus, t, pluck(walk[i % 8] + 12), 0.5)
-        if i % 2 == 0:
-            add(mus, t, pluck(walk[i % 8] - 12, 0.25), 0.35)
-        t += BEAT / 2
-        i += 1
+        # ---- deer: sneaky pizzicato walk (E G A B . B A G E)
+        walk = [40, 43, 45, 47, 47, 45, 43, 40]
+        t = t_deer + 0.3
+        i = 0
+        while t < t_chompL:
+            add(mus, t, pluck(walk[i % 8] + 12), 0.5)
+            if i % 2 == 0:
+                add(mus, t, pluck(walk[i % 8] - 12, 0.25), 0.35)
+            t += BEAT / 2
+            i += 1
 
-    # ---- "Sunflower wins!": a victory stab, cut dead at the turn
-    add(mus, t_win, brass([55, 59, 62, 67], 0.9), 0.55)
-    add(mus, t_win, kick(1.0))
-    add(mus, t_win + BEAT * 2, brass([57, 60, 64, 69], 1.6), 0.5)
-    mus[int(t_turn * SR):int(t_winner * SR)] *= 0
+        # ---- "Sunflower wins!": a victory stab, cut dead at the turn
+        add(mus, t_win, brass([55, 59, 62, 67], 0.9), 0.55)
+        add(mus, t_win, kick(1.0))
+        add(mus, t_win + BEAT * 2, brass([57, 60, 64, 69], 1.6), 0.5)
+        mus[int(t_turn * SR):int(t_winner * SR)] *= 0
+    else:
+        # ---- blackout: a low hum in the dark
+        nn = int(max(0.1, t_win - t_stop) * SR)
+        tt = np.arange(nn) / SR
+        add(mus, t_stop + 0.2, np.sin(2 * np.pi * 55 * tt) * 0.12 * np.minimum(1, tt / 0.5), 1.0)
+        # ---- "Edison wins!": victory stab, cut dead when the power comes back
+        t_pow = E["power"]
+        add(mus, t_win, brass([55, 59, 62, 67], 0.9), 0.55)
+        add(mus, t_win, kick(1.0))
+        add(mus, t_win + BEAT * 2, brass([57, 60, 64, 69], 1.6), 0.5)
+        mus[int(t_pow * SR):] = 0
+        # ---- power back: the groove DROPS back in, full intensity, until the winner card
+        t = t_pow + 0.55
+        b = 0
+        while t < t_winner:
+            bar, sub = divmod(b, 16)
+            beat, q = divmod(sub, 4)
+            if q == 0:
+                add(mus, t, kick(1.1))
+            if q == 0 and beat in (1, 3):
+                add(mus, t, clap(), 0.9)
+            add(mus, t, hat(open_=q == 2), 0.35 if q % 2 else 0.5)
+            if q in (0, 2):
+                nn2 = int(BEAT / 2 * SR)
+                add(mus, t, lp(saw(hz(BASS[bar % 4] + (12 if q == 2 else 0)), nn2), 1300) * env(nn2, a=0.003, d=0.1, s=0.5, r=0.02), 0.6)
+            if q == 2:
+                add(mus, t, brass(PROG[bar % 4], BEAT * 0.4), 0.35)
+            b += 1
+            t = t_pow + 0.55 + b * BEAT / 4
+        mus[int(t_winner * SR):] = 0
 
     # ---- winner: ta-da + bouncy outro
     add(mus, t_winner, brass([48, 55, 60, 64], 0.18), 0.6)
@@ -174,9 +209,11 @@ def main() -> int:
         seg = mus[int(a * SR):int(z * SR)]
         return 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-9)
     print(f"-> {path} ({end:.1f}s)")
-    print("  " + "  ".join(f"{nm}:{rms(a, z):.1f}dB" for nm, a, z in [
-        ("hook", 0, t_fight), ("fight", t_fight, t_stop), ("night", t_stop, t_deer), ("deer", t_deer, t_chompL),
-        ("wins", t_win, t_turn), ("silence", t_turn, t_winner), ("winner", t_winner, end)]))
+    secs = [("hook", 0, t_fight), ("fight", t_fight, t_stop)]
+    secs += [("dark", t_stop, t_win), ("wins", t_win, E["power"]), ("drop", E["power"] + 0.55, t_winner)] if ring else [
+        ("night", t_stop, t_deer), ("deer", t_deer, t_chompL), ("wins", t_win, t_turn), ("silence", t_turn, t_winner)]
+    secs += [("winner", t_winner, end)]
+    print("  " + "  ".join(f"{nm}:{rms(a, z):.1f}dB" for nm, a, z in secs))
     return 0
 
 

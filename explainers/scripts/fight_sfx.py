@@ -129,6 +129,44 @@ def chomp():
     return out
 
 
+def clank():  # GPUs landing: metallic inharmonic hits
+    out = np.zeros(int(1.4 * SR))
+    for i in range(6):
+        t = T(0.4)
+        x = sum(np.sin(2 * np.pi * f * t) * np.exp(-t * d) for f, d in [(540, 9), (1290, 12), (2210, 16), (3370, 20)])
+        x += filt(noise(0.4), "highpass", 2500) * np.exp(-t * 40) * 0.6
+        place(out, x * 0.4, i * 0.13)
+    return out
+
+
+def ding():  # the light bulb switching on
+    t = T(1.2)
+    return (np.sin(2 * np.pi * 1760 * t) + 0.4 * np.sin(2 * np.pi * 2640 * t)) * np.exp(-t * 3.5) * 0.6 + \
+        filt(noise(1.2), "highpass", 5000) * np.exp(-t * 30) * 0.4
+
+
+def shine():  # armour gleam: shimmering upward arpeggio
+    out = np.zeros(int(1.2 * SR))
+    for i, f in enumerate([1047, 1319, 1568, 2093, 2637]):
+        t = T(0.5)
+        place(out, np.sin(2 * np.pi * f * t) * np.exp(-t * 7) * 0.4, i * 0.07)
+    return out
+
+
+def powerdown():
+    t = T(1.3)
+    hum = sine_sweep(240, 30, 1.3, 0.5) + 0.4 * sine_sweep(480, 60, 1.3, 0.5)
+    click = np.zeros_like(t)
+    click[: int(0.01 * SR)] = noise(0.01)
+    return hum * np.exp(-t * 1.6) * 0.7 + click
+
+
+def powerup():
+    t = T(1.4)
+    return sine_sweep(60, 520, 1.4, 1.5) * np.minimum(1, t / 0.4) * 0.6 + \
+        0.3 * sine_sweep(120, 1040, 1.4, 1.5) * np.minimum(1, t / 0.6) * np.minimum(1, (1.4 - t) / 0.1)
+
+
 def save(name, x):
     x = x / (np.max(np.abs(x)) + 1e-9) * 0.9
     with wave.open(os.path.join(OUT, f"{name}.wav"), "wb") as wf:
@@ -141,5 +179,5 @@ def save(name, x):
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    for fn in (punch, bell, slam, zap, coins, seeds, grow, boom, fail, scratch, chomp):
+    for fn in (punch, bell, slam, zap, coins, seeds, grow, boom, fail, scratch, chomp, clank, ding, shine, powerdown, powerup):
         save(fn.__name__, fn())

@@ -19,7 +19,7 @@ export const FighterBox: React.FC<{children: React.ReactNode; w: number}> = ({ch
 );
 
 /* face centred at (cx, cy), sized by s; look = pupil offset toward the opponent */
-const FaceSvg: React.FC<{cx: number; cy: number; s: number; face: Face; look: number; blink?: boolean}> = ({cx, cy, s, face, look, blink}) => {
+export const FaceSvg: React.FC<{cx: number; cy: number; s: number; face: Face; look: number; blink?: boolean; brow?: string; browW?: number}> = ({cx, cy, s, face, look, blink, brow: browCol = FPAL.pupil, browW = 6}) => {
   const ex = 30 * s;
   const ey = cy - 6 * s;
   const er = (face === 'shock' ? 21 : 17) * s;
@@ -43,7 +43,7 @@ const FaceSvg: React.FC<{cx: number; cy: number; s: number; face: Face; look: nu
           <ellipse cx={cx + side * ex} cy={ey} rx={er} ry={er * eyeH} fill={FPAL.eye} />
           {eyeH > 0.2 ? <circle cx={cx + side * ex + look * 4 * s} cy={ey + (face === 'sad' ? 3 * s : 0)} r={Math.min(pr, er * eyeH)} fill={FPAL.pupil} /> : null}
           <line x1={cx + side * (ex - 14 * s)} y1={ey - er - 6 * s + side * 0} x2={cx + side * (ex + 14 * s)} y2={ey - er - 6 * s}
-            transform={`rotate(${side * brow * 18} ${cx + side * ex} ${ey - er - 6 * s})`} stroke={FPAL.pupil} strokeWidth={6 * s} strokeLinecap="round" />
+            transform={`rotate(${side * brow * 18} ${cx + side * ex} ${ey - er - 6 * s})`} stroke={browCol} strokeWidth={browW * s} strokeLinecap="round" />
         </g>
       ))}
       {face === 'hurt' || face === 'shock' ? (
@@ -156,6 +156,93 @@ export const Deer: React.FC<{walk: number; reach: number; chew: number; crown?: 
           </g>
         ) : null}
       </g>
+    </g>
+  );
+};
+
+/* ── HUMANS (chibi: big head, short body) ── 400x700 box, ground y=700, head centre (200,200).
+   arm 0 = down, 1 = both up; fall 0..1 tips the whole body over at the feet (dir -1 left, +1 right);
+   shine 0..1 = the leather jacket's armour gleam. Caricatures for parody: wardrobe + hair, no likeness tracing. */
+const Body: React.FC<{coat: string; coatDark: string; pants: string; shoe: string; arm: number; t: number; skin: string;
+  children?: React.ReactNode}> = ({coat, coatDark, pants, shoe, arm, t, skin, children}) => {
+  const wig = Math.sin(t * 16) * arm * 10;
+  return (
+    <g>
+      <rect x={150} y={505} width={44} height={180} rx={18} fill={pants} />
+      <rect x={206} y={505} width={44} height={180} rx={18} fill={pants} />
+      <ellipse cx={168} cy={690} rx={36} ry={14} fill={shoe} />
+      <ellipse cx={232} cy={690} rx={36} ry={14} fill={shoe} />
+      <g transform={`rotate(${arm * 140 + wig} 128 318)`}>
+        <rect x={104} y={308} width={48} height={170} rx={22} fill={coatDark} />
+        <circle cx={128} cy={486} r={24} fill={skin} />
+      </g>
+      <g transform={`rotate(${-arm * 140 - wig} 272 318)`}>
+        <rect x={248} y={308} width={48} height={170} rx={22} fill={coat} />
+        <circle cx={272} cy={486} r={24} fill={skin} />
+      </g>
+      <path d="M118 318 Q 200 286, 282 318 L 292 520 Q 200 534, 108 520 Z" fill={coat} />
+      {children}
+    </g>
+  );
+};
+
+export const Jensen: React.FC<{face: Face; arm: number; t: number; fall?: number; dir?: number; shine?: number; look?: number}> =
+  ({face, arm, t, fall = 0, dir = -1, shine = 0, look = 1}) => {
+  const skin = '#f1c9a5';
+  return (
+    <g transform={`rotate(${dir * fall * 84} 200 700)`}>
+      <Body coat="#1c1c22" coatDark="#121216" pants="#18181c" shoe="#0d0d10" arm={arm} t={t} skin={skin}>
+        <path d="M168 300 L 200 380 L 232 300 Z" fill="#2c2c33" />
+        <path d="M150 304 L 200 410 L 178 520 L 128 516 Z" fill="#2a2a32" />
+        <path d="M250 304 L 200 410 L 222 520 L 272 516 Z" fill="#26262d" />
+        <rect x={196} y={392} width={8} height={126} fill="#55555f" />
+        <path d="M140 330 Q 150 420, 138 500" fill="none" stroke="#6a6a78" strokeWidth={7} strokeLinecap="round" opacity={0.6} />
+        {shine > 0 ? (
+          <g opacity={shine}>
+            <path d="M118 318 Q 200 286, 282 318 L 292 520 Q 200 534, 108 520 Z" fill="none" stroke="#c8ff6a" strokeWidth={10} style={{filter: 'drop-shadow(0 0 18px #9dff3a)'}} />
+            <rect x={110 + ((t * 600) % 260)} y={300} width={26} height={230} fill="#ffffff" opacity={0.35} transform="skewX(-18)" />
+          </g>
+        ) : null}
+      </Body>
+      <rect x={180} y={262} width={40} height={40} fill="#e3b892" />
+      <circle cx={200} cy={200} r={92} fill={skin} />
+      <ellipse cx={112} cy={210} rx={14} ry={22} fill="#e3b892" />
+      <ellipse cx={288} cy={210} rx={14} ry={22} fill="#e3b892" />
+      {/* swept-back salt-and-pepper hair */}
+      <path d="M106 196 Q 98 108, 180 96 Q 262 86, 296 150 Q 300 178, 292 200 Q 276 150, 236 140 Q 186 130, 136 156 Q 116 172, 110 204 Z" fill="#33333a" />
+      <path d="M110 200 Q 112 160, 132 146 L 128 206 Z" fill="#8a8a94" />
+      <path d="M290 198 Q 290 160, 272 146 L 276 206 Z" fill="#8a8a94" />
+      <path d="M150 118 Q 200 98, 262 120" fill="none" stroke="#5a5a64" strokeWidth={6} strokeLinecap="round" />
+      <FaceSvg cx={200} cy={214} s={1.45} face={face} look={look} blink={Math.floor(t * 10) % 43 === 42} />
+    </g>
+  );
+};
+
+export const Edison: React.FC<{face: Face; arm: number; t: number; fall?: number; dir?: number; look?: number}> =
+  ({face, arm, t, fall = 0, dir = 1, look = -1}) => {
+  const skin = '#f3cfb1';
+  return (
+    <g transform={`rotate(${dir * fall * 84} 200 700)`}>
+      <Body coat="#3a3d4c" coatDark="#2c2e3a" pants="#2f3240" shoe="#1a1a1f" arm={arm} t={t} skin={skin}>
+        <path d="M160 300 L 200 400 L 240 300 Z" fill="#f4f1ea" />
+        <path d="M150 304 L 200 420 L 176 520 L 126 516 Z" fill="#454959" />
+        <path d="M250 304 L 200 420 L 224 520 L 274 516 Z" fill="#404454" />
+        <path d="M176 300 L 200 316 L 224 300 L 224 330 L 200 316 L 176 330 Z" fill="#1d1d24" />
+        <path d="M184 404 L 216 404 L 214 520 L 186 520 Z" fill="#5a4a3a" />
+        <circle cx={200} cy={440} r={5} fill="#c9b07a" /><circle cx={200} cy={470} r={5} fill="#c9b07a" />
+        <path d="M200 455 Q 230 470, 236 448" fill="none" stroke="#d8c07a" strokeWidth={3} />
+      </Body>
+      <rect x={180} y={262} width={40} height={40} fill="#e4b896" />
+      <circle cx={200} cy={200} r={92} fill={skin} />
+      <ellipse cx={112} cy={212} rx={14} ry={22} fill="#e4b896" />
+      <ellipse cx={288} cy={212} rx={14} ry={22} fill="#e4b896" />
+      <path d="M156 268 Q 200 290, 244 268" fill="none" stroke="#d9a888" strokeWidth={5} strokeLinecap="round" />
+      {/* tall white hair, side-parted and a bit wild */}
+      <path d="M104 206 Q 92 116, 160 90 Q 210 70, 262 90 Q 314 120, 298 206 Q 292 168, 270 150 Q 236 128, 200 138 L 186 112 Q 170 140, 128 150 Q 112 170, 104 206 Z" fill="#eeebe4" />
+      <path d="M186 112 Q 230 96, 270 118" fill="none" stroke="#cfcac0" strokeWidth={6} strokeLinecap="round" />
+      <path d="M100 196 Q 88 186, 96 168 M300 196 Q 312 186, 304 168" fill="none" stroke="#eeebe4" strokeWidth={10} strokeLinecap="round" />
+      <path d="M168 150 Q 200 142, 232 150" fill="none" stroke="#e2c4ab" strokeWidth={4} strokeLinecap="round" />
+      <FaceSvg cx={200} cy={216} s={1.45} face={face} look={look} brow="#d9d4ca" browW={10} blink={Math.floor(t * 10) % 47 === 46} />
     </g>
   );
 };

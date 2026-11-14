@@ -9,12 +9,14 @@ export type Timing = {lines: Line[]};
 export type Side = 'L' | 'R';
 export type EventKind =
   | 'fight' | 'move' | 'beam' | 'stat' | 'coins' | 'seeds' | 'grow' | 'stomp' | 'shrink' | 'charge' | 'sunset'
-  | 'deer' | 'chomp' | 'banner' | 'deerTurn' | 'winner';
-export type FightEvent = {cue: string; kind: EventKind; who?: Side; target?: Side; dmg?: number; name?: string; text?: string};
+  | 'deer' | 'chomp' | 'banner' | 'deerTurn' | 'winner'
+  | 'volley' | 'rain' | 'flash' | 'armor' | 'blackout' | 'power' | 'ko' | 'revive';
+export type FightEvent = {cue: string; kind: EventKind; who?: Side; target?: Side; dmg?: number; name?: string; text?: string;
+  sprite?: string; color?: string};
 export type FightLine = {text: string; note: string; pause?: number; events: FightEvent[]};
 export type FightEpisode = {
-  id: string; voice?: string; rate?: string; title: string;
-  fighters: Record<Side, {name: string; color: string}>;
+  id: string; voice?: string; rate?: string; title: string; stage?: 'garden' | 'ring'; hot?: string[];
+  fighters: Record<Side, {name: string; full?: string; color: string; art?: string}>;
   lines: FightLine[];
 };
 
@@ -28,10 +30,14 @@ export const ATTACK: Partial<Record<EventKind, {dur: number; hits: number[]}>> =
   seeds: {dur: 1.4, hits: [0.25, 0.45, 0.65, 0.85, 1.05]},
   stomp: {dur: 0.7, hits: [0.32]},
   chomp: {dur: 0.6, hits: [0.22]},
+  volley: {dur: 1.2, hits: [0.4, 0.6, 0.8]},
+  rain: {dur: 1.4, hits: [0.55, 0.8, 1.05]},
+  flash: {dur: 0.9, hits: [0.38]},
+  ko: {dur: 0.6, hits: [0.45]},
 };
 
 export type TimedEvent = FightEvent & {t: number; line: number};
-export type Hit = {t: number; target: Side; dmg: number};
+export type Hit = {t: number; target: Side; dmg: number; set?: number};
 export type Plan = {lineStarts: number[]; lineEnds: number[]; events: TimedEvent[]; hits: Hit[]; end: number};
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9']/g, '');
@@ -60,9 +66,10 @@ export const buildPlan = (ep: FightEpisode, t: Timing): Plan => {
       const a = ATTACK[e.kind];
       if (a) {
         const target = e.target ?? other(e.who ?? 'L');
-        const total = e.kind === 'chomp' ? 999 : e.dmg ?? 0;
-        a.hits.forEach((h) => hits.push({t: at + h, target, dmg: total / a.hits.length}));
+        const total = e.kind === 'chomp' || e.kind === 'ko' ? 999 : e.dmg ?? 0;
+        if (total > 0) a.hits.forEach((h) => hits.push({t: at + h, target, dmg: total / a.hits.length}));
       }
+      if (e.kind === 'revive') hits.push({t: at + 0.4, target: e.target ?? 'L', dmg: 0, set: 100});
     }
     cur += t.lines[i].duration;
     lineEnds.push(cur);
@@ -75,8 +82,11 @@ export const buildPlan = (ep: FightEpisode, t: Timing): Plan => {
 export const totalFrames = (ep: FightEpisode, t: Timing) => Math.ceil(buildPlan(ep, t).end * FPS);
 
 /** HP 0..100 at time s. */
-export const hpAt = (p: Plan, side: Side, s: number) =>
-  Math.max(0, 100 - p.hits.filter((h) => h.target === side && h.t <= s).reduce((a, h) => a + h.dmg, 0));
+export const hpAt = (p: Plan, side: Side, s: number) => {
+  let hp = 100;
+  for (const h of p.hits) if (h.target === side && h.t <= s) hp = h.set ?? Math.max(0, hp - h.dmg);
+  return hp;
+};
 /** The pale "damage ghost" that drains after the real bar (fighting-game style). */
 export const ghostAt = (p: Plan, side: Side, s: number) => Math.max(hpAt(p, side, s), hpAt(p, side, s - 0.55));
 
@@ -95,7 +105,7 @@ export const eventOf = (p: Plan, kind: EventKind, side?: Side) =>
 
 /** Recoil 0..1 for a fighter: spikes on every hit, decays fast. */
 export const recoilAt = (p: Plan, side: Side, s: number) =>
-  Math.max(0, ...p.hits.filter((h) => h.target === side && h.t <= s).map((h) => Math.exp(-(s - h.t) * 7)));
+  Math.max(0, ...p.hits.filter((h) => h.target === side && h.t <= s && h.dmg > 0).map((h) => Math.exp(-(s - h.t) * 7)));
 
 export const lineAt = (p: Plan, s: number) => {
   let i = 0;
@@ -121,7 +131,7 @@ export const captions = (ep: FightEpisode, t: Timing, p: Plan): Chunk[] => {
     const flush = () => {
       if (!cur.length) return;
       out.push({text: cur.map((w) => w.text).join(' '), start: base + cur[0].start, end: base + cur[cur.length - 1].end,
-        hot: cur.some((w) => HOT.has(norm(w.text))), n: cur.length});
+        hot: cur.some((w) => (ep.hot ? new Set(ep.hot) : HOT).has(norm(w.text))), n: cur.length});
       cur = [];
     };
     ln.words.forEach((w, wi) => {
