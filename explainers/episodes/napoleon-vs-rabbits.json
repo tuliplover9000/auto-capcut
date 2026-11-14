@@ -1,0 +1,22 @@
+{
+  "id": "napoleon-vs-rabbits",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+4%",
+  "title": "Napoleon vs 3000 rabbits",
+  "stage": "park",
+  "headline": ["NAPOLEON", "VS 3,000 RABBITS"],
+  "hot": ["napoleon", "rabbits", "short", "tame", "dinner", "charge", "carriage", "flank", "inside", "winner", "hated"],
+  "hero": {"name": "NAPOLEON", "art": "napoleon", "color": "#2457c9", "bar": "DIGNITY"},
+  "horde": {"name": "RABBITS", "art": "rabbit", "color": "#f4f1ea", "count": 3000, "label": "RABBITS", "sprites": 40},
+  "lines": [
+    {"text": "Napoleon versus three thousand rabbits. This actually happened. Probably.", "note": "Based on the memoirs of General Paul Thiébault", "events": [{"cue": "$end", "kind": "fight"}]},
+    {"text": "1807. Napoleon has just signed a peace treaty, so his chief of staff throws him a celebration rabbit hunt.", "note": "July 1807 · after the Treaties of Tilsit · hosted by Marshal Berthier", "events": []},
+    {"text": "Quick fact: Napoleon wasn't short. About five foot seven. Average for his time.", "note": "About 1.69 m · the myth: French inches + British cartoons", "events": [{"cue": "short", "kind": "stat", "text": "NOT SHORT · 5'7\""}]},
+    {"text": "The cages open. But these rabbits were bought from local farmers. They're tame.", "note": "Accounts range from hundreds to 3,000 rabbits", "events": [{"cue": "open", "kind": "release"}]},
+    {"text": "So instead of running away, they think it's dinner time. And they charge.", "note": "", "events": [{"cue": "charge", "kind": "charge"}]},
+    {"text": "The greatest general in Europe tries to fight them off with his riding crop.", "note": "", "events": [{"cue": "fight", "kind": "move", "name": "RIDING CROP"}, {"cue": "riding", "kind": "swat", "n": 0, "back": true}, {"cue": "crop", "kind": "swat", "n": 0, "back": true}]},
+    {"text": "It doesn't work. He retreats to his carriage, and the rabbits split up and flank him.", "note": "", "events": [{"cue": "work", "kind": "hurt", "dmg": 60}, {"cue": "retreats", "kind": "retreat"}, {"cue": "flank", "kind": "flank"}]},
+    {"text": "Some of them reportedly got inside the carriage.", "note": "", "events": [{"cue": "inside", "kind": "swarm"}, {"cue": "inside", "kind": "hurt", "dmg": 40}]},
+    {"text": "Winner? The rabbits. According to one general's memoir. A general who hated the host.", "note": "Thiébault's memoirs (1894) · he had a long feud with Berthier", "events": [{"cue": "rabbits", "kind": "winner", "text": "RABBITS"}]}
+  ]
+}

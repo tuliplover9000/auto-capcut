@@ -19,6 +19,13 @@ import jensenEp from '../episodes/jensen-vs-edison.json';
 import jensenTiming from '../episodes/jensen-vs-edison.timing.json';
 import {Odds} from './odds/Odds';
 import {LiftArtSheet} from './lift/Sheet';
+import {HordeArtSheet} from './horde/Sheet';
+import {Horde} from './horde/Horde';
+import {totalFrames as hordeFrames, HordeEpisode} from './horde/timeline';
+import gorillaEp from '../episodes/gorilla-vs-100-men.json';
+import gorillaTiming from '../episodes/gorilla-vs-100-men.timing.json';
+import napoleonEp from '../episodes/napoleon-vs-rabbits.json';
+import napoleonTiming from '../episodes/napoleon-vs-rabbits.timing.json';
 import {Lift} from './lift/Lift';
 import balloonsEp from '../episodes/balloons-lift.json';
 import balloonsTiming from '../episodes/balloons-lift.timing.json';
@@ -83,6 +90,7 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="ArtSheet" component={ArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="FightArtSheet" component={FightArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="LiftArtSheet" component={LiftArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="HordeArtSheet" component={HordeArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="WindArtSheet" component={WindArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition
       id="Fight"
@@ -103,6 +111,26 @@ export const RemotionRoot: React.FC = () => (
       defaultProps={{episode: jensenEp as FightEpisode, timing: jensenTiming as FightTiming}}
       durationInFrames={fightFrames(jensenEp as FightEpisode, jensenTiming as FightTiming)}
       calculateMetadata={({props}) => ({durationInFrames: fightFrames(props.episode, props.timing)})}
+    />
+    <Composition
+      id="HordeGorilla"
+      component={Horde}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: gorillaEp as HordeEpisode, timing: gorillaTiming as FightTiming}}
+      durationInFrames={hordeFrames(gorillaEp as HordeEpisode, gorillaTiming as FightTiming)}
+      calculateMetadata={({props}) => ({durationInFrames: hordeFrames(props.episode, props.timing)})}
+    />
+    <Composition
+      id="HordeNapoleon"
+      component={Horde}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: napoleonEp as HordeEpisode, timing: napoleonTiming as FightTiming}}
+      durationInFrames={hordeFrames(napoleonEp as HordeEpisode, napoleonTiming as FightTiming)}
+      calculateMetadata={({props}) => ({durationInFrames: hordeFrames(props.episode, props.timing)})}
     />
     <Composition
       id="LiftBalloons"

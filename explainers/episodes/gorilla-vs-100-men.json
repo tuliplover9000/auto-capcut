@@ -1,0 +1,22 @@
+{
+  "id": "gorilla-vs-100-men",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+4%",
+  "title": "100 men vs 1 gorilla",
+  "stage": "jungle",
+  "headline": ["100 MEN", "VS 1 GORILLA"],
+  "hot": ["gorilla", "silverback", "measured", "chest", "run", "lunch", "leaves", "winner", "arguing"],
+  "hero": {"name": "GORILLA", "art": "gorilla", "color": "#9a9ca6", "bar": "STAMINA"},
+  "horde": {"name": "100 MEN", "art": "man", "color": "#ff4f5e", "count": 100, "label": "MEN LEFT", "sprites": 32},
+  "lines": [
+    {"text": "A hundred men versus one gorilla. The internet has been arguing about this for months.", "note": "Cartoon simulation · not a real fight", "events": [{"cue": "$end", "kind": "fight"}]},
+    {"text": "The men charge. All at once.", "note": "", "events": [{"cue": "charge", "kind": "charge"}]},
+    {"text": "A silverback weighs around 160 kilos. One swing, and ten men go flying.", "note": "Wild adult male gorillas: roughly 140–200 kg", "events": [{"cue": "silverback", "kind": "stat", "text": "160 KG SILVERBACK"}, {"cue": "swing", "kind": "swat", "n": 10}]},
+    {"text": "People say gorillas are ten times stronger than us. Fun fact: nobody has ever actually measured it.", "note": "Berggorilla & Regenwald Direkthilfe: no study has measured gorilla vs human strength", "events": [{"cue": "measured", "kind": "stat", "text": "NEVER MEASURED"}]},
+    {"text": "Doesn't matter. Twenty more go down. Then thirty. But he's getting tired.", "note": "", "events": [{"cue": "twenty", "kind": "swat", "n": 20}, {"cue": "thirty", "kind": "swat", "n": 30}, {"cue": "tired", "kind": "hurt", "dmg": 70}]},
+    {"text": "So he does the one thing gorillas actually do. He beats his chest.", "note": "Wright et al. 2021 (Scientific Reports): chest beats advertise body size", "events": [{"cue": "beats", "kind": "move", "name": "CHEST BEAT"}, {"cue": "chest", "kind": "beat"}]},
+    {"text": "That sound tells rivals exactly how big he is. And the last forty men run.", "note": "Bigger silverbacks make deeper chest beats", "pause": 0.1, "events": [{"cue": "run", "kind": "flee"}]},
+    {"text": "He never wanted the fight. He wanted lunch. About twenty kilos of leaves.", "note": "Wild silverbacks eat roughly 18–30 kg of plants a day", "events": [{"cue": "lunch", "kind": "eat"}]},
+    {"text": "Winner? The gorilla. And the internet is still arguing.", "note": "", "events": [{"cue": "gorilla", "kind": "winner", "text": "GORILLA"}]}
+  ]
+}

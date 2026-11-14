@@ -184,7 +184,7 @@ const Seeds: React.FC<{e: TimedEvent; s: number}> = ({e, s}) => {
   );
 };
 
-const Spark: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y, k, color}) => (
+export const Spark: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y, k, color}) => (
   <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
     <g transform={`translate(${x} ${y}) scale(${0.6 + k * 1.1})`} opacity={1 - k}>
       <polygon points="0,-90 22,-26 88,-30 34,10 56,74 0,34 -56,74 -34,10 -88,-30 -22,-26" fill={color} />
@@ -194,7 +194,7 @@ const Spark: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y
 );
 
 /* shockwave ring + flying debris streaks on every hit (0 <= k <= 1 over ~0.45 s) */
-const Shock: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y, k, color}) => (
+export const Shock: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y, k, color}) => (
   <svg width={W} height={1920} style={{position: 'absolute', left: 0, top: 0}}>
     <circle cx={x} cy={y} r={40 + 260 * ease(k)} fill="none" stroke="#ffffff" strokeWidth={26 * (1 - k)} opacity={1 - k} />
     <circle cx={x} cy={y} r={20 + 190 * ease(k)} fill="none" stroke={color} strokeWidth={14 * (1 - k)} opacity={1 - k} />
@@ -209,7 +209,7 @@ const Shock: React.FC<{x: number; y: number; k: number; color: string}> = ({x, y
 );
 
 /* anime speed lines + colour wash behind a fighter during their special move */
-const SpeedLines: React.FC<{x: number; y: number; color: string; k: number; frame: number}> = ({x, y, color, k, frame}) => {
+export const SpeedLines: React.FC<{x: number; y: number; color: string; k: number; frame: number}> = ({x, y, color, k, frame}) => {
   const op = Math.min(clamp01(k / 0.08), clamp01((1 - k) / 0.2));
   const rnd = (i: number) => {
     const v = Math.sin(i * 127.1 + Math.floor(frame / 2) * 311.7) * 43758.5453;
@@ -272,7 +272,7 @@ const SnailGag: React.FC<{s: number; end: number; night: number}> = ({s, end, ni
 };
 
 /* banners: slanted band that slams in from the attacker's side */
-const Band: React.FC<{k: number; from: Side; color: string; label?: string; text: string; size?: number; top?: number}> =
+export const Band: React.FC<{k: number; from: Side; color: string; label?: string; text: string; size?: number; top?: number}> =
   ({k, from, color, label, text, size = 104, top = 446}) => {
   const inK = clamp01(k / 0.12);
   const outK = clamp01((k - 0.86) / 0.14);
@@ -287,7 +287,7 @@ const Band: React.FC<{k: number; from: Side; color: string; label?: string; text
   );
 };
 
-const Slam: React.FC<{k: number; text: string; color: string; size: number; top: number}> = ({k, text, color, size, top}) => {
+export const Slam: React.FC<{k: number; text: string; color: string; size: number; top: number}> = ({k, text, color, size, top}) => {
   const sc = k < 0.15 ? 2.4 - 1.4 * (k / 0.15) : 1 + 0.03 * Math.sin(k * 30);
   return (
     <div style={{position: 'absolute', left: 0, top, width: W, textAlign: 'center', fontFamily: heavy, fontWeight: 900, fontSize: size,

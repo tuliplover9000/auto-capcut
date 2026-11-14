@@ -1,0 +1,623 @@
+{
+ "lines": [
+  {
+   "file": "narration/gorilla-vs-100-men/line_0.mp3",
+   "duration": 4.92,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.096,
+     "end": 0.144
+    },
+    {
+     "text": "hundred",
+     "start": 0.156,
+     "end": 0.457
+    },
+    {
+     "text": "men",
+     "start": 0.469,
+     "end": 0.781
+    },
+    {
+     "text": "versus",
+     "start": 0.793,
+     "end": 1.202
+    },
+    {
+     "text": "one",
+     "start": 1.214,
+     "end": 1.478
+    },
+    {
+     "text": "gorilla",
+     "start": 1.49,
+     "end": 1.923
+    },
+    {
+     "text": "The",
+     "start": 2.332,
+     "end": 2.404
+    },
+    {
+     "text": "internet",
+     "start": 2.416,
+     "end": 2.752
+    },
+    {
+     "text": "has",
+     "start": 2.764,
+     "end": 2.897
+    },
+    {
+     "text": "been",
+     "start": 2.909,
+     "end": 3.029
+    },
+    {
+     "text": "arguing",
+     "start": 3.041,
+     "end": 3.474
+    },
+    {
+     "text": "about",
+     "start": 3.486,
+     "end": 3.75
+    },
+    {
+     "text": "this",
+     "start": 3.762,
+     "end": 3.906
+    },
+    {
+     "text": "for",
+     "start": 3.918,
+     "end": 4.05
+    },
+    {
+     "text": "months",
+     "start": 4.062,
+     "end": 4.567
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_1.mp3",
+   "duration": 2.3,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.108,
+     "end": 0.156
+    },
+    {
+     "text": "men",
+     "start": 0.168,
+     "end": 0.373
+    },
+    {
+     "text": "charge",
+     "start": 0.385,
+     "end": 0.901
+    },
+    {
+     "text": "All",
+     "start": 1.298,
+     "end": 1.43
+    },
+    {
+     "text": "at",
+     "start": 1.442,
+     "end": 1.526
+    },
+    {
+     "text": "once",
+     "start": 1.538,
+     "end": 1.935
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_2.mp3",
+   "duration": 5.59,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.096,
+     "end": 0.144
+    },
+    {
+     "text": "silverback",
+     "start": 0.156,
+     "end": 0.841
+    },
+    {
+     "text": "weighs",
+     "start": 0.889,
+     "end": 1.13
+    },
+    {
+     "text": "around",
+     "start": 1.142,
+     "end": 1.466
+    },
+    {
+     "text": "160",
+     "start": 1.478,
+     "end": 2.26
+    },
+    {
+     "text": "kilos",
+     "start": 2.272,
+     "end": 2.788
+    },
+    {
+     "text": "One",
+     "start": 3.185,
+     "end": 3.353
+    },
+    {
+     "text": "swing",
+     "start": 3.365,
+     "end": 3.774
+    },
+    {
+     "text": "and",
+     "start": 4.062,
+     "end": 4.135
+    },
+    {
+     "text": "ten",
+     "start": 4.147,
+     "end": 4.375
+    },
+    {
+     "text": "men",
+     "start": 4.387,
+     "end": 4.579
+    },
+    {
+     "text": "go",
+     "start": 4.591,
+     "end": 4.76
+    },
+    {
+     "text": "flying",
+     "start": 4.772,
+     "end": 5.228
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_3.mp3",
+   "duration": 6.02,
+   "words": [
+    {
+     "text": "People",
+     "start": 0.108,
+     "end": 0.337
+    },
+    {
+     "text": "say",
+     "start": 0.349,
+     "end": 0.553
+    },
+    {
+     "text": "gorillas",
+     "start": 0.565,
+     "end": 0.986
+    },
+    {
+     "text": "are",
+     "start": 0.998,
+     "end": 1.142
+    },
+    {
+     "text": "ten",
+     "start": 1.154,
+     "end": 1.466
+    },
+    {
+     "text": "times",
+     "start": 1.478,
+     "end": 1.755
+    },
+    {
+     "text": "stronger",
+     "start": 1.767,
+     "end": 2.175
+    },
+    {
+     "text": "than",
+     "start": 2.188,
+     "end": 2.332
+    },
+    {
+     "text": "us",
+     "start": 2.344,
+     "end": 2.656
+    },
+    {
+     "text": "Fun",
+     "start": 3.089,
+     "end": 3.209
+    },
+    {
+     "text": "fact",
+     "start": 3.221,
+     "end": 3.606
+    },
+    {
+     "text": "nobody",
+     "start": 3.99,
+     "end": 4.315
+    },
+    {
+     "text": "has",
+     "start": 4.327,
+     "end": 4.519
+    },
+    {
+     "text": "ever",
+     "start": 4.531,
+     "end": 4.784
+    },
+    {
+     "text": "actually",
+     "start": 4.796,
+     "end": 5.132
+    },
+    {
+     "text": "measured",
+     "start": 5.144,
+     "end": 5.493
+    },
+    {
+     "text": "it",
+     "start": 5.505,
+     "end": 5.673
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_4.mp3",
+   "duration": 4.56,
+   "words": [
+    {
+     "text": "Doesn't",
+     "start": 0.096,
+     "end": 0.276
+    },
+    {
+     "text": "matter",
+     "start": 0.288,
+     "end": 0.625
+    },
+    {
+     "text": "Twenty",
+     "start": 1.022,
+     "end": 1.202
+    },
+    {
+     "text": "more",
+     "start": 1.214,
+     "end": 1.382
+    },
+    {
+     "text": "go",
+     "start": 1.394,
+     "end": 1.562
+    },
+    {
+     "text": "down",
+     "start": 1.575,
+     "end": 1.947
+    },
+    {
+     "text": "Then",
+     "start": 2.356,
+     "end": 2.512
+    },
+    {
+     "text": "thirty",
+     "start": 2.524,
+     "end": 2.945
+    },
+    {
+     "text": "But",
+     "start": 3.353,
+     "end": 3.426
+    },
+    {
+     "text": "he's",
+     "start": 3.438,
+     "end": 3.558
+    },
+    {
+     "text": "getting",
+     "start": 3.57,
+     "end": 3.762
+    },
+    {
+     "text": "tired",
+     "start": 3.774,
+     "end": 4.195
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_5.mp3",
+   "duration": 3.77,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.096,
+     "end": 0.192
+    },
+    {
+     "text": "he",
+     "start": 0.204,
+     "end": 0.276
+    },
+    {
+     "text": "does",
+     "start": 0.288,
+     "end": 0.421
+    },
+    {
+     "text": "the",
+     "start": 0.433,
+     "end": 0.529
+    },
+    {
+     "text": "one",
+     "start": 0.541,
+     "end": 0.757
+    },
+    {
+     "text": "thing",
+     "start": 0.769,
+     "end": 0.986
+    },
+    {
+     "text": "gorillas",
+     "start": 0.998,
+     "end": 1.394
+    },
+    {
+     "text": "actually",
+     "start": 1.406,
+     "end": 1.767
+    },
+    {
+     "text": "do",
+     "start": 1.779,
+     "end": 2.055
+    },
+    {
+     "text": "He",
+     "start": 2.464,
+     "end": 2.548
+    },
+    {
+     "text": "beats",
+     "start": 2.56,
+     "end": 2.788
+    },
+    {
+     "text": "his",
+     "start": 2.8,
+     "end": 2.909
+    },
+    {
+     "text": "chest",
+     "start": 2.921,
+     "end": 3.401
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_6.mp3",
+   "duration": 4.78,
+   "words": [
+    {
+     "text": "That",
+     "start": 0.108,
+     "end": 0.204
+    },
+    {
+     "text": "sound",
+     "start": 0.216,
+     "end": 0.517
+    },
+    {
+     "text": "tells",
+     "start": 0.529,
+     "end": 0.781
+    },
+    {
+     "text": "rivals",
+     "start": 0.793,
+     "end": 1.166
+    },
+    {
+     "text": "exactly",
+     "start": 1.178,
+     "end": 1.743
+    },
+    {
+     "text": "how",
+     "start": 1.755,
+     "end": 1.923
+    },
+    {
+     "text": "big",
+     "start": 1.935,
+     "end": 2.187
+    },
+    {
+     "text": "he",
+     "start": 2.2,
+     "end": 2.356
+    },
+    {
+     "text": "is",
+     "start": 2.368,
+     "end": 2.668
+    },
+    {
+     "text": "And",
+     "start": 3.065,
+     "end": 3.125
+    },
+    {
+     "text": "the",
+     "start": 3.137,
+     "end": 3.221
+    },
+    {
+     "text": "last",
+     "start": 3.233,
+     "end": 3.57
+    },
+    {
+     "text": "forty",
+     "start": 3.582,
+     "end": 3.858
+    },
+    {
+     "text": "men",
+     "start": 3.87,
+     "end": 4.135
+    },
+    {
+     "text": "run",
+     "start": 4.147,
+     "end": 4.411
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_7.mp3",
+   "duration": 4.44,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.108,
+     "end": 0.156
+    },
+    {
+     "text": "never",
+     "start": 0.168,
+     "end": 0.409
+    },
+    {
+     "text": "wanted",
+     "start": 0.421,
+     "end": 0.613
+    },
+    {
+     "text": "the",
+     "start": 0.625,
+     "end": 0.685
+    },
+    {
+     "text": "fight",
+     "start": 0.697,
+     "end": 1.07
+    },
+    {
+     "text": "He",
+     "start": 1.478,
+     "end": 1.514
+    },
+    {
+     "text": "wanted",
+     "start": 1.526,
+     "end": 1.731
+    },
+    {
+     "text": "lunch",
+     "start": 1.743,
+     "end": 2.139
+    },
+    {
+     "text": "About",
+     "start": 2.536,
+     "end": 2.788
+    },
+    {
+     "text": "twenty",
+     "start": 2.8,
+     "end": 3.113
+    },
+    {
+     "text": "kilos",
+     "start": 3.125,
+     "end": 3.486
+    },
+    {
+     "text": "of",
+     "start": 3.498,
+     "end": 3.594
+    },
+    {
+     "text": "leaves",
+     "start": 3.606,
+     "end": 4.087
+    }
+   ]
+  },
+  {
+   "file": "narration/gorilla-vs-100-men/line_8.mp3",
+   "duration": 3.58,
+   "words": [
+    {
+     "text": "Winner",
+     "start": 0.108,
+     "end": 0.397
+    },
+    {
+     "text": "The",
+     "start": 0.805,
+     "end": 0.865
+    },
+    {
+     "text": "gorilla",
+     "start": 0.877,
+     "end": 1.274
+    },
+    {
+     "text": "And",
+     "start": 1.671,
+     "end": 1.731
+    },
+    {
+     "text": "the",
+     "start": 1.743,
+     "end": 1.827
+    },
+    {
+     "text": "internet",
+     "start": 1.839,
+     "end": 2.272
+    },
+    {
+     "text": "is",
+     "start": 2.356,
+     "end": 2.44
+    },
+    {
+     "text": "still",
+     "start": 2.452,
+     "end": 2.692
+    },
+    {
+     "text": "arguing",
+     "start": 2.704,
+     "end": 3.221
+    }
+   ]
+  }
+ ]
+}

@@ -4,7 +4,7 @@
 import {ATTACK, Plan, Side, TimedEvent, other} from './timeline';
 
 export type Cam = {x: number; y: number; z: number; r: number}; // world point at frame centre, zoom, roll (deg)
-type Shot = Cam & {t: number; blend: number};
+export type Shot = Cam & {t: number; blend: number};
 
 const W = 1080;
 const H = 1920;
