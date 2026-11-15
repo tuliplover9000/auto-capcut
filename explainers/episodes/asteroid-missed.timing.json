@@ -1,0 +1,549 @@
+{
+ "lines": [
+  {
+   "file": "narration/asteroid-missed/line_0.mp3",
+   "duration": 2.93,
+   "words": [
+    {
+     "text": "What",
+     "start": 0.091,
+     "end": 0.17
+    },
+    {
+     "text": "if",
+     "start": 0.182,
+     "end": 0.261
+    },
+    {
+     "text": "the",
+     "start": 0.273,
+     "end": 0.364
+    },
+    {
+     "text": "asteroid",
+     "start": 0.375,
+     "end": 0.92
+    },
+    {
+     "text": "that",
+     "start": 0.932,
+     "end": 1.057
+    },
+    {
+     "text": "killed",
+     "start": 1.068,
+     "end": 1.295
+    },
+    {
+     "text": "the",
+     "start": 1.307,
+     "end": 1.386
+    },
+    {
+     "text": "dinosaurs",
+     "start": 1.398,
+     "end": 1.92
+    },
+    {
+     "text": "had",
+     "start": 1.932,
+     "end": 2.08
+    },
+    {
+     "text": "missed",
+     "start": 2.091,
+     "end": 2.591
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_1.mp3",
+   "duration": 1.44,
+   "words": [
+    {
+     "text": "You",
+     "start": 0.091,
+     "end": 0.159
+    },
+    {
+     "text": "would",
+     "start": 0.17,
+     "end": 0.273
+    },
+    {
+     "text": "never",
+     "start": 0.284,
+     "end": 0.511
+    },
+    {
+     "text": "have",
+     "start": 0.523,
+     "end": 0.625
+    },
+    {
+     "text": "been",
+     "start": 0.636,
+     "end": 0.773
+    },
+    {
+     "text": "born",
+     "start": 0.784,
+     "end": 1.102
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_2.mp3",
+   "duration": 5.21,
+   "words": [
+    {
+     "text": "Back",
+     "start": 0.102,
+     "end": 0.284
+    },
+    {
+     "text": "then",
+     "start": 0.295,
+     "end": 0.523
+    },
+    {
+     "text": "our",
+     "start": 0.898,
+     "end": 1.023
+    },
+    {
+     "text": "ancestors",
+     "start": 1.034,
+     "end": 1.568
+    },
+    {
+     "text": "were",
+     "start": 1.58,
+     "end": 1.693
+    },
+    {
+     "text": "tiny",
+     "start": 1.705,
+     "end": 2.148
+    },
+    {
+     "text": "shrew-sized",
+     "start": 2.398,
+     "end": 2.977
+    },
+    {
+     "text": "animals",
+     "start": 2.989,
+     "end": 3.477
+    },
+    {
+     "text": "hiding",
+     "start": 3.807,
+     "end": 4.057
+    },
+    {
+     "text": "from",
+     "start": 4.068,
+     "end": 4.205
+    },
+    {
+     "text": "dinosaurs",
+     "start": 4.216,
+     "end": 4.875
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_3.mp3",
+   "duration": 4.54,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.091,
+     "end": 0.227
+    },
+    {
+     "text": "real",
+     "start": 0.239,
+     "end": 0.443
+    },
+    {
+     "text": "life",
+     "start": 0.455,
+     "end": 0.83
+    },
+    {
+     "text": "the",
+     "start": 1.023,
+     "end": 1.125
+    },
+    {
+     "text": "asteroid",
+     "start": 1.136,
+     "end": 1.693
+    },
+    {
+     "text": "cleared",
+     "start": 1.705,
+     "end": 2.011
+    },
+    {
+     "text": "the",
+     "start": 2.023,
+     "end": 2.091
+    },
+    {
+     "text": "planet",
+     "start": 2.102,
+     "end": 2.511
+    },
+    {
+     "text": "and",
+     "start": 2.807,
+     "end": 2.909
+    },
+    {
+     "text": "mammals",
+     "start": 2.92,
+     "end": 3.284
+    },
+    {
+     "text": "finally",
+     "start": 3.295,
+     "end": 3.636
+    },
+    {
+     "text": "got",
+     "start": 3.648,
+     "end": 3.875
+    },
+    {
+     "text": "big",
+     "start": 3.886,
+     "end": 4.182
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_4.mp3",
+   "duration": 4.2,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.102,
+     "end": 0.182
+    },
+    {
+     "text": "if",
+     "start": 0.193,
+     "end": 0.284
+    },
+    {
+     "text": "it",
+     "start": 0.295,
+     "end": 0.375
+    },
+    {
+     "text": "missed",
+     "start": 0.386,
+     "end": 0.818
+    },
+    {
+     "text": "the",
+     "start": 1.023,
+     "end": 1.114
+    },
+    {
+     "text": "dinosaurs",
+     "start": 1.125,
+     "end": 1.636
+    },
+    {
+     "text": "keep",
+     "start": 1.648,
+     "end": 1.875
+    },
+    {
+     "text": "the",
+     "start": 1.886,
+     "end": 1.955
+    },
+    {
+     "text": "planet",
+     "start": 1.966,
+     "end": 2.375
+    },
+    {
+     "text": "And",
+     "start": 2.75,
+     "end": 2.818
+    },
+    {
+     "text": "we",
+     "start": 2.83,
+     "end": 2.92
+    },
+    {
+     "text": "probably",
+     "start": 2.932,
+     "end": 3.284
+    },
+    {
+     "text": "stay",
+     "start": 3.295,
+     "end": 3.489
+    },
+    {
+     "text": "tiny",
+     "start": 3.5,
+     "end": 3.864
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_5.mp3",
+   "duration": 3.46,
+   "words": [
+    {
+     "text": "Here's",
+     "start": 0.125,
+     "end": 0.261
+    },
+    {
+     "text": "the",
+     "start": 0.273,
+     "end": 0.352
+    },
+    {
+     "text": "twist",
+     "start": 0.364,
+     "end": 0.795
+    },
+    {
+     "text": "Some",
+     "start": 1.182,
+     "end": 1.33
+    },
+    {
+     "text": "dinosaurs",
+     "start": 1.341,
+     "end": 1.864
+    },
+    {
+     "text": "were",
+     "start": 1.875,
+     "end": 2.057
+    },
+    {
+     "text": "already",
+     "start": 2.068,
+     "end": 2.443
+    },
+    {
+     "text": "getting",
+     "start": 2.455,
+     "end": 2.67
+    },
+    {
+     "text": "smarter",
+     "start": 2.682,
+     "end": 3.125
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_6.mp3",
+   "duration": 3.89,
+   "words": [
+    {
+     "text": "In 1982",
+     "start": 0.091,
+     "end": 1.057
+    },
+    {
+     "text": "a",
+     "start": 1.25,
+     "end": 1.318
+    },
+    {
+     "text": "paleontologist",
+     "start": 1.33,
+     "end": 2.239
+    },
+    {
+     "text": "imagined",
+     "start": 2.25,
+     "end": 2.727
+    },
+    {
+     "text": "where",
+     "start": 2.739,
+     "end": 2.886
+    },
+    {
+     "text": "that",
+     "start": 2.898,
+     "end": 3.045
+    },
+    {
+     "text": "could",
+     "start": 3.057,
+     "end": 3.205
+    },
+    {
+     "text": "lead",
+     "start": 3.216,
+     "end": 3.545
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_7.mp3",
+   "duration": 4.13,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.08,
+     "end": 0.148
+    },
+    {
+     "text": "big-brained",
+     "start": 0.159,
+     "end": 0.636
+    },
+    {
+     "text": "dinosaur",
+     "start": 0.648,
+     "end": 1.102
+    },
+    {
+     "text": "that",
+     "start": 1.114,
+     "end": 1.261
+    },
+    {
+     "text": "walks",
+     "start": 1.273,
+     "end": 1.534
+    },
+    {
+     "text": "upright",
+     "start": 1.545,
+     "end": 1.932
+    },
+    {
+     "text": "like",
+     "start": 2.159,
+     "end": 2.318
+    },
+    {
+     "text": "us",
+     "start": 2.33,
+     "end": 2.659
+    },
+    {
+     "text": "The",
+     "start": 3.045,
+     "end": 3.102
+    },
+    {
+     "text": "Dinosauroid",
+     "start": 3.114,
+     "end": 3.784
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_8.mp3",
+   "duration": 3.31,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.102,
+     "end": 0.205
+    },
+    {
+     "text": "right",
+     "start": 0.216,
+     "end": 0.375
+    },
+    {
+     "text": "now",
+     "start": 0.386,
+     "end": 0.625
+    },
+    {
+     "text": "something",
+     "start": 0.875,
+     "end": 1.17
+    },
+    {
+     "text": "might",
+     "start": 1.182,
+     "end": 1.352
+    },
+    {
+     "text": "still",
+     "start": 1.364,
+     "end": 1.568
+    },
+    {
+     "text": "be",
+     "start": 1.58,
+     "end": 1.682
+    },
+    {
+     "text": "scrolling",
+     "start": 1.693,
+     "end": 2.125
+    },
+    {
+     "text": "past",
+     "start": 2.136,
+     "end": 2.477
+    },
+    {
+     "text": "this",
+     "start": 2.489,
+     "end": 2.614
+    },
+    {
+     "text": "video",
+     "start": 2.625,
+     "end": 2.977
+    }
+   ]
+  },
+  {
+   "file": "narration/asteroid-missed/line_9.mp3",
+   "duration": 1.87,
+   "words": [
+    {
+     "text": "It",
+     "start": 0.091,
+     "end": 0.148
+    },
+    {
+     "text": "just",
+     "start": 0.159,
+     "end": 0.375
+    },
+    {
+     "text": "wouldn't",
+     "start": 0.386,
+     "end": 0.602
+    },
+    {
+     "text": "be",
+     "start": 0.614,
+     "end": 0.739
+    },
+    {
+     "text": "you",
+     "start": 0.75,
+     "end": 0.932
+    }
+   ]
+  }
+ ]
+}

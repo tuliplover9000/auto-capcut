@@ -21,10 +21,14 @@ import {Odds} from './odds/Odds';
 import {LiftArtSheet} from './lift/Sheet';
 import {HordeArtSheet} from './horde/Sheet';
 import {StoryArtSheet} from './story/Sheet';
+import {WhatIfArtSheet} from './whatif/Sheet';
 import {Story} from './story/Story';
 import {totalFrames as storyFrames, StoryEpisode} from './story/timeline';
 import wojtekEp from '../episodes/wojtek-the-bear.json';
 import wojtekTiming from '../episodes/wojtek-the-bear.timing.json';
+import {WhatIf} from './whatif/WhatIf';
+import asteroidEp from '../episodes/asteroid-missed.json';
+import asteroidTiming from '../episodes/asteroid-missed.timing.json';
 import {Horde} from './horde/Horde';
 import {totalFrames as hordeFrames, HordeEpisode} from './horde/timeline';
 import gorillaEp from '../episodes/gorilla-vs-100-men.json';
@@ -96,6 +100,7 @@ export const RemotionRoot: React.FC = () => (
     <Composition id="FightArtSheet" component={FightArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="LiftArtSheet" component={LiftArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="HordeArtSheet" component={HordeArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
+    <Composition id="WhatIfArtSheet" component={WhatIfArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="StoryArtSheet" component={StoryArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="WindArtSheet" component={WindArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition
@@ -137,6 +142,15 @@ export const RemotionRoot: React.FC = () => (
       defaultProps={{episode: napoleonEp as HordeEpisode, timing: napoleonTiming as FightTiming}}
       durationInFrames={hordeFrames(napoleonEp as HordeEpisode, napoleonTiming as FightTiming)}
       calculateMetadata={({props}) => ({durationInFrames: hordeFrames(props.episode, props.timing)})}
+    />
+    <Composition
+      id="WhatIfAsteroid"
+      component={WhatIf}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: asteroidEp as StoryEpisode, timing: asteroidTiming as FightTiming}}
+      durationInFrames={storyFrames(asteroidEp as StoryEpisode, asteroidTiming as FightTiming)}
     />
     <Composition
       id="StoryWojtek"

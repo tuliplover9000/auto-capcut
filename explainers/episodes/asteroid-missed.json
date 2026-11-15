@@ -1,0 +1,29 @@
+{
+  "id": "asteroid-missed",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+10%",
+  "title": "What if dinosaurs never went extinct",
+  "hot": ["missed", "never", "born", "tiny", "dinosaurs", "big", "stay", "twist", "smarter", "1982", "dinosauroid", "scrolling", "you"],
+  "lines": [
+    {"text": "What if the asteroid that killed the dinosaurs had missed?", "scene": "space", "chapter": "66 MILLION YEARS AGO", "note": "Chicxulub impact · about 66 million years ago",
+      "events": [{"cue": "missed", "kind": "miss"}]},
+    {"text": "You would never have been born.", "scene": "you", "chapter": "66 MILLION YEARS AGO", "note": "",
+      "events": [{"cue": "born", "kind": "poof"}]},
+    {"text": "Back then, our ancestors were tiny, shrew-sized animals, hiding from dinosaurs.", "scene": "jungle", "chapter": "THE CRETACEOUS", "note": "Most mammals were small · a few reached badger size",
+      "events": [{"cue": "tiny", "kind": "shrew"}, {"cue": "dinosaurs", "kind": "stomp"}]},
+    {"text": "In real life, the asteroid cleared the planet, and mammals finally got big.", "scene": "real", "chapter": "REAL LIFE", "note": "Some grew 100x bigger within 700,000 years",
+      "events": [{"cue": "cleared", "kind": "clear"}, {"cue": "big", "kind": "grow"}]},
+    {"text": "But if it missed, the dinosaurs keep the planet. And we probably stay tiny.", "scene": "alt", "chapter": "WHAT IF", "note": "Speculation · nobody can rerun evolution",
+      "events": [{"cue": "missed", "kind": "alt"}, {"cue": "tiny", "kind": "stay"}]},
+    {"text": "Here's the twist. Some dinosaurs were already getting smarter.", "scene": "troodon", "chapter": "WHAT IF", "note": "Troodon · a big brain for its body size", "pause": 0.1,
+      "events": [{"cue": "twist", "kind": "twist"}, {"cue": "smarter", "kind": "smart"}]},
+    {"text": "In 1982, a paleontologist imagined where that could lead.", "scene": "lab", "chapter": "1982", "note": "Dale Russell & sculptor Ron Séguin",
+      "events": [{"cue": "imagined", "kind": "imagine"}]},
+    {"text": "A big-brained dinosaur that walks upright, like us. The Dinosauroid.", "scene": "lab", "chapter": "1982", "note": "A thought experiment · many scientists call it too human",
+      "events": [{"cue": "upright", "kind": "unveil"}, {"cue": "Dinosauroid", "kind": "name", "text": "DINOSAUROID"}]},
+    {"text": "So right now, something might still be scrolling past this video.", "scene": "today", "chapter": "TODAY · WHAT IF", "note": "", "pause": 0.1,
+      "events": [{"cue": "scrolling", "kind": "scroll"}]},
+    {"text": "It just wouldn't be you.", "scene": "today", "chapter": "TODAY · WHAT IF", "note": "", "pause": 0.35,
+      "events": [{"cue": "you", "kind": "sting"}]}
+  ]
+}
