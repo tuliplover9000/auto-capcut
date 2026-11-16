@@ -1,0 +1,469 @@
+{
+ "lines": [
+  {
+   "file": "narration/pickpocket-station/line_0.mp3",
+   "duration": 4.3,
+   "words": [
+    {
+     "text": "600",
+     "start": 0.093,
+     "end": 0.556
+    },
+    {
+     "text": "people",
+     "start": 0.567,
+     "end": 0.903
+    },
+    {
+     "text": "One",
+     "start": 1.285,
+     "end": 1.424
+    },
+    {
+     "text": "pickpocket",
+     "start": 1.435,
+     "end": 1.979
+    },
+    {
+     "text": "15 seconds",
+     "start": 2.407,
+     "end": 3.252
+    },
+    {
+     "text": "Find",
+     "start": 3.646,
+     "end": 3.808
+    },
+    {
+     "text": "him",
+     "start": 3.819,
+     "end": 3.947
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_1.mp3",
+   "duration": 1.7,
+   "words": [
+    {
+     "text": "Stop",
+     "start": 0.069,
+     "end": 0.417
+    },
+    {
+     "text": "Did",
+     "start": 0.799,
+     "end": 0.891
+    },
+    {
+     "text": "you",
+     "start": 0.903,
+     "end": 0.972
+    },
+    {
+     "text": "find",
+     "start": 0.984,
+     "end": 1.215
+    },
+    {
+     "text": "him",
+     "start": 1.227,
+     "end": 1.354
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_2.mp3",
+   "duration": 1.08,
+   "words": [
+    {
+     "text": "Let's",
+     "start": 0.093,
+     "end": 0.231
+    },
+    {
+     "text": "rewind",
+     "start": 0.243,
+     "end": 0.741
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_3.mp3",
+   "duration": 3.29,
+   "words": [
+    {
+     "text": "First",
+     "start": 0.139,
+     "end": 0.451
+    },
+    {
+     "text": "a",
+     "start": 0.706,
+     "end": 0.729
+    },
+    {
+     "text": "man",
+     "start": 0.741,
+     "end": 1.007
+    },
+    {
+     "text": "bumps",
+     "start": 1.018,
+     "end": 1.319
+    },
+    {
+     "text": "into",
+     "start": 1.331,
+     "end": 1.516
+    },
+    {
+     "text": "her",
+     "start": 1.528,
+     "end": 1.806
+    },
+    {
+     "text": "and",
+     "start": 1.968,
+     "end": 2.025
+    },
+    {
+     "text": "spills",
+     "start": 2.037,
+     "end": 2.384
+    },
+    {
+     "text": "his",
+     "start": 2.396,
+     "end": 2.512
+    },
+    {
+     "text": "coffee",
+     "start": 2.523,
+     "end": 2.928
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_4.mp3",
+   "duration": 3.22,
+   "words": [
+    {
+     "text": "While",
+     "start": 0.104,
+     "end": 0.197
+    },
+    {
+     "text": "she",
+     "start": 0.208,
+     "end": 0.347
+    },
+    {
+     "text": "cleans",
+     "start": 0.359,
+     "end": 0.66
+    },
+    {
+     "text": "it",
+     "start": 0.671,
+     "end": 0.741
+    },
+    {
+     "text": "up",
+     "start": 0.752,
+     "end": 0.949
+    },
+    {
+     "text": "a",
+     "start": 1.227,
+     "end": 1.262
+    },
+    {
+     "text": "second",
+     "start": 1.273,
+     "end": 1.62
+    },
+    {
+     "text": "man",
+     "start": 1.632,
+     "end": 1.863
+    },
+    {
+     "text": "reaches",
+     "start": 1.875,
+     "end": 2.211
+    },
+    {
+     "text": "into",
+     "start": 2.222,
+     "end": 2.384
+    },
+    {
+     "text": "her",
+     "start": 2.396,
+     "end": 2.512
+    },
+    {
+     "text": "bag",
+     "start": 2.523,
+     "end": 2.87
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_5.mp3",
+   "duration": 2.45,
+   "words": [
+    {
+     "text": "That's",
+     "start": 0.104,
+     "end": 0.231
+    },
+    {
+     "text": "the",
+     "start": 0.243,
+     "end": 0.324
+    },
+    {
+     "text": "pickpocket",
+     "start": 0.336,
+     "end": 0.891
+    },
+    {
+     "text": "But",
+     "start": 1.285,
+     "end": 1.366
+    },
+    {
+     "text": "watch",
+     "start": 1.377,
+     "end": 1.586
+    },
+    {
+     "text": "his",
+     "start": 1.597,
+     "end": 1.713
+    },
+    {
+     "text": "hand",
+     "start": 1.725,
+     "end": 2.106
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_6.mp3",
+   "duration": 3.07,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.116,
+     "end": 0.185
+    },
+    {
+     "text": "slips",
+     "start": 0.197,
+     "end": 0.486
+    },
+    {
+     "text": "the",
+     "start": 0.498,
+     "end": 0.59
+    },
+    {
+     "text": "wallet",
+     "start": 0.602,
+     "end": 0.903
+    },
+    {
+     "text": "to",
+     "start": 0.914,
+     "end": 1.053
+    },
+    {
+     "text": "a",
+     "start": 1.065,
+     "end": 1.123
+    },
+    {
+     "text": "third",
+     "start": 1.134,
+     "end": 1.447
+    },
+    {
+     "text": "man",
+     "start": 1.458,
+     "end": 1.759
+    },
+    {
+     "text": "who",
+     "start": 2.049,
+     "end": 2.13
+    },
+    {
+     "text": "walks",
+     "start": 2.141,
+     "end": 2.419
+    },
+    {
+     "text": "away",
+     "start": 2.431,
+     "end": 2.72
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_7.mp3",
+   "duration": 2.04,
+   "words": [
+    {
+     "text": "Three",
+     "start": 0.127,
+     "end": 0.255
+    },
+    {
+     "text": "strangers",
+     "start": 0.266,
+     "end": 0.88
+    },
+    {
+     "text": "One",
+     "start": 1.262,
+     "end": 1.377
+    },
+    {
+     "text": "team",
+     "start": 1.389,
+     "end": 1.69
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_8.mp3",
+   "duration": 3.34,
+   "words": [
+    {
+     "text": "If",
+     "start": 0.104,
+     "end": 0.185
+    },
+    {
+     "text": "someone",
+     "start": 0.197,
+     "end": 0.486
+    },
+    {
+     "text": "spills",
+     "start": 0.498,
+     "end": 0.822
+    },
+    {
+     "text": "on",
+     "start": 0.833,
+     "end": 0.949
+    },
+    {
+     "text": "you",
+     "start": 0.961,
+     "end": 1.076
+    },
+    {
+     "text": "in",
+     "start": 1.088,
+     "end": 1.215
+    },
+    {
+     "text": "a",
+     "start": 1.227,
+     "end": 1.273
+    },
+    {
+     "text": "crowd",
+     "start": 1.285,
+     "end": 1.736
+    },
+    {
+     "text": "grab",
+     "start": 1.979,
+     "end": 2.187
+    },
+    {
+     "text": "your",
+     "start": 2.199,
+     "end": 2.292
+    },
+    {
+     "text": "bag",
+     "start": 2.303,
+     "end": 2.535
+    },
+    {
+     "text": "first",
+     "start": 2.546,
+     "end": 2.986
+    }
+   ]
+  },
+  {
+   "file": "narration/pickpocket-station/line_9.mp3",
+   "duration": 2.83,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.104,
+     "end": 0.197
+    },
+    {
+     "text": "one",
+     "start": 0.208,
+     "end": 0.336
+    },
+    {
+     "text": "more",
+     "start": 0.347,
+     "end": 0.509
+    },
+    {
+     "text": "person",
+     "start": 0.521,
+     "end": 0.868
+    },
+    {
+     "text": "was",
+     "start": 0.88,
+     "end": 1.018
+    },
+    {
+     "text": "in",
+     "start": 1.03,
+     "end": 1.111
+    },
+    {
+     "text": "on",
+     "start": 1.123,
+     "end": 1.308
+    },
+    {
+     "text": "it",
+     "start": 1.319,
+     "end": 1.481
+    },
+    {
+     "text": "Who's",
+     "start": 1.887,
+     "end": 2.014
+    },
+    {
+     "text": "the",
+     "start": 2.025,
+     "end": 2.095
+    },
+    {
+     "text": "lookout",
+     "start": 2.107,
+     "end": 2.488
+    }
+   ]
+  }
+ ]
+}

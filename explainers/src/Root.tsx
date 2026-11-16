@@ -29,6 +29,9 @@ import wojtekTiming from '../episodes/wojtek-the-bear.timing.json';
 import {WhatIf} from './whatif/WhatIf';
 import asteroidEp from '../episodes/asteroid-missed.json';
 import asteroidTiming from '../episodes/asteroid-missed.timing.json';
+import {Observe} from './observe/Observe';
+import pickpocketEp from '../episodes/pickpocket-station.json';
+import pickpocketTiming from '../episodes/pickpocket-station.timing.json';
 import {Horde} from './horde/Horde';
 import {totalFrames as hordeFrames, HordeEpisode} from './horde/timeline';
 import gorillaEp from '../episodes/gorilla-vs-100-men.json';
@@ -151,6 +154,15 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: asteroidEp as StoryEpisode, timing: asteroidTiming as FightTiming}}
       durationInFrames={storyFrames(asteroidEp as StoryEpisode, asteroidTiming as FightTiming)}
+    />
+    <Composition
+      id="ObservePickpocket"
+      component={Observe}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: pickpocketEp as StoryEpisode, timing: pickpocketTiming as FightTiming}}
+      durationInFrames={storyFrames(pickpocketEp as StoryEpisode, pickpocketTiming as FightTiming)}
     />
     <Composition
       id="StoryWojtek"

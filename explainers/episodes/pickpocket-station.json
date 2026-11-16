@@ -1,0 +1,29 @@
+{
+  "id": "pickpocket-station",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+8%",
+  "title": "Observation test: find the pickpocket",
+  "hot": ["600", "pickpocket", "15", "stop", "rewind", "coffee", "bag", "wallet", "team", "lookout"],
+  "lines": [
+    {"text": "600 people. One pickpocket. 15 seconds. Find him.", "scene": "station", "chapter": "OBSERVATION TEST", "note": "",
+      "events": [{"cue": "Find", "kind": "go"}]},
+    {"text": "Stop! Did you find him?", "scene": "station", "chapter": "TIME'S UP", "note": "", "pause": 15.0,
+      "events": [{"cue": "Stop", "kind": "stop"}]},
+    {"text": "Let's rewind.", "scene": "station", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "rewind", "kind": "rewind"}]},
+    {"text": "First, a man bumps into her and spills his coffee.", "scene": "station", "chapter": "REPLAY", "note": "Police warn about this exact distraction",
+      "events": [{"cue": "spills", "kind": "spill"}]},
+    {"text": "While she cleans it up, a second man reaches into her bag.", "scene": "station", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "reaches", "kind": "dip"}]},
+    {"text": "That's the pickpocket. But watch his hand.", "scene": "station", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "pickpocket", "kind": "thief"}, {"cue": "hand", "kind": "hand"}]},
+    {"text": "He slips the wallet to a third man, who walks away.", "scene": "station", "chapter": "REPLAY", "note": "Teams pass it on fast, so the thief is clean",
+      "events": [{"cue": "slips", "kind": "pass"}, {"cue": "walks", "kind": "exit"}]},
+    {"text": "Three strangers. One team.", "scene": "station", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "strangers", "kind": "three"}, {"cue": "team", "kind": "team"}]},
+    {"text": "If someone spills on you in a crowd, grab your bag first.", "scene": "station", "chapter": "STAY SAFE", "note": "Police advice: hold your things, then clean up", "pause": 0.1,
+      "events": [{"cue": "grab", "kind": "tip"}]},
+    {"text": "But one more person was in on it. Who's the lookout?", "scene": "station", "chapter": "ONE MORE", "note": "", "pause": 0.15,
+      "events": [{"cue": "lookout", "kind": "lookout"}]}
+  ]
+}
