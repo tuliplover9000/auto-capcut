@@ -20,7 +20,7 @@ const W = 1080;
 const H = 1920;
 const FLOOR = 760;
 const SEARCH = 12;
-const N_EXTRAS = 42;
+const N_EXTRAS = 115;
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
@@ -122,9 +122,32 @@ const PROPS = [
   {x: 70, y: 1180, r: 50, el: <Planter />, key: 'pl1'},
   {x: 990, y: 1470, r: 50, el: <Planter />, key: 'pl2'},
 ];
+/* decoys (red herrings): another kid with an ice cream, another dog on a leash, another flock */
+const DKID: [number, number] = [230, 985];
+const DFLOCK: [number, number] = [880, 1370];
+const dOwnerX = (w: number) => 520 + 11 * w;
+const DECOY_BIRDS = Array.from({length: 6}).map((_, i) => ({x: DFLOCK[0] + (rnd(i * 4.4 + 50) - 0.5) * 110, y: DFLOCK[1] + (rnd(i * 6.6 + 50) - 0.5) * 44, flip: rnd(i * 2.2 + 50) < 0.5}));
+const LOOK_DKID: Look = {shirt: '#3fa7ff', pants: '#5a4a3a', skin: '#a86e45', hair: '#1b1b22', hairStyle: 0, hat: 'cap', hatCol: '#e8505b'};
+const LOOK_DOWNER: Look = {shirt: '#2fb5a4', pants: '#2a3a5a', skin: '#f3d6bd', hair: '#c98f3a', hairStyle: 3};
+const decoysAt = (w: number): Ent[] => {
+  const ox = dOwnerX(w);
+  const k = kAt(1530);
+  return [
+    {x: DKID[0], y: DKID[1], key: 'dkid', sc: 0.74, el: <Person L={LOOK_DKID} p={{facing: 'front', cone: true, bob: Math.sin(w * 2.4) * 0.8}} />},
+    {x: ox, y: 1530, key: 'downer', el: <Person L={LOOK_DOWNER} p={{facing: 'side', walk: w * 6, reach: 0.35}} />},
+    {x: ox + 64, y: 1540, key: 'ddog', el: (
+      <g>
+        <path d={`M ${10 - 64 / k} ${-24 - 10 / k} Q ${(10 - 64 / k + 11) / 2} ${-4} 11 -20`} fill="none" stroke="#2a8a5a" strokeWidth={2.2} />
+        <g transform="scale(0.9)"><Dog run={w * 6} wag={w * 12} /></g>
+      </g>
+    )},
+    ...DECOY_BIRDS.map((b, i) => ({x: b.x, y: b.y, key: `dbird${i}`, el: <g transform={`scale(${b.flip ? -1 : 1} 1)`}><Pigeon peck={w * 5 + i * 1.7} /></g>})),
+  ];
+};
 const KEEP_OUT: [number, number, number][] = [
-  [MAN[0], MAN[1], 80], [LAD[0], LAD[1], 70], [CART[0], CART[1], 130], [FLOCK[0], FLOCK[1], 95], [KID[0], KID[1], 70],
-  [ownerX(0), 1330, 80], [300, 1300, 60], [370, 1260, 60], [480, 1180, 60], [620, 870, 70], [780, 800, 70],
+  [MAN[0], MAN[1], 70], [LAD[0], LAD[1], 60], [CART[0], CART[1], 115], [FLOCK[0], FLOCK[1], 80], [KID[0], KID[1], 60],
+  [ownerX(0), 1330, 70], [300, 1300, 50], [370, 1260, 50], [480, 1180, 50], [620, 870, 60], [780, 800, 60],
+  [DKID[0], DKID[1], 55], [DFLOCK[0], DFLOCK[1], 75], [480, 1535, 70], [580, 1535, 70], [680, 1535, 70], [760, 1535, 70],
   ...PROPS.map((p) => [p.x, p.y, p.r] as [number, number, number]),
 ];
 type Extra = {look: Look; x: number; y: number; v: number; facing: 'front' | 'back' | 'side'; flip: boolean; phone: boolean; walk: boolean};
@@ -134,11 +157,11 @@ const EXTRAS: Extra[] = (() => {
     const x = 40 + rnd(c * 7.13) * 1000;
     const y = FLOOR + 40 + rnd(c * 3.71 + 0.5) * 1000;
     const k = kAt(y);
-    if (KEEP_OUT.some(([px, py, r]) => Math.hypot(px - x, (py - y) * 1.3) < r + 20 * k)) continue;
-    if (out.some((o) => Math.hypot(o.x - x, (o.y - y) * 1.6) < 92 * k)) continue;
+    if (KEEP_OUT.some(([px, py, r]) => Math.hypot(px - x, (py - y) * 1.3) < r + 8 * k)) continue;
+    if (out.some((o) => Math.hypot(o.x - x, (o.y - y) * 1.6) < 58 * k)) continue;
     const i = out.length;
     const r = (j: number) => rnd(i * 17.3 + j * 3.7);
-    const walk = y > 1430 && r(12) < 0.45;
+    const walk = (y > 1600 || (y > 1010 && y < 1065)) && r(12) < 0.55;
     const look: Look = {
       shirt: pick(SHIRTS, r(1)), pants: pick(PANTS, r(2)), skin: pick(SKINS, r(3)), hair: pick(HAIRS, r(4)),
       hairStyle: (Math.floor(r(5) * 4) % 4) as 0 | 1 | 2 | 3, hat: r(6) < 0.15 ? 'cap' : null, hatCol: pick(['#1b1b22', '#c8504a', '#2f4a6a'], r(7)),
@@ -237,7 +260,7 @@ export const Chain: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episod
   shot(tGo + T_SPLAT - 0.05, 0.12, {x: 820, y: 800, z: 1.5});
   shot(tLate, 0.5, {x: 540, y: 960, z: 1.0});
   shot(LS[3], 0.6, {x: 860, y: 760, z: 1.85});
-  shot(LS[4] - 0.1, 0.6, {x: 640, y: 870, z: 1.45});
+  shot(LS[4] - 0.1, 0.6, {x: 640, y: 790, z: 1.45});
   shot(LS[5] - 0.1, 0.6, {x: 420, y: 1210, z: 2.1});
   shot(LS[6] - 0.1, 0.6, {x: 380, y: 1230, z: 1.75});
   shot(LS[7] - 0.1, 0.6, {x: 525, y: 1080, z: 3.0});
@@ -284,7 +307,7 @@ export const Chain: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episod
 
   const hw = 540 / cam.z + 120;
   const hh = 960 / cam.z + 160;
-  const ents: Ent[] = [...extrasAt(w), kid, owner, dog, man, ladder, cart, ...(coneEnt ? [coneEnt] : []), ...groundBirds,
+  const ents: Ent[] = [...extrasAt(w), ...decoysAt(w), kid, owner, dog, man, ladder, cart, ...(coneEnt ? [coneEnt] : []), ...groundBirds,
     ...PROPS.map((p) => ({x: p.x, y: p.y, key: p.key, el: p.el}))]
     .filter((e) => Math.abs(e.x - cam.x) < hw && e.y > cam.y - hh && e.y - 400 < cam.y + hh)
     .sort((a, b) => a.y - b.y);
