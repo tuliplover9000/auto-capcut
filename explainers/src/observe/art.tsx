@@ -44,7 +44,12 @@ export type Pose = {
   stain?: number;     // 0..1 coffee stain on the shirt
   bob?: number;       // idle bob in px
   alert?: number;     // 0..1 "!" above the head
+  cone?: boolean;     // ice-cream cone in the front hand (arm raised)
+  paint?: number;     // 0..1 covered in blue paint from the head down
+  mouthO?: boolean;   // shocked "O" mouth (front/side)
+  flail?: number;     // phase: both arms waving wildly
 };
+export const PAINT = '#2f7bff';
 
 const legs = (p: Pose, L: Look) => {
   const ph = p.walk;
@@ -102,7 +107,10 @@ export const Person: React.FC<{L: Look; p: Pose}> = ({L, p}) => {
   if (p.phone) frontDeg = frontDeg * (1 - p.phone) + 150 * p.phone;
   if (p.wipe !== undefined) frontDeg = 42 + Math.sin(p.wipe) * 14; // hand rubbing the stain on the chest
   if (p.ear) frontDeg = frontDeg * (1 - p.ear) + 165 * p.ear;
-  const backDeg = side ? -sw * 30 : 0;
+  if (p.cone) frontDeg = 55;
+  if (p.flail !== undefined) frontDeg = 140 + Math.sin(p.flail) * 35;
+  let backDeg = side ? -sw * 30 : 0;
+  if (p.flail !== undefined) backDeg = side ? 150 + Math.cos(p.flail * 1.3) * 35 : -(140 + Math.cos(p.flail * 1.3) * 35);
   const head = (
     <g>
       <circle cx={0} cy={-49} r={9.5} fill={L.skin} />
@@ -144,12 +152,14 @@ export const Person: React.FC<{L: Look; p: Pose}> = ({L, p}) => {
           <>
             <circle cx={5} cy={-48.5} r={1.5} fill={OPAL.ink} />
             {L.shades ? <rect x={1.5} y={-50.5} width={8} height={4} rx={1.5} fill={OPAL.ink} /> : null}
+            {p.mouthO ? <ellipse cx={6.5} cy={-43.2} rx={1.6} ry={2.2} fill={OPAL.ink} /> : null}
           </>
         ) : (
           <>
             <circle cx={-3.4} cy={-48} r={1.5} fill={OPAL.ink} />
             <circle cx={3.4} cy={-48} r={1.5} fill={OPAL.ink} />
             {L.shades ? <><rect x={-7.5} y={-50.5} width={6.4} height={4.2} rx={1.5} fill={OPAL.ink} /><rect x={1.1} y={-50.5} width={6.4} height={4.2} rx={1.5} fill={OPAL.ink} /><rect x={-1.5} y={-49.5} width={3} height={1.2} fill={OPAL.ink} /></> : null}
+            {p.mouthO ? <ellipse cx={0} cy={-43} rx={2} ry={2.6} fill={OPAL.ink} /> : null}
           </>
         )
       ) : null}
@@ -185,6 +195,12 @@ export const Person: React.FC<{L: Look; p: Pose}> = ({L, p}) => {
   const frontArm = (
     <Arm x={side ? 1 : bw - 1} y={-36} deg={side ? frontDeg : Math.min(frontDeg, 175)} col={sleeve} skin={L.skin} len={L.coat ? 18 : 16}>
       {p.wallet ? <Wallet /> : null}
+      {p.cone ? (
+        <g transform="rotate(55)">
+          <path d="M -3.4 -1 L 3.4 -1 L 0 9 Z" fill="#e0a860" stroke="#b07830" strokeWidth={0.6} />
+          <circle cx={0} cy={-4} r={4.4} fill="#ff8fc0" />
+        </g>
+      ) : null}
       {p.cup ? <Cup tilt={p.spill ?? 0} /> : null}
       {p.phone && p.phone > 0.5 ? <g transform="rotate(90)"><rect x={-3} y={-5} width={6} height={10} rx={1.2} fill={OPAL.ink} /></g> : null}
     </Arm>
@@ -202,6 +218,15 @@ export const Person: React.FC<{L: Look; p: Pose}> = ({L, p}) => {
       {back ? backpack : null}
       {!side ? backArm : null}
       {head}
+      {p.paint ? (
+        <g opacity={Math.min(1, p.paint * 2)}>
+          <path d="M -10.6 -48 A 10.6 10.6 0 0 1 10.6 -48 Z" fill={PAINT} />
+          {[-10, -5, 6, 10].map((x, k) => <rect key={x} x={x - 1.8} y={-49} width={3.6} height={(4 + (k % 2) * 4) * (p.paint ?? 0) + 2} rx={1.8} fill={PAINT} />)}
+          <ellipse cx={-bw + 2} cy={-38} rx={5} ry={3.2 * p.paint} fill={PAINT} />
+          <ellipse cx={bw - 2} cy={-38} rx={5} ry={3.2 * p.paint} fill={PAINT} />
+          {[-6, 1, 7].map((x, k) => <rect key={x} x={x - 1.6} y={-39} width={3.2} height={(5 + k * 3) * (p.paint ?? 0)} rx={1.6} fill={PAINT} />)}
+        </g>
+      ) : null}
       {tote}
       {!back && !side ? suitcase : null}
       {back ? null : null}

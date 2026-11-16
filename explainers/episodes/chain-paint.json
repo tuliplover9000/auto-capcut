@@ -1,0 +1,29 @@
+{
+  "id": "chain-paint",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+8%",
+  "title": "Chain reaction: find what starts it",
+  "hot": ["12", "paint", "starts", "late", "back", "ladder", "umbrella", "pigeons", "dog", "ice", "kid", "blue"],
+  "lines": [
+    {"text": "In 12 seconds, this guy gets covered in paint. Find what starts it.", "scene": "plaza", "chapter": "CHAIN REACTION", "note": "",
+      "events": [{"cue": "guy", "kind": "arrow"}, {"cue": "starts", "kind": "go"}]},
+    {"text": "Too late! Did you catch it?", "scene": "plaza", "chapter": "TIME'S UP", "note": "", "pause": 12.0,
+      "events": [{"cue": "late", "kind": "late"}]},
+    {"text": "Let's trace it back.", "scene": "plaza", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "back", "kind": "rewind"}]},
+    {"text": "The paint fell because the ladder got hit.", "scene": "plaza", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "paint", "kind": "l6"}, {"cue": "hit", "kind": "l5"}]},
+    {"text": "Hit by an umbrella, knocked over by pigeons.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.3,
+      "events": [{"cue": "umbrella", "kind": "l4"}, {"cue": "pigeons", "kind": "l3"}]},
+    {"text": "The pigeons were scared off by a dog.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.3,
+      "events": [{"cue": "scared", "kind": "scared"}, {"cue": "dog", "kind": "l2"}]},
+    {"text": "And the dog was chasing an ice cream.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.3,
+      "events": [{"cue": "chasing", "kind": "chasing"}, {"cue": "ice", "kind": "l1"}]},
+    {"text": "Dropped by this kid.", "scene": "plaza", "chapter": "IT STARTED HERE", "note": "", "pause": 0.35,
+      "events": [{"cue": "Dropped", "kind": "drop"}, {"cue": "kid", "kind": "kid"}]},
+    {"text": "One ice cream. Six disasters.", "scene": "plaza", "chapter": "THE CHAIN", "note": "", "pause": 0.5,
+      "events": [{"cue": "One", "kind": "map"}, {"cue": "Six", "kind": "six"}]},
+    {"text": "And one very blue guy.", "scene": "plaza", "chapter": "THE CHAIN", "note": "", "pause": 0.1,
+      "events": [{"cue": "blue", "kind": "blue"}]}
+  ]
+}
