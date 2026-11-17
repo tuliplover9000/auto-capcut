@@ -1,0 +1,31 @@
+{
+  "id": "chain-party",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "title": "Chain reaction HARD MODE: find what starts it (10 links)",
+  "hot": ["15", "cake", "smashed", "starts", "late", "back", "kite", "owner", "bucket", "seesaw", "jogger", "ball", "kid", "goose", "sprinkler", "here", "half", "ten", "happy", "birthday"],
+  "lines": [
+    {"text": "In 15 seconds, this cake gets smashed. Find what starts it.", "scene": "park", "chapter": "CHAIN REACTION", "note": "",
+      "events": [{"cue": "cake", "kind": "arrow"}, {"cue": "starts", "kind": "go"}]},
+    {"text": "Too late! Did you catch it?", "scene": "park", "chapter": "TIME'S UP", "note": "", "pause": 15.0,
+      "events": [{"cue": "late", "kind": "late"}]},
+    {"text": "Let's trace it back.", "scene": "park", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "back", "kind": "rewind"}]},
+    {"text": "The cake got smashed by a falling kite.", "scene": "park", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "smashed", "kind": "l10"}, {"cue": "kite", "kind": "l9"}]},
+    {"text": "Its owner let go, blinded by a bucket.", "scene": "park", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "owner", "kind": "l8"}, {"cue": "bucket", "kind": "l7"}]},
+    {"text": "The bucket flew off a seesaw, hit by a jogger.", "scene": "park", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "seesaw", "kind": "l6"}, {"cue": "jogger", "kind": "l5"}]},
+    {"text": "He tripped on a ball, kicked by a kid.", "scene": "park", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "ball", "kind": "l4"}, {"cue": "kid", "kind": "l3"}]},
+    {"text": "The kid ran from a goose, soaked by a sprinkler.", "scene": "park", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "goose", "kind": "l2"}, {"cue": "sprinkler", "kind": "l1"}]},
+    {"text": "It started way up here, in the first half second.", "scene": "park", "chapter": "IT STARTED HERE", "note": "", "pause": 0.3,
+      "events": [{"cue": "here", "kind": "here"}, {"cue": "half", "kind": "first"}]},
+    {"text": "Ten links, while you watched the cake.", "scene": "park", "chapter": "THE CHAIN", "note": "", "pause": 0.4,
+      "events": [{"cue": "Ten", "kind": "map"}, {"cue": "cake", "kind": "ten"}]},
+    {"text": "Happy birthday.", "scene": "park", "chapter": "THE CHAIN", "note": "", "pause": 0.3,
+      "events": [{"cue": "Happy", "kind": "bday"}]}
+  ]
+}

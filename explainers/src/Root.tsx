@@ -38,6 +38,9 @@ import chainTiming from '../episodes/chain-paint.timing.json';
 import {Karma} from './chain/Karma';
 import karmaEp from '../episodes/chain-karma.json';
 import karmaTiming from '../episodes/chain-karma.timing.json';
+import {Party} from './chain/Party';
+import partyEp from '../episodes/chain-party.json';
+import partyTiming from '../episodes/chain-party.timing.json';
 import {Blood} from './blood/Blood';
 import bloodEp from '../episodes/blood-spatter.json';
 import bloodTiming from '../episodes/blood-spatter.timing.json';
@@ -181,6 +184,15 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: chainEp as StoryEpisode, timing: chainTiming as FightTiming}}
       durationInFrames={storyFrames(chainEp as StoryEpisode, chainTiming as FightTiming)}
+    />
+    <Composition
+      id="ChainParty"
+      component={Party}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: partyEp as StoryEpisode, timing: partyTiming as FightTiming}}
+      durationInFrames={storyFrames(partyEp as StoryEpisode, partyTiming as FightTiming)}
     />
     <Composition
       id="ChainKarma"
