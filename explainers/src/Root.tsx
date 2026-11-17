@@ -35,6 +35,9 @@ import pickpocketTiming from '../episodes/pickpocket-station.timing.json';
 import {Chain} from './chain/Chain';
 import chainEp from '../episodes/chain-paint.json';
 import chainTiming from '../episodes/chain-paint.timing.json';
+import {Blood} from './blood/Blood';
+import bloodEp from '../episodes/blood-spatter.json';
+import bloodTiming from '../episodes/blood-spatter.timing.json';
 import {Horde} from './horde/Horde';
 import {totalFrames as hordeFrames, HordeEpisode} from './horde/timeline';
 import gorillaEp from '../episodes/gorilla-vs-100-men.json';
@@ -175,6 +178,15 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: chainEp as StoryEpisode, timing: chainTiming as FightTiming}}
       durationInFrames={storyFrames(chainEp as StoryEpisode, chainTiming as FightTiming)}
+    />
+    <Composition
+      id="BloodSpatter"
+      component={Blood}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: bloodEp as StoryEpisode, timing: bloodTiming as FightTiming}}
+      durationInFrames={storyFrames(bloodEp as StoryEpisode, bloodTiming as FightTiming)}
     />
     <Composition
       id="StoryWojtek"

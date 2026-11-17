@@ -1,0 +1,31 @@
+{
+  "id": "blood-spatter",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "title": "Dexter blood spatter: how did they die?",
+  "hot": ["dexter", "die", "round", "tail", "mist", "gunshot", "blow", "curved", "swinging", "zigzag", "heartbeat", "turn", "b", "spot", "twice", "three", "gap", "nine"],
+  "lines": [
+    {"text": "Dexter can look at blood on a wall and know how someone died. Learn the code, then you try.", "scene": "wall", "chapter": "BLOOD SPATTER 101", "note": "",
+      "events": [{"cue": "wall", "kind": "wall"}, {"cue": "code", "kind": "wipe"}]},
+    {"text": "Round drops fell straight down. Long ones hit at an angle, and the tail points where they flew.", "scene": "wall", "chapter": "1 · SHAPE", "note": "",
+      "events": [{"cue": "Round", "kind": "round"}, {"cue": "Long", "kind": "long"}, {"cue": "tail", "kind": "tail"}]},
+    {"text": "Fine mist, under a millimeter? Usually a gunshot.", "scene": "wall", "chapter": "2 · MIST", "note": "", "pause": 0.2,
+      "events": [{"cue": "mist", "kind": "mist"}, {"cue": "gunshot", "kind": "gun"}]},
+    {"text": "Bigger drops, sprayed from one spot? A heavy blow.", "scene": "wall", "chapter": "3 · SPRAY", "note": "", "pause": 0.2,
+      "events": [{"cue": "Bigger", "kind": "spray"}, {"cue": "blow", "kind": "blow"}]},
+    {"text": "A curved line of drops is cast-off, flung from a swinging weapon.", "scene": "wall", "chapter": "4 · CAST-OFF", "note": "", "pause": 0.2,
+      "events": [{"cue": "curved", "kind": "cast"}, {"cue": "swinging", "kind": "swing"}]},
+    {"text": "And zigzag waves are an artery. One wave per heartbeat.", "scene": "wall", "chapter": "5 · ZIGZAG", "note": "", "pause": 0.2,
+      "events": [{"cue": "zigzag", "kind": "zig"}, {"cue": "heartbeat", "kind": "beat"}]},
+    {"text": "Your turn. How did this person die?", "scene": "wall", "chapter": "YOUR TURN", "note": "", "pause": 0.3,
+      "events": [{"cue": "turn", "kind": "test"}, {"cue": "die", "kind": "ask"}]},
+    {"text": "B! A heavy blow. Every drop points back to one spot.", "scene": "wall", "chapter": "THE ANSWER", "note": "", "pause": 6.0,
+      "events": [{"cue": "B", "kind": "answer"}, {"cue": "Every", "kind": "strings"}, {"cue": "spot", "kind": "origin"}]},
+    {"text": "Two cast-off arcs: the weapon swung back twice. The first hit flings nothing, so at least three hits.", "scene": "wall", "chapter": "HOW MANY HITS?", "note": "", "pause": 0.2,
+      "events": [{"cue": "Two", "kind": "arc1"}, {"cue": "twice", "kind": "arc2"}, {"cue": "first", "kind": "first"}, {"cue": "three", "kind": "three"}]},
+    {"text": "And this gap? Someone was standing right there.", "scene": "wall", "chapter": "THE GAP", "note": "", "pause": 0.3,
+      "events": [{"cue": "gap", "kind": "gap"}, {"cue": "standing", "kind": "stood"}]},
+    {"text": "Dexter never gets it wrong. In a 2021 study, real analysts did, about one time in nine.", "scene": "wall", "chapter": "TV VS REAL", "note": "", "pause": 0.3,
+      "events": [{"cue": "never", "kind": "tv"}, {"cue": "study", "kind": "study"}, {"cue": "nine", "kind": "nine"}]}
+  ]
+}

@@ -1,0 +1,755 @@
+{
+ "lines": [
+  {
+   "file": "narration/blood-spatter/line_0.mp3",
+   "duration": 5.64,
+   "words": [
+    {
+     "text": "Dexter",
+     "start": 0.1,
+     "end": 0.438
+    },
+    {
+     "text": "can",
+     "start": 0.45,
+     "end": 0.625
+    },
+    {
+     "text": "look",
+     "start": 0.637,
+     "end": 0.8
+    },
+    {
+     "text": "at",
+     "start": 0.812,
+     "end": 0.9
+    },
+    {
+     "text": "blood",
+     "start": 0.912,
+     "end": 1.175
+    },
+    {
+     "text": "on",
+     "start": 1.188,
+     "end": 1.3
+    },
+    {
+     "text": "a",
+     "start": 1.312,
+     "end": 1.375
+    },
+    {
+     "text": "wall",
+     "start": 1.387,
+     "end": 1.812
+    },
+    {
+     "text": "and",
+     "start": 2.025,
+     "end": 2.15
+    },
+    {
+     "text": "know",
+     "start": 2.163,
+     "end": 2.425
+    },
+    {
+     "text": "how",
+     "start": 2.438,
+     "end": 2.587
+    },
+    {
+     "text": "someone",
+     "start": 2.6,
+     "end": 2.925
+    },
+    {
+     "text": "died",
+     "start": 2.938,
+     "end": 3.3
+    },
+    {
+     "text": "Learn",
+     "start": 3.712,
+     "end": 3.862
+    },
+    {
+     "text": "the",
+     "start": 3.875,
+     "end": 3.95
+    },
+    {
+     "text": "code",
+     "start": 3.962,
+     "end": 4.338
+    },
+    {
+     "text": "then",
+     "start": 4.713,
+     "end": 4.812
+    },
+    {
+     "text": "you",
+     "start": 4.825,
+     "end": 4.9
+    },
+    {
+     "text": "try",
+     "start": 4.912,
+     "end": 5.275
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_1.mp3",
+   "duration": 5.33,
+   "words": [
+    {
+     "text": "Round",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "drops",
+     "start": 0.312,
+     "end": 0.65
+    },
+    {
+     "text": "fell",
+     "start": 0.662,
+     "end": 0.837
+    },
+    {
+     "text": "straight",
+     "start": 0.85,
+     "end": 1.163
+    },
+    {
+     "text": "down",
+     "start": 1.175,
+     "end": 1.488
+    },
+    {
+     "text": "Long",
+     "start": 1.9,
+     "end": 2.15
+    },
+    {
+     "text": "ones",
+     "start": 2.163,
+     "end": 2.4
+    },
+    {
+     "text": "hit",
+     "start": 2.413,
+     "end": 2.65
+    },
+    {
+     "text": "at",
+     "start": 2.663,
+     "end": 2.763
+    },
+    {
+     "text": "an",
+     "start": 2.775,
+     "end": 2.85
+    },
+    {
+     "text": "angle",
+     "start": 2.862,
+     "end": 3.3
+    },
+    {
+     "text": "and",
+     "start": 3.612,
+     "end": 3.662
+    },
+    {
+     "text": "the",
+     "start": 3.675,
+     "end": 3.75
+    },
+    {
+     "text": "tail",
+     "start": 3.763,
+     "end": 4.013
+    },
+    {
+     "text": "points",
+     "start": 4.025,
+     "end": 4.35
+    },
+    {
+     "text": "where",
+     "start": 4.362,
+     "end": 4.462
+    },
+    {
+     "text": "they",
+     "start": 4.475,
+     "end": 4.587
+    },
+    {
+     "text": "flew",
+     "start": 4.6,
+     "end": 4.95
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_2.mp3",
+   "duration": 3.53,
+   "words": [
+    {
+     "text": "Fine",
+     "start": 0.163,
+     "end": 0.363
+    },
+    {
+     "text": "mist",
+     "start": 0.375,
+     "end": 0.775
+    },
+    {
+     "text": "under",
+     "start": 0.988,
+     "end": 1.175
+    },
+    {
+     "text": "a",
+     "start": 1.188,
+     "end": 1.225
+    },
+    {
+     "text": "millimeter",
+     "start": 1.238,
+     "end": 1.788
+    },
+    {
+     "text": "Usually",
+     "start": 2.2,
+     "end": 2.538
+    },
+    {
+     "text": "a",
+     "start": 2.55,
+     "end": 2.612
+    },
+    {
+     "text": "gunshot",
+     "start": 2.625,
+     "end": 3.163
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_3.mp3",
+   "duration": 3.62,
+   "words": [
+    {
+     "text": "Bigger",
+     "start": 0.113,
+     "end": 0.312
+    },
+    {
+     "text": "drops",
+     "start": 0.325,
+     "end": 0.825
+    },
+    {
+     "text": "sprayed",
+     "start": 1.025,
+     "end": 1.35
+    },
+    {
+     "text": "from",
+     "start": 1.363,
+     "end": 1.525
+    },
+    {
+     "text": "one",
+     "start": 1.538,
+     "end": 1.7
+    },
+    {
+     "text": "spot",
+     "start": 1.712,
+     "end": 2.175
+    },
+    {
+     "text": "A",
+     "start": 2.587,
+     "end": 2.625
+    },
+    {
+     "text": "heavy",
+     "start": 2.638,
+     "end": 2.913
+    },
+    {
+     "text": "blow",
+     "start": 2.925,
+     "end": 3.262
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_4.mp3",
+   "duration": 4.37,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.1,
+     "end": 0.163
+    },
+    {
+     "text": "curved",
+     "start": 0.175,
+     "end": 0.537
+    },
+    {
+     "text": "line",
+     "start": 0.55,
+     "end": 0.763
+    },
+    {
+     "text": "of",
+     "start": 0.775,
+     "end": 0.863
+    },
+    {
+     "text": "drops",
+     "start": 0.875,
+     "end": 1.312
+    },
+    {
+     "text": "is",
+     "start": 1.375,
+     "end": 1.5
+    },
+    {
+     "text": "cast-off",
+     "start": 1.512,
+     "end": 2.263
+    },
+    {
+     "text": "flung",
+     "start": 2.525,
+     "end": 2.938
+    },
+    {
+     "text": "from",
+     "start": 2.95,
+     "end": 3.1
+    },
+    {
+     "text": "a",
+     "start": 3.112,
+     "end": 3.162
+    },
+    {
+     "text": "swinging",
+     "start": 3.175,
+     "end": 3.637
+    },
+    {
+     "text": "weapon",
+     "start": 3.65,
+     "end": 4.0
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_5.mp3",
+   "duration": 3.55,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.1,
+     "end": 0.2
+    },
+    {
+     "text": "zigzag",
+     "start": 0.212,
+     "end": 0.725
+    },
+    {
+     "text": "waves",
+     "start": 0.738,
+     "end": 1.013
+    },
+    {
+     "text": "are",
+     "start": 1.025,
+     "end": 1.1
+    },
+    {
+     "text": "an",
+     "start": 1.113,
+     "end": 1.175
+    },
+    {
+     "text": "artery",
+     "start": 1.188,
+     "end": 1.65
+    },
+    {
+     "text": "One",
+     "start": 2.062,
+     "end": 2.263
+    },
+    {
+     "text": "wave",
+     "start": 2.275,
+     "end": 2.5
+    },
+    {
+     "text": "per",
+     "start": 2.513,
+     "end": 2.65
+    },
+    {
+     "text": "heartbeat",
+     "start": 2.663,
+     "end": 3.175
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_6.mp3",
+   "duration": 2.4,
+   "words": [
+    {
+     "text": "Your",
+     "start": 0.1,
+     "end": 0.2
+    },
+    {
+     "text": "turn",
+     "start": 0.212,
+     "end": 0.575
+    },
+    {
+     "text": "How",
+     "start": 0.988,
+     "end": 1.062
+    },
+    {
+     "text": "did",
+     "start": 1.075,
+     "end": 1.2
+    },
+    {
+     "text": "this",
+     "start": 1.212,
+     "end": 1.337
+    },
+    {
+     "text": "person",
+     "start": 1.35,
+     "end": 1.7
+    },
+    {
+     "text": "die",
+     "start": 1.712,
+     "end": 2.038
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_7.mp3",
+   "duration": 4.06,
+   "words": [
+    {
+     "text": "B",
+     "start": 0.113,
+     "end": 0.325
+    },
+    {
+     "text": "A",
+     "start": 0.738,
+     "end": 0.775
+    },
+    {
+     "text": "heavy",
+     "start": 0.787,
+     "end": 1.062
+    },
+    {
+     "text": "blow",
+     "start": 1.075,
+     "end": 1.413
+    },
+    {
+     "text": "Every",
+     "start": 1.825,
+     "end": 2.025
+    },
+    {
+     "text": "drop",
+     "start": 2.038,
+     "end": 2.288
+    },
+    {
+     "text": "points",
+     "start": 2.3,
+     "end": 2.6
+    },
+    {
+     "text": "back",
+     "start": 2.612,
+     "end": 2.887
+    },
+    {
+     "text": "to",
+     "start": 2.9,
+     "end": 3.0
+    },
+    {
+     "text": "one",
+     "start": 3.013,
+     "end": 3.2
+    },
+    {
+     "text": "spot",
+     "start": 3.212,
+     "end": 3.675
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_8.mp3",
+   "duration": 6.62,
+   "words": [
+    {
+     "text": "Two",
+     "start": 0.113,
+     "end": 0.25
+    },
+    {
+     "text": "cast-off",
+     "start": 0.263,
+     "end": 0.75
+    },
+    {
+     "text": "arcs",
+     "start": 0.762,
+     "end": 1.225
+    },
+    {
+     "text": "the",
+     "start": 1.488,
+     "end": 1.588
+    },
+    {
+     "text": "weapon",
+     "start": 1.6,
+     "end": 1.9
+    },
+    {
+     "text": "swung",
+     "start": 1.913,
+     "end": 2.238
+    },
+    {
+     "text": "back",
+     "start": 2.25,
+     "end": 2.525
+    },
+    {
+     "text": "twice",
+     "start": 2.538,
+     "end": 3.138
+    },
+    {
+     "text": "The",
+     "start": 3.562,
+     "end": 3.612
+    },
+    {
+     "text": "first",
+     "start": 3.625,
+     "end": 3.95
+    },
+    {
+     "text": "hit",
+     "start": 3.962,
+     "end": 4.1
+    },
+    {
+     "text": "flings",
+     "start": 4.112,
+     "end": 4.4
+    },
+    {
+     "text": "nothing",
+     "start": 4.412,
+     "end": 4.787
+    },
+    {
+     "text": "so",
+     "start": 5.088,
+     "end": 5.25
+    },
+    {
+     "text": "at",
+     "start": 5.263,
+     "end": 5.35
+    },
+    {
+     "text": "least",
+     "start": 5.362,
+     "end": 5.587
+    },
+    {
+     "text": "three",
+     "start": 5.6,
+     "end": 5.775
+    },
+    {
+     "text": "hits",
+     "start": 5.787,
+     "end": 6.25
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_9.mp3",
+   "duration": 2.71,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.1,
+     "end": 0.175
+    },
+    {
+     "text": "this",
+     "start": 0.188,
+     "end": 0.338
+    },
+    {
+     "text": "gap",
+     "start": 0.35,
+     "end": 0.688
+    },
+    {
+     "text": "Someone",
+     "start": 1.1,
+     "end": 1.35
+    },
+    {
+     "text": "was",
+     "start": 1.363,
+     "end": 1.488
+    },
+    {
+     "text": "standing",
+     "start": 1.5,
+     "end": 1.85
+    },
+    {
+     "text": "right",
+     "start": 1.863,
+     "end": 2.05
+    },
+    {
+     "text": "there",
+     "start": 2.062,
+     "end": 2.35
+    }
+   ]
+  },
+  {
+   "file": "narration/blood-spatter/line_10.mp3",
+   "duration": 6.5,
+   "words": [
+    {
+     "text": "Dexter",
+     "start": 0.1,
+     "end": 0.387
+    },
+    {
+     "text": "never",
+     "start": 0.4,
+     "end": 0.613
+    },
+    {
+     "text": "gets",
+     "start": 0.625,
+     "end": 0.812
+    },
+    {
+     "text": "it",
+     "start": 0.825,
+     "end": 0.925
+    },
+    {
+     "text": "wrong",
+     "start": 0.938,
+     "end": 1.238
+    },
+    {
+     "text": "In",
+     "start": 1.65,
+     "end": 1.725
+    },
+    {
+     "text": "a",
+     "start": 1.738,
+     "end": 1.788
+    },
+    {
+     "text": "2021",
+     "start": 1.8,
+     "end": 2.587
+    },
+    {
+     "text": "study",
+     "start": 2.6,
+     "end": 3.025
+    },
+    {
+     "text": "real",
+     "start": 3.3,
+     "end": 3.625
+    },
+    {
+     "text": "analysts",
+     "start": 3.725,
+     "end": 4.213
+    },
+    {
+     "text": "did",
+     "start": 4.225,
+     "end": 4.537
+    },
+    {
+     "text": "about",
+     "start": 4.85,
+     "end": 5.175
+    },
+    {
+     "text": "one",
+     "start": 5.188,
+     "end": 5.4
+    },
+    {
+     "text": "time",
+     "start": 5.412,
+     "end": 5.675
+    },
+    {
+     "text": "in",
+     "start": 5.688,
+     "end": 5.787
+    },
+    {
+     "text": "nine",
+     "start": 5.8,
+     "end": 6.125
+    }
+   ]
+  }
+ ]
+}
