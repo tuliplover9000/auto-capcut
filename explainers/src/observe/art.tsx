@@ -48,6 +48,7 @@ export type Pose = {
   paint?: number;     // 0..1 covered in blue paint from the head down
   mouthO?: boolean;   // shocked "O" mouth (front/side)
   flail?: number;     // phase: both arms waving wildly
+  banana?: number;    // 1 = holding a banana peel up in the front hand; >1 = swinging up to toss (1..2)
 };
 export const PAINT = '#2f7bff';
 
@@ -108,6 +109,7 @@ export const Person: React.FC<{L: Look; p: Pose}> = ({L, p}) => {
   if (p.wipe !== undefined) frontDeg = 42 + Math.sin(p.wipe) * 14; // hand rubbing the stain on the chest
   if (p.ear) frontDeg = frontDeg * (1 - p.ear) + 165 * p.ear;
   if (p.cone) frontDeg = 55;
+  if (p.banana) frontDeg = 55 + Math.max(0, p.banana - 1) * 95;
   if (p.flail !== undefined) frontDeg = 140 + Math.sin(p.flail) * 35;
   let backDeg = side ? -sw * 30 : 0;
   if (p.flail !== undefined) backDeg = side ? 150 + Math.cos(p.flail * 1.3) * 35 : -(140 + Math.cos(p.flail * 1.3) * 35);
@@ -202,6 +204,12 @@ export const Person: React.FC<{L: Look; p: Pose}> = ({L, p}) => {
         </g>
       ) : null}
       {p.cup ? <Cup tilt={p.spill ?? 0} /> : null}
+      {p.banana && p.banana < 2 ? (
+        <g transform="rotate(55)">
+          <path d="M -1.5 -2 Q -6 -9 -5 -13 Q -2 -8 0 -6 Q 1 -11 4 -14 Q 4 -8 1.6 -2 Z" fill="#ffd84a" stroke="#b8902a" strokeWidth={0.6} />
+          <rect x={-2} y={-2} width={4} height={6} rx={1.5} fill="#ffd84a" stroke="#b8902a" strokeWidth={0.6} />
+        </g>
+      ) : null}
       {p.phone && p.phone > 0.5 ? <g transform="rotate(90)"><rect x={-3} y={-5} width={6} height={10} rx={1.2} fill={OPAL.ink} /></g> : null}
     </Arm>
   );

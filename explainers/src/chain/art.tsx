@@ -5,11 +5,9 @@ import {OPAL, PAINT} from '../observe/art';
 // (0,0), facing right; the scene scales each by the perspective factor.
 
 /* a small dog, side view. run = phase (undefined = standing), wag = phase */
-export const Dog: React.FC<{run?: number; wag: number; eat?: boolean}> = ({run, wag, eat}) => {
+export const Dog: React.FC<{run?: number; wag: number; eat?: boolean; fur?: string; dark?: string}> = ({run, wag, eat, fur = '#c98f3a', dark = '#9a6a2a'}) => {
   const sw = run === undefined ? 0 : Math.sin(run);
   const lift = run === undefined ? 0 : Math.abs(Math.cos(run)) * 3;
-  const fur = '#c98f3a';
-  const dark = '#9a6a2a';
   return (
     <g transform={`translate(0 ${-lift})`}>
       <ellipse cx={0} cy={lift} rx={22} ry={4} fill="rgba(0,0,0,.18)" />

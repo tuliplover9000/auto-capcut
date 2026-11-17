@@ -1,0 +1,31 @@
+{
+  "id": "chain-karma",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "title": "Chain reaction: find what starts it (10 links)",
+  "hot": ["15", "fountain", "starts", "late", "back", "bike", "dog", "tray", "waiter", "orange", "stand", "skateboard", "skater", "banana", "same", "ten", "karma", "twelve"],
+  "lines": [
+    {"text": "In 15 seconds, this guy ends up in the fountain. Find what starts it.", "scene": "plaza", "chapter": "CHAIN REACTION", "note": "",
+      "events": [{"cue": "guy", "kind": "arrow"}, {"cue": "starts", "kind": "go"}]},
+    {"text": "Too late! Did you catch it?", "scene": "plaza", "chapter": "TIME'S UP", "note": "", "pause": 15.0,
+      "events": [{"cue": "late", "kind": "late"}]},
+    {"text": "Let's trace it back.", "scene": "plaza", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "back", "kind": "rewind"}]},
+    {"text": "He fell in because a bike hit him.", "scene": "plaza", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "fell", "kind": "l10"}, {"cue": "bike", "kind": "l9"}]},
+    {"text": "The bike swerved for a dog, scared by a flying tray.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "dog", "kind": "l8"}, {"cue": "tray", "kind": "l7"}]},
+    {"text": "The waiter dropped it, slipping on an orange.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "waiter", "kind": "l6"}, {"cue": "orange", "kind": "l5"}]},
+    {"text": "The oranges fell off a stand, hit by a skateboard.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "stand", "kind": "l4"}, {"cue": "skateboard", "kind": "l3"}]},
+    {"text": "The skater slipped on a banana peel.", "scene": "plaza", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "skater", "kind": "l2"}, {"cue": "banana", "kind": "l1"}]},
+    {"text": "Thrown by... the same guy.", "scene": "plaza", "chapter": "IT STARTED HERE", "note": "", "pause": 0.3,
+      "events": [{"cue": "Thrown", "kind": "throw"}, {"cue": "same", "kind": "same"}]},
+    {"text": "One missed bin, ten disasters.", "scene": "plaza", "chapter": "THE CHAIN", "note": "", "pause": 0.6,
+      "events": [{"cue": "One", "kind": "map"}, {"cue": "Ten", "kind": "ten"}]},
+    {"text": "Karma took twelve seconds.", "scene": "plaza", "chapter": "THE CHAIN", "note": "", "pause": 0.2,
+      "events": [{"cue": "Karma", "kind": "karma"}, {"cue": "seconds", "kind": "secs"}]}
+  ]
+}

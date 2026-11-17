@@ -1,0 +1,475 @@
+{
+ "lines": [
+  {
+   "file": "narration/chain-karma/line_0.mp3",
+   "duration": 4.44,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.1,
+     "end": 0.213
+    },
+    {
+     "text": "15 seconds",
+     "start": 0.225,
+     "end": 1.25
+    },
+    {
+     "text": "this",
+     "start": 1.512,
+     "end": 1.7
+    },
+    {
+     "text": "guy",
+     "start": 1.712,
+     "end": 1.938
+    },
+    {
+     "text": "ends",
+     "start": 1.95,
+     "end": 2.138
+    },
+    {
+     "text": "up",
+     "start": 2.15,
+     "end": 2.3
+    },
+    {
+     "text": "in",
+     "start": 2.312,
+     "end": 2.362
+    },
+    {
+     "text": "the",
+     "start": 2.375,
+     "end": 2.438
+    },
+    {
+     "text": "fountain",
+     "start": 2.45,
+     "end": 2.888
+    },
+    {
+     "text": "Find",
+     "start": 3.325,
+     "end": 3.45
+    },
+    {
+     "text": "what",
+     "start": 3.462,
+     "end": 3.538
+    },
+    {
+     "text": "starts",
+     "start": 3.55,
+     "end": 3.887
+    },
+    {
+     "text": "it",
+     "start": 3.9,
+     "end": 4.075
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_1.mp3",
+   "duration": 1.92,
+   "words": [
+    {
+     "text": "Too",
+     "start": 0.1,
+     "end": 0.25
+    },
+    {
+     "text": "late",
+     "start": 0.263,
+     "end": 0.562
+    },
+    {
+     "text": "Did",
+     "start": 0.975,
+     "end": 1.062
+    },
+    {
+     "text": "you",
+     "start": 1.075,
+     "end": 1.15
+    },
+    {
+     "text": "catch",
+     "start": 1.163,
+     "end": 1.388
+    },
+    {
+     "text": "it",
+     "start": 1.4,
+     "end": 1.537
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_2.mp3",
+   "duration": 1.87,
+   "words": [
+    {
+     "text": "Let's",
+     "start": 0.1,
+     "end": 0.225
+    },
+    {
+     "text": "trace",
+     "start": 0.237,
+     "end": 0.512
+    },
+    {
+     "text": "it",
+     "start": 0.525,
+     "end": 0.6
+    },
+    {
+     "text": "back",
+     "start": 0.613,
+     "end": 0.95
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_3.mp3",
+   "duration": 1.94,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.125,
+     "end": 0.212
+    },
+    {
+     "text": "fell",
+     "start": 0.225,
+     "end": 0.488
+    },
+    {
+     "text": "in",
+     "start": 0.5,
+     "end": 0.637
+    },
+    {
+     "text": "because",
+     "start": 0.65,
+     "end": 0.938
+    },
+    {
+     "text": "a",
+     "start": 0.95,
+     "end": 1.0
+    },
+    {
+     "text": "bike",
+     "start": 1.012,
+     "end": 1.25
+    },
+    {
+     "text": "hit",
+     "start": 1.262,
+     "end": 1.387
+    },
+    {
+     "text": "him",
+     "start": 1.4,
+     "end": 1.562
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_4.mp3",
+   "duration": 3.55,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.113,
+     "end": 0.175
+    },
+    {
+     "text": "bike",
+     "start": 0.188,
+     "end": 0.45
+    },
+    {
+     "text": "swerved",
+     "start": 0.463,
+     "end": 0.838
+    },
+    {
+     "text": "for",
+     "start": 0.85,
+     "end": 1.012
+    },
+    {
+     "text": "a",
+     "start": 1.025,
+     "end": 1.062
+    },
+    {
+     "text": "dog",
+     "start": 1.075,
+     "end": 1.45
+    },
+    {
+     "text": "scared",
+     "start": 1.738,
+     "end": 2.125
+    },
+    {
+     "text": "by",
+     "start": 2.138,
+     "end": 2.288
+    },
+    {
+     "text": "a",
+     "start": 2.3,
+     "end": 2.362
+    },
+    {
+     "text": "flying",
+     "start": 2.375,
+     "end": 2.75
+    },
+    {
+     "text": "tray",
+     "start": 2.763,
+     "end": 3.175
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_5.mp3",
+   "duration": 2.69,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.113,
+     "end": 0.175
+    },
+    {
+     "text": "waiter",
+     "start": 0.188,
+     "end": 0.425
+    },
+    {
+     "text": "dropped",
+     "start": 0.438,
+     "end": 0.8
+    },
+    {
+     "text": "it",
+     "start": 0.812,
+     "end": 0.925
+    },
+    {
+     "text": "slipping",
+     "start": 1.212,
+     "end": 1.587
+    },
+    {
+     "text": "on",
+     "start": 1.6,
+     "end": 1.7
+    },
+    {
+     "text": "an",
+     "start": 1.712,
+     "end": 1.8
+    },
+    {
+     "text": "orange",
+     "start": 1.812,
+     "end": 2.325
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_6.mp3",
+   "duration": 3.34,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.1,
+     "end": 0.163
+    },
+    {
+     "text": "oranges",
+     "start": 0.175,
+     "end": 0.575
+    },
+    {
+     "text": "fell",
+     "start": 0.588,
+     "end": 0.863
+    },
+    {
+     "text": "off",
+     "start": 0.875,
+     "end": 1.087
+    },
+    {
+     "text": "a",
+     "start": 1.1,
+     "end": 1.15
+    },
+    {
+     "text": "stand",
+     "start": 1.163,
+     "end": 1.638
+    },
+    {
+     "text": "hit",
+     "start": 2.013,
+     "end": 2.163
+    },
+    {
+     "text": "by",
+     "start": 2.175,
+     "end": 2.312
+    },
+    {
+     "text": "a",
+     "start": 2.325,
+     "end": 2.375
+    },
+    {
+     "text": "skateboard",
+     "start": 2.388,
+     "end": 2.963
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_7.mp3",
+   "duration": 2.21,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.113,
+     "end": 0.163
+    },
+    {
+     "text": "skater",
+     "start": 0.175,
+     "end": 0.55
+    },
+    {
+     "text": "slipped",
+     "start": 0.562,
+     "end": 0.925
+    },
+    {
+     "text": "on",
+     "start": 0.938,
+     "end": 1.025
+    },
+    {
+     "text": "a",
+     "start": 1.038,
+     "end": 1.088
+    },
+    {
+     "text": "banana",
+     "start": 1.1,
+     "end": 1.438
+    },
+    {
+     "text": "peel",
+     "start": 1.45,
+     "end": 1.837
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_8.mp3",
+   "duration": 1.92,
+   "words": [
+    {
+     "text": "Thrown",
+     "start": 0.125,
+     "end": 0.338
+    },
+    {
+     "text": "by",
+     "start": 0.35,
+     "end": 0.637
+    },
+    {
+     "text": "the",
+     "start": 0.875,
+     "end": 0.975
+    },
+    {
+     "text": "same",
+     "start": 0.988,
+     "end": 1.238
+    },
+    {
+     "text": "guy",
+     "start": 1.25,
+     "end": 1.538
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_9.mp3",
+   "duration": 2.42,
+   "words": [
+    {
+     "text": "One",
+     "start": 0.1,
+     "end": 0.275
+    },
+    {
+     "text": "missed",
+     "start": 0.287,
+     "end": 0.537
+    },
+    {
+     "text": "bin",
+     "start": 0.55,
+     "end": 0.875
+    },
+    {
+     "text": "ten",
+     "start": 1.15,
+     "end": 1.312
+    },
+    {
+     "text": "disasters",
+     "start": 1.325,
+     "end": 2.062
+    }
+   ]
+  },
+  {
+   "file": "narration/chain-karma/line_10.mp3",
+   "duration": 1.87,
+   "words": [
+    {
+     "text": "Karma",
+     "start": 0.1,
+     "end": 0.375
+    },
+    {
+     "text": "took",
+     "start": 0.388,
+     "end": 0.613
+    },
+    {
+     "text": "twelve",
+     "start": 0.625,
+     "end": 0.9
+    },
+    {
+     "text": "seconds",
+     "start": 0.912,
+     "end": 1.462
+    }
+   ]
+  }
+ ]
+}
