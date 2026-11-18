@@ -110,6 +110,48 @@ const DnaStrip: React.FC<{x: number; y: number; k: number; glow: number}> = ({x,
   </g>
 );
 
+/* ── the crime-scene print is a PARTIAL fragment of C: zoomed, rotated, smudged ── */
+const FR = 84; // fragment radius (print-local units)
+const FZ = 1.55; // zoom on the crime card
+const FROT = 38; // rotation on the crime card (deg)
+const cMins = () => printData('C').mins;
+const FC = (() => {
+  const m = cMins();
+  return [m.reduce((a, q) => a + q.x, 0) / m.length, m.reduce((a, q) => a + q.y, 0) / m.length] as [number, number];
+})();
+const BLOB = (() => {
+  const pts: string[] = [];
+  for (let i = 0; i < 48; i++) {
+    const a = (i / 48) * Math.PI * 2;
+    const r = FR * (1 + 0.1 * Math.sin(3 * a + 1) + 0.07 * Math.sin(5 * a + 2.3));
+    pts.push(`${(FC[0] + Math.cos(a) * r).toFixed(1)} ${(FC[1] + Math.sin(a) * r).toFixed(1)}`);
+  }
+  return `M ${pts.join(' L ')} Z`;
+})();
+const SMUDGES = ([[-34, -52, 24, 11, 30], [58, 18, 20, 10, -20], [-6, 72, 26, 9, 10], [-74, -4, 16, 9, 60], [30, -30, 12, 7, -50]] as const)
+  .filter(([dx, dy]) => cMins().every((m) => Math.hypot(FC[0] + dx - m.x, FC[1] + dy - m.y) > 30));
+type FPose = {x: number; y: number; z: number; rot: number};
+const CRIME_POSE: FPose = {x: CR[0], y: CR[1] + 4, z: FZ, rot: FROT};
+const fragAt = (p: {x: number; y: number}, f: FPose): [number, number] => {
+  const a = (f.rot * Math.PI) / 180;
+  const dx = p.x - FC[0];
+  const dy = p.y - FC[1];
+  return [f.x + f.z * (dx * Math.cos(a) - dy * Math.sin(a)), f.y + f.z * (dx * Math.sin(a) + dy * Math.cos(a))];
+};
+const Fragment: React.FC<{f: FPose; uid: string; k?: number; ghost?: number; outline?: string}> = ({f, uid, k = 1, ghost = 0, outline}) => (
+  <g transform={`translate(${f.x} ${f.y}) rotate(${f.rot}) scale(${f.z}) translate(${-FC[0]} ${-FC[1]})`}>
+    <defs><clipPath id={`fr-${uid}`}><path d={BLOB} /></clipPath></defs>
+    {ghost > 0 ? <path d={BLOB} fill={CREAM} opacity={0.9 * ghost} /> : null}
+    <g clipPath={`url(#fr-${uid})`}>
+      <Print id="C" x={0} y={0} s={1} uid={`fp-${uid}`} ink="#3a3d48" k={k} />
+      {SMUDGES.map(([dx, dy, rx, ry, r], i) => (
+        <ellipse key={i} cx={FC[0] + dx} cy={FC[1] + dy} rx={rx} ry={ry} transform={`rotate(${r} ${FC[0] + dx} ${FC[1] + dy})`} fill={CREAM} opacity={0.88} />
+      ))}
+    </g>
+    {outline ? <path d={BLOB} fill="none" stroke={outline} strokeWidth={4 / f.z} strokeDasharray={`${12 / f.z} ${8 / f.z}`} /> : null}
+  </g>
+);
+
 export const Prints: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode: ep, timing}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
@@ -155,7 +197,9 @@ export const Prints: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episo
   const scanY = s >= T('wipe') ? lerp(CR[1] - 210, CR[1] + 210, clamp01((s - T('wipe')) / 0.9)) : -1;
   const hook = hookK > 0 ? (
     <g opacity={hookK} transform={`translate(0 ${(1 - hookK) * 260})`}>
-      <Card x={CR[0]} y={CR[1]} w={330} h={410} id="crime" s={CR_S} uid="hk" head="CRIME SCENE" k={dustK} />
+      <Card x={CR[0]} y={CR[1]} w={330} h={410} s={CR_S} uid="hk" head="CRIME SCENE" />
+      <Fragment f={CRIME_POSE} uid="hk" k={dustK} />
+      <Chip x={CR[0]} y={CR[1] + 180} text="PARTIAL · ZOOMED IN" size={20} />
       {dustK < 1 ? (
         <g transform={`translate(${CR[0] + brushLx * CR_S + 40} ${CR[1] + 18 + brushLy * CR_S - 40}) rotate(-35)`}>
           {Array.from({length: 14}).map((_, j) => (
@@ -272,9 +316,12 @@ export const Prints: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episo
   ) : null;
 
   // ── the test + proof
-  const crimeMins = printData('crime').mins;
+  const crimeMins = printData('C').mins;
   const susPt = (i: number, m: {x: number; y: number}): [number, number] => [SUS_X[i] + m.x * SUS_S, SUS_Y - 18 + m.y * SUS_S];
-  const crimePt = (m: {x: number; y: number}): [number, number] => [CR[0] + m.x * CR_S, CR[1] + 18 + m.y * CR_S];
+  const C_POSE: FPose = {x: SUS_X[2] + FC[0] * SUS_S, y: SUS_Y - 18 + FC[1] * SUS_S, z: SUS_S, rot: 0};
+  const flyK = ease(clamp01((s - T('lineup')) / 0.75));
+  const flyPose: FPose = {x: lerp(CRIME_POSE.x, C_POSE.x, flyK), y: lerp(CRIME_POSE.y, C_POSE.y, flyK), z: lerp(CRIME_POSE.z, C_POSE.z, flyK), rot: lerp(CRIME_POSE.rot, 0, flyK)};
+  const landed = s >= T('lineup') + 0.78;
   const testIn = (i: number) => inK(s, T('test') - 0.12 + i * 0.1, 0.3);
   const outA = s >= T('outA');
   const offB = s >= T('off');
@@ -283,9 +330,11 @@ export const Prints: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episo
     <g>
       {/* crime card */}
       <g opacity={1 - crimeOut} transform={`translate(0 ${(1 - testIn(0)) * -500 - crimeOut * 200})`}>
-        <Card x={CR[0]} y={CR[1]} w={330} h={410} id="crime" s={CR_S} uid="tc" head="CRIME SCENE" />
+        <Card x={CR[0]} y={CR[1]} w={330} h={410} s={CR_S} uid="tc" head="CRIME SCENE" />
+        <Fragment f={CRIME_POSE} uid="tc" />
+        <Chip x={CR[0]} y={CR[1] + 180} text="PARTIAL · ZOOMED IN" size={20} />
         {s >= T('b') && li <= 8 ? crimeMins.map((m, j) => {
-          const [x, y] = crimePt(m);
+          const [x, y] = fragAt(m, CRIME_POSE);
           return <Ring key={j} x={x} y={y} col={YEL} k={pop(s, T('b') + 0.15 + j * 0.12)} r={22} n={`${j + 1}`} />;
         }) : null}
       </g>
@@ -338,24 +387,14 @@ export const Prints: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episo
             {/* C: they line up */}
             {isC && s >= T('lineup') && li === 8 ? crimeMins.map((m, j) => {
               const [x, y] = susPt(2, m);
-              return <Ring key={j} x={x} y={y} col={GOOD} k={pop(s, T('lineup') + 0.25 + j * 0.1)} r={18} mark={s >= T('exact') + 0.2 ? '✓' : `${j + 1}`} />;
+              return landed ? <Ring key={j} x={x} y={y} col={GOOD} k={pop(s, T('lineup') + 0.8 + j * 0.08)} r={18} mark="✓" /> : null;
             }) : null}
           </g>
         );
       })}
-      {/* threads from the crime print to C */}
-      {s >= T('lineup') && li === 8 ? crimeMins.map((m, j) => {
-        const [x0, y0] = crimePt(m);
-        const [x1, y1] = susPt(2, m);
-        const k = ease(clamp01((s - T('lineup') - j * 0.08) / 0.45));
-        return (
-          <g key={`th${j}`}>
-            <line x1={x0} y1={y0} x2={lerp(x0, x1, k)} y2={lerp(y0, y1, k)} stroke="#1b1b22" strokeWidth={9} strokeLinecap="round" />
-            <line x1={x0} y1={y0} x2={lerp(x0, x1, k)} y2={lerp(y0, y1, k)} stroke={GOOD} strokeWidth={4.5} strokeLinecap="round" strokeDasharray="14 9" />
-          </g>
-        );
-      }) : null}
-      {s >= T('exact') + 0.15 && li === 8 ? <Chip x={SUS_X[2]} y={SUS_Y + 222} text="MATCH" bg={GOOD} fg="#1b1b22" k={pop(s, T('exact') + 0.15)} /> : null}
+      {/* the fragment flies back into its spot on C */}
+      {s >= T('lineup') && li === 8 ? <Fragment f={flyPose} uid="fly" ghost={landed ? 0.35 : 1} outline={GOOD} /> : null}
+      {landed && li === 8 ? <Chip x={SUS_X[2]} y={SUS_Y + 222} text="MATCH" bg={GOOD} fg="#1b1b22" k={pop(s, T('lineup') + 0.85)} /> : null}
       {offB && li === 8 ? <Chip x={SUS_X[1]} y={SUS_Y + 222} text="NO MATCH" bg={BAD} fg="#1b1b22" k={pop(s, T('off') + 0.3)} size={30} /> : null}
     </g>
   ) : null;
