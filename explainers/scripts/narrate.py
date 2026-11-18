@@ -21,15 +21,18 @@ import edge_tts
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def episode_lines(ep: dict) -> list[str]:
+def episode_lines(ep: dict) -> list[dict]:
+    """Each line as {text, voice, rate, pitch}. A line may override the episode voice
+    (multi-character skits) and give a `say` spelling for TTS ("Rizz dot exe")."""
+    base = {"voice": ep.get("voice", "en-US-AndrewNeural"), "rate": ep.get("rate", "+0%"), "pitch": "+0Hz"}
     if "lines" in ep:  # generic episodes (e.g. Fight): an explicit list of narration lines
-        return [ln["text"] for ln in ep["lines"]]
-    return [ep["hook"], *[c["line"] for c in ep["contenders"]], ep["finale"]["line"], ep["sting"]["line"]]
+        return [{**base, **{k: ln[k] for k in ("voice", "rate", "pitch") if k in ln}, "text": ln.get("say", ln["text"])} for ln in ep["lines"]]
+    return [{**base, "text": x} for x in (ep["hook"], *[c["line"] for c in ep["contenders"]], ep["finale"]["line"], ep["sting"]["line"])]
 
 
-async def synth(text: str, voice: str, rate: str, path: str) -> list[dict]:
+async def synth(text: str, voice: str, rate: str, path: str, pitch: str = "+0Hz") -> list[dict]:
     words, audio = [], bytearray()
-    c = edge_tts.Communicate(text, voice, rate=rate, boundary="WordBoundary")
+    c = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch, boundary="WordBoundary")
     async for ch in c.stream():
         if ch["type"] == "audio":
             audio += ch["data"]
@@ -41,14 +44,14 @@ async def synth(text: str, voice: str, rate: str, path: str) -> list[dict]:
     return words
 
 
-def synth_retry(text: str, voice: str, rate: str, path: str, tries: int = 5) -> list[dict]:
+def synth_retry(text: str, voice: str, rate: str, path: str, tries: int = 5, pitch: str = "+0Hz") -> list[dict]:
     """The free service drops requests intermittently (NoAudioReceived / 403);
     the same request usually succeeds a few seconds later."""
     import time
     last = None
     for k in range(tries):
         try:
-            return asyncio.run(synth(text, voice, rate, path))
+            return asyncio.run(synth(text, voice, rate, path, pitch))
         except Exception as e:  # noqa: BLE001 — service flakiness, retried
             last = e
             time.sleep(2 + 3 * k)
@@ -72,9 +75,10 @@ def main() -> int:
     out_dir = os.path.join(ROOT, "public", "narration", ep["id"])
     os.makedirs(out_dir, exist_ok=True)
     lines = []
-    for i, text in enumerate(episode_lines(ep)):
+    for i, L in enumerate(episode_lines(ep)):
+        text = L["text"]
         path = os.path.join(out_dir, f"line_{i}.mp3")
-        words = synth_retry(text, ep.get("voice", "en-US-AndrewNeural"), ep.get("rate", "+0%"), path)
+        words = synth_retry(text, L["voice"], L["rate"], path, pitch=L["pitch"])
         if not words:
             sys.exit(f"line {i}: no word timings returned — is boundary=WordBoundary supported?")
         dur = mp3_duration(path)

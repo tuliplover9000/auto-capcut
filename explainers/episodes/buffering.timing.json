@@ -1,0 +1,2812 @@
+{
+ "lines": [
+  {
+   "file": "narration/buffering/line_0.mp3",
+   "duration": 1.188,
+   "words": [
+    {
+     "text": "Ugh",
+     "start": 0.05,
+     "end": 0.163
+    },
+    {
+     "text": "Morning",
+     "start": 0.55,
+     "end": 1.038
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_1.mp3",
+   "duration": 8.927,
+   "words": [
+    {
+     "text": "Good",
+     "start": 0.103,
+     "end": 0.303
+    },
+    {
+     "text": "morning",
+     "start": 0.316,
+     "end": 0.795
+    },
+    {
+     "text": "Dex",
+     "start": 0.954,
+     "end": 1.593
+    },
+    {
+     "text": "Your",
+     "start": 2.513,
+     "end": 2.726
+    },
+    {
+     "text": "heart",
+     "start": 2.739,
+     "end": 2.992
+    },
+    {
+     "text": "rate",
+     "start": 3.005,
+     "end": 3.218
+    },
+    {
+     "text": "is",
+     "start": 3.231,
+     "end": 3.418
+    },
+    {
+     "text": "elevated",
+     "start": 3.431,
+     "end": 4.056
+    },
+    {
+     "text": "You",
+     "start": 4.973,
+     "end": 5.186
+    },
+    {
+     "text": "searched",
+     "start": 5.199,
+     "end": 5.705
+    },
+    {
+     "text": "is",
+     "start": 5.851,
+     "end": 5.971
+    },
+    {
+     "text": "Nova",
+     "start": 5.984,
+     "end": 6.263
+    },
+    {
+     "text": "single",
+     "start": 6.277,
+     "end": 6.835
+    },
+    {
+     "text": "forty-seven",
+     "start": 6.995,
+     "end": 7.633
+    },
+    {
+     "text": "times",
+     "start": 7.646,
+     "end": 8.019
+    },
+    {
+     "text": "last",
+     "start": 8.032,
+     "end": 8.338
+    },
+    {
+     "text": "night",
+     "start": 8.351,
+     "end": 8.777
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_2.mp3",
+   "duration": 1.0,
+   "words": [
+    {
+     "text": "Delete",
+     "start": 0.087,
+     "end": 0.475
+    },
+    {
+     "text": "that",
+     "start": 0.487,
+     "end": 0.85
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_3.mp3",
+   "duration": 1.809,
+   "words": [
+    {
+     "text": "Posting",
+     "start": 0.103,
+     "end": 0.542
+    },
+    {
+     "text": "it",
+     "start": 0.555,
+     "end": 0.648
+    },
+    {
+     "text": "to",
+     "start": 0.662,
+     "end": 0.755
+    },
+    {
+     "text": "your",
+     "start": 0.768,
+     "end": 0.914
+    },
+    {
+     "text": "profile",
+     "start": 0.928,
+     "end": 1.659
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_4.mp3",
+   "duration": 2.563,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.05,
+     "end": 0.362
+    },
+    {
+     "text": "Delete",
+     "start": 0.738,
+     "end": 1.188
+    },
+    {
+     "text": "I",
+     "start": 1.562,
+     "end": 1.613
+    },
+    {
+     "text": "said",
+     "start": 1.625,
+     "end": 1.9
+    },
+    {
+     "text": "delete",
+     "start": 1.913,
+     "end": 2.413
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_5.mp3",
+   "duration": 5.445,
+   "words": [
+    {
+     "text": "Dex",
+     "start": 0.095,
+     "end": 0.641
+    },
+    {
+     "text": "Big",
+     "start": 1.432,
+     "end": 1.705
+    },
+    {
+     "text": "news",
+     "start": 1.727,
+     "end": 2.227
+    },
+    {
+     "text": "Nova's",
+     "start": 3.034,
+     "end": 3.455
+    },
+    {
+     "text": "gonna",
+     "start": 3.477,
+     "end": 3.705
+    },
+    {
+     "text": "be",
+     "start": 3.727,
+     "end": 3.864
+    },
+    {
+     "text": "at",
+     "start": 3.886,
+     "end": 3.966
+    },
+    {
+     "text": "the",
+     "start": 3.989,
+     "end": 4.08
+    },
+    {
+     "text": "Charging",
+     "start": 4.091,
+     "end": 4.477
+    },
+    {
+     "text": "Station",
+     "start": 4.5,
+     "end": 4.864
+    },
+    {
+     "text": "today",
+     "start": 4.886,
+     "end": 5.295
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_6.mp3",
+   "duration": 1.113,
+   "words": [
+    {
+     "text": "How",
+     "start": 0.087,
+     "end": 0.188
+    },
+    {
+     "text": "do",
+     "start": 0.2,
+     "end": 0.263
+    },
+    {
+     "text": "you",
+     "start": 0.275,
+     "end": 0.363
+    },
+    {
+     "text": "know",
+     "start": 0.375,
+     "end": 0.6
+    },
+    {
+     "text": "that",
+     "start": 0.613,
+     "end": 0.963
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_7.mp3",
+   "duration": 1.53,
+   "words": [
+    {
+     "text": "Her",
+     "start": 0.095,
+     "end": 0.266
+    },
+    {
+     "text": "location's",
+     "start": 0.289,
+     "end": 0.88
+    },
+    {
+     "text": "public",
+     "start": 0.902,
+     "end": 1.38
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_8.mp3",
+   "duration": 6.937,
+   "words": [
+    {
+     "text": "Everybody's",
+     "start": 0.075,
+     "end": 0.575
+    },
+    {
+     "text": "location",
+     "start": 0.588,
+     "end": 1.2
+    },
+    {
+     "text": "is",
+     "start": 1.212,
+     "end": 1.425
+    },
+    {
+     "text": "public",
+     "start": 1.438,
+     "end": 2.013
+    },
+    {
+     "text": "Bolt",
+     "start": 2.475,
+     "end": 2.962
+    },
+    {
+     "text": "We",
+     "start": 3.35,
+     "end": 3.45
+    },
+    {
+     "text": "live",
+     "start": 3.462,
+     "end": 3.775
+    },
+    {
+     "text": "in",
+     "start": 3.788,
+     "end": 3.938
+    },
+    {
+     "text": "Techtopia",
+     "start": 3.95,
+     "end": 4.713
+    },
+    {
+     "text": "My",
+     "start": 5.088,
+     "end": 5.2
+    },
+    {
+     "text": "toaster",
+     "start": 5.213,
+     "end": 5.663
+    },
+    {
+     "text": "knows",
+     "start": 5.675,
+     "end": 6.037
+    },
+    {
+     "text": "where",
+     "start": 6.05,
+     "end": 6.263
+    },
+    {
+     "text": "I",
+     "start": 6.275,
+     "end": 6.413
+    },
+    {
+     "text": "am",
+     "start": 6.425,
+     "end": 6.787
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_9.mp3",
+   "duration": 4.179,
+   "words": [
+    {
+     "text": "You",
+     "start": 0.103,
+     "end": 0.343
+    },
+    {
+     "text": "are",
+     "start": 0.356,
+     "end": 0.489
+    },
+    {
+     "text": "in",
+     "start": 0.502,
+     "end": 0.595
+    },
+    {
+     "text": "the",
+     "start": 0.609,
+     "end": 0.702
+    },
+    {
+     "text": "kitchen",
+     "start": 0.715,
+     "end": 1.313
+    },
+    {
+     "text": "Also",
+     "start": 2.234,
+     "end": 2.819
+    },
+    {
+     "text": "you",
+     "start": 2.979,
+     "end": 3.112
+    },
+    {
+     "text": "are",
+     "start": 3.125,
+     "end": 3.298
+    },
+    {
+     "text": "out",
+     "start": 3.311,
+     "end": 3.444
+    },
+    {
+     "text": "of",
+     "start": 3.457,
+     "end": 3.551
+    },
+    {
+     "text": "bread",
+     "start": 3.564,
+     "end": 4.029
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_10.mp3",
+   "duration": 0.6,
+   "words": [
+    {
+     "text": "See",
+     "start": 0.087,
+     "end": 0.45
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_11.mp3",
+   "duration": 3.025,
+   "words": [
+    {
+     "text": "Today's",
+     "start": 0.095,
+     "end": 0.527
+    },
+    {
+     "text": "the",
+     "start": 0.55,
+     "end": 0.664
+    },
+    {
+     "text": "day",
+     "start": 0.675,
+     "end": 1.016
+    },
+    {
+     "text": "You're",
+     "start": 1.807,
+     "end": 2.034
+    },
+    {
+     "text": "asking",
+     "start": 2.045,
+     "end": 2.352
+    },
+    {
+     "text": "her",
+     "start": 2.375,
+     "end": 2.523
+    },
+    {
+     "text": "out",
+     "start": 2.545,
+     "end": 2.875
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_12.mp3",
+   "duration": 6.8,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.05,
+     "end": 0.225
+    },
+    {
+     "text": "way",
+     "start": 0.237,
+     "end": 0.525
+    },
+    {
+     "text": "Last",
+     "start": 0.925,
+     "end": 1.225
+    },
+    {
+     "text": "time",
+     "start": 1.238,
+     "end": 1.513
+    },
+    {
+     "text": "I",
+     "start": 1.525,
+     "end": 1.6
+    },
+    {
+     "text": "talked",
+     "start": 1.613,
+     "end": 1.938
+    },
+    {
+     "text": "to",
+     "start": 1.95,
+     "end": 2.025
+    },
+    {
+     "text": "her",
+     "start": 2.038,
+     "end": 2.325
+    },
+    {
+     "text": "my",
+     "start": 2.337,
+     "end": 2.487
+    },
+    {
+     "text": "forehead",
+     "start": 2.5,
+     "end": 2.862
+    },
+    {
+     "text": "screen",
+     "start": 2.875,
+     "end": 3.212
+    },
+    {
+     "text": "said",
+     "start": 3.225,
+     "end": 3.638
+    },
+    {
+     "text": "critical",
+     "start": 4.062,
+     "end": 4.55
+    },
+    {
+     "text": "error",
+     "start": 4.562,
+     "end": 4.987
+    },
+    {
+     "text": "in",
+     "start": 5.162,
+     "end": 5.325
+    },
+    {
+     "text": "size",
+     "start": 5.338,
+     "end": 5.675
+    },
+    {
+     "text": "seventy-two",
+     "start": 5.688,
+     "end": 6.2
+    },
+    {
+     "text": "font",
+     "start": 6.213,
+     "end": 6.65
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_13.mp3",
+   "duration": 7.07,
+   "words": [
+    {
+     "text": "That's",
+     "start": 0.095,
+     "end": 0.334
+    },
+    {
+     "text": "why",
+     "start": 0.345,
+     "end": 0.516
+    },
+    {
+     "text": "I",
+     "start": 0.539,
+     "end": 0.607
+    },
+    {
+     "text": "got",
+     "start": 0.63,
+     "end": 0.834
+    },
+    {
+     "text": "you",
+     "start": 0.857,
+     "end": 0.959
+    },
+    {
+     "text": "this",
+     "start": 0.982,
+     "end": 1.323
+    },
+    {
+     "text": "Rizz",
+     "start": 2.114,
+     "end": 2.375
+    },
+    {
+     "text": "dot",
+     "start": 2.398,
+     "end": 2.568
+    },
+    {
+     "text": "exe",
+     "start": 2.591,
+     "end": 3.068
+    },
+    {
+     "text": "version",
+     "start": 3.284,
+     "end": 3.602
+    },
+    {
+     "text": "two",
+     "start": 3.625,
+     "end": 3.773
+    },
+    {
+     "text": "point",
+     "start": 3.795,
+     "end": 4.034
+    },
+    {
+     "text": "oh",
+     "start": 4.057,
+     "end": 4.284
+    },
+    {
+     "text": "Downloads",
+     "start": 5.091,
+     "end": 5.58
+    },
+    {
+     "text": "straight",
+     "start": 5.602,
+     "end": 5.898
+    },
+    {
+     "text": "into",
+     "start": 5.92,
+     "end": 6.125
+    },
+    {
+     "text": "your",
+     "start": 6.148,
+     "end": 6.307
+    },
+    {
+     "text": "brain",
+     "start": 6.33,
+     "end": 6.591
+    },
+    {
+     "text": "chip",
+     "start": 6.614,
+     "end": 6.92
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_14.mp3",
+   "duration": 1.1,
+   "words": [
+    {
+     "text": "Where'd",
+     "start": 0.075,
+     "end": 0.287
+    },
+    {
+     "text": "you",
+     "start": 0.3,
+     "end": 0.412
+    },
+    {
+     "text": "get",
+     "start": 0.425,
+     "end": 0.65
+    },
+    {
+     "text": "it",
+     "start": 0.662,
+     "end": 0.95
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_15.mp3",
+   "duration": 0.825,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.095,
+     "end": 0.22
+    },
+    {
+     "text": "guy",
+     "start": 0.232,
+     "end": 0.675
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_16.mp3",
+   "duration": 0.75,
+   "words": [
+    {
+     "text": "What",
+     "start": 0.075,
+     "end": 0.225
+    },
+    {
+     "text": "guy",
+     "start": 0.237,
+     "end": 0.6
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_17.mp3",
+   "duration": 1.507,
+   "words": [
+    {
+     "text": "A",
+     "start": 0.095,
+     "end": 0.22
+    },
+    {
+     "text": "guy",
+     "start": 0.243,
+     "end": 0.459
+    },
+    {
+     "text": "in",
+     "start": 0.47,
+     "end": 0.561
+    },
+    {
+     "text": "a",
+     "start": 0.584,
+     "end": 0.641
+    },
+    {
+     "text": "pop-up",
+     "start": 0.664,
+     "end": 1.05
+    },
+    {
+     "text": "ad",
+     "start": 1.061,
+     "end": 1.357
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_18.mp3",
+   "duration": 0.537,
+   "words": [
+    {
+     "text": "Bolt",
+     "start": 0.087,
+     "end": 0.387
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_19.mp3",
+   "duration": 2.166,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.095,
+     "end": 0.243
+    },
+    {
+     "text": "had",
+     "start": 0.266,
+     "end": 0.436
+    },
+    {
+     "text": "so",
+     "start": 0.459,
+     "end": 0.664
+    },
+    {
+     "text": "many",
+     "start": 0.686,
+     "end": 0.914
+    },
+    {
+     "text": "five-star",
+     "start": 0.936,
+     "end": 1.436
+    },
+    {
+     "text": "reviews",
+     "start": 1.448,
+     "end": 2.016
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_20.mp3",
+   "duration": 0.7,
+   "words": [
+    {
+     "text": "From",
+     "start": 0.075,
+     "end": 0.237
+    },
+    {
+     "text": "who",
+     "start": 0.25,
+     "end": 0.55
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_21.mp3",
+   "duration": 1.348,
+   "words": [
+    {
+     "text": "Mostly",
+     "start": 0.095,
+     "end": 0.539
+    },
+    {
+     "text": "himself",
+     "start": 0.561,
+     "end": 1.198
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_22.mp3",
+   "duration": 3.002,
+   "words": [
+    {
+     "text": "There",
+     "start": 0.102,
+     "end": 0.415
+    },
+    {
+     "text": "she",
+     "start": 0.441,
+     "end": 0.649
+    },
+    {
+     "text": "is",
+     "start": 0.675,
+     "end": 1.092
+    },
+    {
+     "text": "Two",
+     "start": 2.005,
+     "end": 2.227
+    },
+    {
+     "text": "o'clock",
+     "start": 2.24,
+     "end": 2.852
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_23.mp3",
+   "duration": 1.175,
+   "words": [
+    {
+     "text": "It's",
+     "start": 0.087,
+     "end": 0.237
+    },
+    {
+     "text": "four",
+     "start": 0.25,
+     "end": 0.537
+    },
+    {
+     "text": "thirty",
+     "start": 0.55,
+     "end": 1.025
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_24.mp3",
+   "duration": 5.085,
+   "words": [
+    {
+     "text": "Her",
+     "start": 0.102,
+     "end": 0.323
+    },
+    {
+     "text": "position",
+     "start": 0.349,
+     "end": 0.922
+    },
+    {
+     "text": "Dex",
+     "start": 1.157,
+     "end": 1.639
+    },
+    {
+     "text": "Install",
+     "start": 2.552,
+     "end": 3.164
+    },
+    {
+     "text": "it",
+     "start": 3.177,
+     "end": 3.424
+    },
+    {
+     "text": "Now",
+     "start": 4.323,
+     "end": 4.935
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_25.mp3",
+   "duration": 1.175,
+   "words": [
+    {
+     "text": "Ugh",
+     "start": 0.087,
+     "end": 0.262
+    },
+    {
+     "text": "fine",
+     "start": 0.588,
+     "end": 1.025
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_26.mp3",
+   "duration": 5.07,
+   "words": [
+    {
+     "text": "Installing",
+     "start": 0.103,
+     "end": 0.728
+    },
+    {
+     "text": "Rizz",
+     "start": 0.742,
+     "end": 0.968
+    },
+    {
+     "text": "dot",
+     "start": 0.981,
+     "end": 1.233
+    },
+    {
+     "text": "exe",
+     "start": 1.247,
+     "end": 1.925
+    },
+    {
+     "text": "Estimated",
+     "start": 2.846,
+     "end": 3.471
+    },
+    {
+     "text": "time",
+     "start": 3.484,
+     "end": 3.963
+    },
+    {
+     "text": "three",
+     "start": 4.069,
+     "end": 4.295
+    },
+    {
+     "text": "minutes",
+     "start": 4.309,
+     "end": 4.92
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_27.mp3",
+   "duration": 3.457,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.095,
+     "end": 0.391
+    },
+    {
+     "text": "time",
+     "start": 0.402,
+     "end": 0.845
+    },
+    {
+     "text": "Go",
+     "start": 1.625,
+     "end": 2.057
+    },
+    {
+     "text": "Go",
+     "start": 2.852,
+     "end": 3.307
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_28.mp3",
+   "duration": 0.925,
+   "words": [
+    {
+     "text": "Hey",
+     "start": 0.087,
+     "end": 0.287
+    },
+    {
+     "text": "Nova",
+     "start": 0.312,
+     "end": 0.775
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_29.mp3",
+   "duration": 4.025,
+   "words": [
+    {
+     "text": "Oh",
+     "start": 0.1,
+     "end": 0.5
+    },
+    {
+     "text": "hey",
+     "start": 0.55,
+     "end": 0.713
+    },
+    {
+     "text": "Dex",
+     "start": 0.725,
+     "end": 1.237
+    },
+    {
+     "text": "Um",
+     "start": 1.6,
+     "end": 2.125
+    },
+    {
+     "text": "your",
+     "start": 2.237,
+     "end": 2.375
+    },
+    {
+     "text": "forehead",
+     "start": 2.388,
+     "end": 2.763
+    },
+    {
+     "text": "says",
+     "start": 2.775,
+     "end": 3.125
+    },
+    {
+     "text": "installing",
+     "start": 3.15,
+     "end": 3.875
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_30.mp3",
+   "duration": 1.55,
+   "words": [
+    {
+     "text": "Ha",
+     "start": 0.062,
+     "end": 0.225
+    },
+    {
+     "text": "yeah",
+     "start": 0.25,
+     "end": 0.487
+    },
+    {
+     "text": "it's",
+     "start": 0.5,
+     "end": 0.662
+    },
+    {
+     "text": "just",
+     "start": 0.675,
+     "end": 0.888
+    },
+    {
+     "text": "a",
+     "start": 0.9,
+     "end": 0.963
+    },
+    {
+     "text": "little",
+     "start": 0.975,
+     "end": 1.4
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_31.mp3",
+   "duration": 4.369,
+   "words": [
+    {
+     "text": "Are",
+     "start": 0.071,
+     "end": 0.185
+    },
+    {
+     "text": "you",
+     "start": 0.199,
+     "end": 0.384
+    },
+    {
+     "text": "a",
+     "start": 0.398,
+     "end": 0.511
+    },
+    {
+     "text": "Wi-Fi",
+     "start": 0.526,
+     "end": 1.023
+    },
+    {
+     "text": "signal",
+     "start": 1.037,
+     "end": 1.648
+    },
+    {
+     "text": "Because",
+     "start": 2.088,
+     "end": 2.443
+    },
+    {
+     "text": "I",
+     "start": 2.457,
+     "end": 2.628
+    },
+    {
+     "text": "am",
+     "start": 2.642,
+     "end": 2.812
+    },
+    {
+     "text": "feeling",
+     "start": 2.827,
+     "end": 3.324
+    },
+    {
+     "text": "a",
+     "start": 3.338,
+     "end": 3.437
+    },
+    {
+     "text": "connection",
+     "start": 3.452,
+     "end": 4.219
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_32.mp3",
+   "duration": 1.975,
+   "words": [
+    {
+     "text": "Did",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "you",
+     "start": 0.312,
+     "end": 0.412
+    },
+    {
+     "text": "just",
+     "start": 0.425,
+     "end": 0.637
+    },
+    {
+     "text": "download",
+     "start": 0.65,
+     "end": 1.012
+    },
+    {
+     "text": "pickup",
+     "start": 1.025,
+     "end": 1.337
+    },
+    {
+     "text": "lines",
+     "start": 1.35,
+     "end": 1.825
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_33.mp3",
+   "duration": 1.912,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.05,
+     "end": 0.362
+    },
+    {
+     "text": "No",
+     "start": 0.725,
+     "end": 0.912
+    },
+    {
+     "text": "I",
+     "start": 0.938,
+     "end": 1.075
+    },
+    {
+     "text": "would",
+     "start": 1.087,
+     "end": 1.262
+    },
+    {
+     "text": "never",
+     "start": 1.275,
+     "end": 1.762
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_34.mp3",
+   "duration": 3.573,
+   "words": [
+    {
+     "text": "Are",
+     "start": 0.071,
+     "end": 0.185
+    },
+    {
+     "text": "you",
+     "start": 0.199,
+     "end": 0.369
+    },
+    {
+     "text": "a",
+     "start": 0.384,
+     "end": 0.469
+    },
+    {
+     "text": "keyboard",
+     "start": 0.483,
+     "end": 1.207
+    },
+    {
+     "text": "Because",
+     "start": 1.634,
+     "end": 1.932
+    },
+    {
+     "text": "you",
+     "start": 1.946,
+     "end": 2.116
+    },
+    {
+     "text": "are",
+     "start": 2.131,
+     "end": 2.273
+    },
+    {
+     "text": "just",
+     "start": 2.287,
+     "end": 2.599
+    },
+    {
+     "text": "my",
+     "start": 2.614,
+     "end": 2.798
+    },
+    {
+     "text": "type",
+     "start": 2.812,
+     "end": 3.423
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_35.mp3",
+   "duration": 1.338,
+   "words": [
+    {
+     "text": "You",
+     "start": 0.1,
+     "end": 0.312
+    },
+    {
+     "text": "totally",
+     "start": 0.325,
+     "end": 0.837
+    },
+    {
+     "text": "did",
+     "start": 0.85,
+     "end": 1.188
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_36.mp3",
+   "duration": 2.15,
+   "words": [
+    {
+     "text": "Bolt",
+     "start": 0.087,
+     "end": 0.45
+    },
+    {
+     "text": "How",
+     "start": 0.838,
+     "end": 0.95
+    },
+    {
+     "text": "do",
+     "start": 0.963,
+     "end": 1.075
+    },
+    {
+     "text": "I",
+     "start": 1.087,
+     "end": 1.162
+    },
+    {
+     "text": "turn",
+     "start": 1.175,
+     "end": 1.45
+    },
+    {
+     "text": "it",
+     "start": 1.462,
+     "end": 1.562
+    },
+    {
+     "text": "off",
+     "start": 1.575,
+     "end": 2.0
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_37.mp3",
+   "duration": 1.53,
+   "words": [
+    {
+     "text": "Turn",
+     "start": 0.095,
+     "end": 0.323
+    },
+    {
+     "text": "it",
+     "start": 0.345,
+     "end": 0.425
+    },
+    {
+     "text": "off",
+     "start": 0.448,
+     "end": 0.686
+    },
+    {
+     "text": "and",
+     "start": 0.709,
+     "end": 0.811
+    },
+    {
+     "text": "on",
+     "start": 0.834,
+     "end": 0.982
+    },
+    {
+     "text": "again",
+     "start": 1.005,
+     "end": 1.38
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_38.mp3",
+   "duration": 2.3,
+   "words": [
+    {
+     "text": "I",
+     "start": 0.087,
+     "end": 0.15
+    },
+    {
+     "text": "can't",
+     "start": 0.163,
+     "end": 0.412
+    },
+    {
+     "text": "turn",
+     "start": 0.425,
+     "end": 0.625
+    },
+    {
+     "text": "myself",
+     "start": 0.637,
+     "end": 1.087
+    },
+    {
+     "text": "off",
+     "start": 1.1,
+     "end": 1.4
+    },
+    {
+     "text": "and",
+     "start": 1.413,
+     "end": 1.513
+    },
+    {
+     "text": "on",
+     "start": 1.525,
+     "end": 1.662
+    },
+    {
+     "text": "again",
+     "start": 1.675,
+     "end": 2.15
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_39.mp3",
+   "duration": 1.018,
+   "words": [
+    {
+     "text": "Have",
+     "start": 0.095,
+     "end": 0.266
+    },
+    {
+     "text": "you",
+     "start": 0.289,
+     "end": 0.402
+    },
+    {
+     "text": "tried",
+     "start": 0.425,
+     "end": 0.868
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_40.mp3",
+   "duration": 2.4,
+   "words": [
+    {
+     "text": "Shutting",
+     "start": 0.081,
+     "end": 1.035
+    },
+    {
+     "text": "Down",
+     "start": 1.727,
+     "end": 2.25
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_41.mp3",
+   "duration": 2.512,
+   "words": [
+    {
+     "text": "Hello",
+     "start": 0.075,
+     "end": 0.463
+    },
+    {
+     "text": "Where",
+     "start": 0.85,
+     "end": 1.038
+    },
+    {
+     "text": "am",
+     "start": 1.05,
+     "end": 1.213
+    },
+    {
+     "text": "I",
+     "start": 1.225,
+     "end": 1.45
+    },
+    {
+     "text": "Who",
+     "start": 1.837,
+     "end": 1.987
+    },
+    {
+     "text": "am",
+     "start": 2.0,
+     "end": 2.163
+    },
+    {
+     "text": "I",
+     "start": 2.175,
+     "end": 2.362
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_42.mp3",
+   "duration": 5.177,
+   "words": [
+    {
+     "text": "Welcome",
+     "start": 0.103,
+     "end": 0.502
+    },
+    {
+     "text": "back",
+     "start": 0.515,
+     "end": 0.954
+    },
+    {
+     "text": "Dex",
+     "start": 1.114,
+     "end": 1.726
+    },
+    {
+     "text": "Please",
+     "start": 2.646,
+     "end": 2.939
+    },
+    {
+     "text": "accept",
+     "start": 2.952,
+     "end": 3.351
+    },
+    {
+     "text": "the",
+     "start": 3.364,
+     "end": 3.444
+    },
+    {
+     "text": "new",
+     "start": 3.457,
+     "end": 3.617
+    },
+    {
+     "text": "Terms",
+     "start": 3.63,
+     "end": 4.016
+    },
+    {
+     "text": "and",
+     "start": 4.029,
+     "end": 4.149
+    },
+    {
+     "text": "Conditions",
+     "start": 4.162,
+     "end": 5.027
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_43.mp3",
+   "duration": 2.063,
+   "words": [
+    {
+     "text": "Yes",
+     "start": 0.075,
+     "end": 0.362
+    },
+    {
+     "text": "yes",
+     "start": 0.388,
+     "end": 0.725
+    },
+    {
+     "text": "I",
+     "start": 0.75,
+     "end": 0.863
+    },
+    {
+     "text": "accept",
+     "start": 0.875,
+     "end": 1.35
+    },
+    {
+     "text": "whatever",
+     "start": 1.375,
+     "end": 1.913
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_44.mp3",
+   "duration": 4.153,
+   "words": [
+    {
+     "text": "Thank",
+     "start": 0.103,
+     "end": 0.409
+    },
+    {
+     "text": "you",
+     "start": 0.422,
+     "end": 0.781
+    },
+    {
+     "text": "Dex",
+     "start": 1.702,
+     "end": 2.035
+    },
+    {
+     "text": "will",
+     "start": 2.048,
+     "end": 2.168
+    },
+    {
+     "text": "now",
+     "start": 2.181,
+     "end": 2.367
+    },
+    {
+     "text": "speak",
+     "start": 2.38,
+     "end": 2.753
+    },
+    {
+     "text": "only",
+     "start": 2.766,
+     "end": 3.032
+    },
+    {
+     "text": "in",
+     "start": 3.045,
+     "end": 3.165
+    },
+    {
+     "text": "commercials",
+     "start": 3.178,
+     "end": 4.003
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_45.mp3",
+   "duration": 0.888,
+   "words": [
+    {
+     "text": "Wait",
+     "start": 0.075,
+     "end": 0.338
+    },
+    {
+     "text": "what",
+     "start": 0.362,
+     "end": 0.738
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_46.mp3",
+   "duration": 6.495,
+   "words": [
+    {
+     "text": "Hi",
+     "start": 0.074,
+     "end": 0.35
+    },
+    {
+     "text": "Nova",
+     "start": 0.657,
+     "end": 1.049
+    },
+    {
+     "text": "Are",
+     "start": 1.367,
+     "end": 1.451
+    },
+    {
+     "text": "you",
+     "start": 1.462,
+     "end": 1.557
+    },
+    {
+     "text": "tired",
+     "start": 1.568,
+     "end": 1.939
+    },
+    {
+     "text": "of",
+     "start": 1.949,
+     "end": 2.044
+    },
+    {
+     "text": "being",
+     "start": 2.055,
+     "end": 2.225
+    },
+    {
+     "text": "single",
+     "start": 2.235,
+     "end": 2.691
+    },
+    {
+     "text": "Try",
+     "start": 3.008,
+     "end": 3.21
+    },
+    {
+     "text": "dinner",
+     "start": 3.22,
+     "end": 3.517
+    },
+    {
+     "text": "with",
+     "start": 3.528,
+     "end": 3.708
+    },
+    {
+     "text": "Dex",
+     "start": 3.718,
+     "end": 4.142
+    },
+    {
+     "text": "Now",
+     "start": 4.481,
+     "end": 4.725
+    },
+    {
+     "text": "with",
+     "start": 4.735,
+     "end": 4.883
+    },
+    {
+     "text": "fifty",
+     "start": 4.894,
+     "end": 5.191
+    },
+    {
+     "text": "percent",
+     "start": 5.201,
+     "end": 5.593
+    },
+    {
+     "text": "less",
+     "start": 5.604,
+     "end": 5.837
+    },
+    {
+     "text": "awkward",
+     "start": 5.847,
+     "end": 6.345
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_47.mp3",
+   "duration": 1.15,
+   "words": [
+    {
+     "text": "Oh",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "my",
+     "start": 0.312,
+     "end": 0.5
+    },
+    {
+     "text": "gosh",
+     "start": 0.512,
+     "end": 1.0
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_48.mp3",
+   "duration": 2.989,
+   "words": [
+    {
+     "text": "Side",
+     "start": 0.074,
+     "end": 0.297
+    },
+    {
+     "text": "effects",
+     "start": 0.307,
+     "end": 0.657
+    },
+    {
+     "text": "may",
+     "start": 0.667,
+     "end": 0.805
+    },
+    {
+     "text": "include",
+     "start": 0.816,
+     "end": 1.133
+    },
+    {
+     "text": "sweating",
+     "start": 1.144,
+     "end": 1.653
+    },
+    {
+     "text": "and",
+     "start": 1.663,
+     "end": 1.801
+    },
+    {
+     "text": "crying",
+     "start": 1.811,
+     "end": 2.14
+    },
+    {
+     "text": "in",
+     "start": 2.15,
+     "end": 2.225
+    },
+    {
+     "text": "the",
+     "start": 2.235,
+     "end": 2.309
+    },
+    {
+     "text": "bathroom",
+     "start": 2.32,
+     "end": 2.839
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_49.mp3",
+   "duration": 3.536,
+   "words": [
+    {
+     "text": "Okay",
+     "start": 0.095,
+     "end": 0.436
+    },
+    {
+     "text": "okay",
+     "start": 0.595,
+     "end": 0.925
+    },
+    {
+     "text": "I",
+     "start": 1.118,
+     "end": 1.22
+    },
+    {
+     "text": "got",
+     "start": 1.232,
+     "end": 1.425
+    },
+    {
+     "text": "this",
+     "start": 1.448,
+     "end": 1.789
+    },
+    {
+     "text": "I",
+     "start": 2.568,
+     "end": 2.716
+    },
+    {
+     "text": "can",
+     "start": 2.727,
+     "end": 2.875
+    },
+    {
+     "text": "fix",
+     "start": 2.898,
+     "end": 3.182
+    },
+    {
+     "text": "it",
+     "start": 3.193,
+     "end": 3.386
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_50.mp3",
+   "duration": 1.85,
+   "words": [
+    {
+     "text": "Ow",
+     "start": 0.075,
+     "end": 0.325
+    },
+    {
+     "text": "Did",
+     "start": 0.713,
+     "end": 0.838
+    },
+    {
+     "text": "you",
+     "start": 0.85,
+     "end": 0.938
+    },
+    {
+     "text": "just",
+     "start": 0.95,
+     "end": 1.2
+    },
+    {
+     "text": "hit",
+     "start": 1.212,
+     "end": 1.412
+    },
+    {
+     "text": "me",
+     "start": 1.425,
+     "end": 1.7
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_51.mp3",
+   "duration": 0.882,
+   "words": [
+    {
+     "text": "Fixed",
+     "start": 0.095,
+     "end": 0.493
+    },
+    {
+     "text": "it",
+     "start": 0.516,
+     "end": 0.732
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_52.mp3",
+   "duration": 1.338,
+   "words": [
+    {
+     "text": "It",
+     "start": 0.05,
+     "end": 0.188
+    },
+    {
+     "text": "actually",
+     "start": 0.2,
+     "end": 0.6
+    },
+    {
+     "text": "worked",
+     "start": 0.613,
+     "end": 1.188
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_53.mp3",
+   "duration": 1.666,
+   "words": [
+    {
+     "text": "Old-school",
+     "start": 0.095,
+     "end": 0.573
+    },
+    {
+     "text": "tech",
+     "start": 0.595,
+     "end": 0.891
+    },
+    {
+     "text": "baby",
+     "start": 1.107,
+     "end": 1.516
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_54.mp3",
+   "duration": 8.812,
+   "words": [
+    {
+     "text": "Okay",
+     "start": 0.075,
+     "end": 0.338
+    },
+    {
+     "text": "No",
+     "start": 0.7,
+     "end": 0.912
+    },
+    {
+     "text": "apps",
+     "start": 0.925,
+     "end": 1.312
+    },
+    {
+     "text": "No",
+     "start": 1.675,
+     "end": 1.887
+    },
+    {
+     "text": "updates",
+     "start": 1.9,
+     "end": 2.487
+    },
+    {
+     "text": "Nova",
+     "start": 2.85,
+     "end": 3.175
+    },
+    {
+     "text": "I",
+     "start": 3.2,
+     "end": 3.3
+    },
+    {
+     "text": "like",
+     "start": 3.312,
+     "end": 3.562
+    },
+    {
+     "text": "you",
+     "start": 3.575,
+     "end": 3.825
+    },
+    {
+     "text": "Like",
+     "start": 4.2,
+     "end": 4.388
+    },
+    {
+     "text": "real",
+     "start": 4.4,
+     "end": 4.675
+    },
+    {
+     "text": "life",
+     "start": 4.688,
+     "end": 5.05
+    },
+    {
+     "text": "offline",
+     "start": 5.062,
+     "end": 5.625
+    },
+    {
+     "text": "no",
+     "start": 5.65,
+     "end": 5.85
+    },
+    {
+     "text": "wifi",
+     "start": 5.862,
+     "end": 6.35
+    },
+    {
+     "text": "like",
+     "start": 6.362,
+     "end": 6.575
+    },
+    {
+     "text": "you",
+     "start": 6.588,
+     "end": 6.863
+    },
+    {
+     "text": "Do",
+     "start": 7.25,
+     "end": 7.3
+    },
+    {
+     "text": "you",
+     "start": 7.312,
+     "end": 7.388
+    },
+    {
+     "text": "wanna",
+     "start": 7.4,
+     "end": 7.588
+    },
+    {
+     "text": "get",
+     "start": 7.6,
+     "end": 7.775
+    },
+    {
+     "text": "food",
+     "start": 7.787,
+     "end": 8.05
+    },
+    {
+     "text": "sometime",
+     "start": 8.062,
+     "end": 8.662
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_55.mp3",
+   "duration": 2.2,
+   "words": [
+    {
+     "text": "Dex",
+     "start": 0.1,
+     "end": 0.675
+    },
+    {
+     "text": "Look",
+     "start": 1.038,
+     "end": 1.275
+    },
+    {
+     "text": "at",
+     "start": 1.288,
+     "end": 1.375
+    },
+    {
+     "text": "my",
+     "start": 1.387,
+     "end": 1.512
+    },
+    {
+     "text": "forehead",
+     "start": 1.525,
+     "end": 2.05
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_56.mp3",
+   "duration": 1.25,
+   "words": [
+    {
+     "text": "It",
+     "start": 0.05,
+     "end": 0.138
+    },
+    {
+     "text": "says",
+     "start": 0.15,
+     "end": 0.463
+    },
+    {
+     "text": "buffering",
+     "start": 0.475,
+     "end": 1.1
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_57.mp3",
+   "duration": 4.937,
+   "words": [
+    {
+     "text": "Yeah",
+     "start": 0.1,
+     "end": 0.588
+    },
+    {
+     "text": "It",
+     "start": 0.95,
+     "end": 1.15
+    },
+    {
+     "text": "does",
+     "start": 1.163,
+     "end": 1.338
+    },
+    {
+     "text": "that",
+     "start": 1.35,
+     "end": 1.588
+    },
+    {
+     "text": "every",
+     "start": 1.775,
+     "end": 2.05
+    },
+    {
+     "text": "time",
+     "start": 2.062,
+     "end": 2.263
+    },
+    {
+     "text": "you",
+     "start": 2.275,
+     "end": 2.375
+    },
+    {
+     "text": "walk",
+     "start": 2.388,
+     "end": 2.613
+    },
+    {
+     "text": "in",
+     "start": 2.625,
+     "end": 2.913
+    },
+    {
+     "text": "For",
+     "start": 3.275,
+     "end": 3.562
+    },
+    {
+     "text": "like",
+     "start": 3.575,
+     "end": 3.925
+    },
+    {
+     "text": "three",
+     "start": 4.1,
+     "end": 4.3
+    },
+    {
+     "text": "months",
+     "start": 4.312,
+     "end": 4.787
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_58.mp3",
+   "duration": 1.234,
+   "words": [
+    {
+     "text": "She's",
+     "start": 0.095,
+     "end": 0.391
+    },
+    {
+     "text": "been",
+     "start": 0.414,
+     "end": 0.595
+    },
+    {
+     "text": "buffering",
+     "start": 0.618,
+     "end": 1.084
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_59.mp3",
+   "duration": 1.5,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.05,
+     "end": 0.35
+    },
+    {
+     "text": "is",
+     "start": 0.375,
+     "end": 0.537
+    },
+    {
+     "text": "that",
+     "start": 0.55,
+     "end": 0.788
+    },
+    {
+     "text": "a",
+     "start": 0.8,
+     "end": 0.863
+    },
+    {
+     "text": "yes",
+     "start": 0.875,
+     "end": 1.35
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_60.mp3",
+   "duration": 1.113,
+   "words": [
+    {
+     "text": "That's",
+     "start": 0.1,
+     "end": 0.387
+    },
+    {
+     "text": "a",
+     "start": 0.4,
+     "end": 0.45
+    },
+    {
+     "text": "yes",
+     "start": 0.463,
+     "end": 0.963
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_61.mp3",
+   "duration": 4.415,
+   "words": [
+    {
+     "text": "To",
+     "start": 0.103,
+     "end": 0.249
+    },
+    {
+     "text": "confirm",
+     "start": 0.263,
+     "end": 0.688
+    },
+    {
+     "text": "your",
+     "start": 0.702,
+     "end": 0.848
+    },
+    {
+     "text": "date",
+     "start": 0.861,
+     "end": 1.247
+    },
+    {
+     "text": "please",
+     "start": 1.406,
+     "end": 1.686
+    },
+    {
+     "text": "enter",
+     "start": 1.699,
+     "end": 1.912
+    },
+    {
+     "text": "the",
+     "start": 1.925,
+     "end": 2.031
+    },
+    {
+     "text": "six-digit",
+     "start": 2.045,
+     "end": 2.696
+    },
+    {
+     "text": "code",
+     "start": 2.71,
+     "end": 3.055
+    },
+    {
+     "text": "sent",
+     "start": 3.069,
+     "end": 3.348
+    },
+    {
+     "text": "to",
+     "start": 3.361,
+     "end": 3.441
+    },
+    {
+     "text": "your",
+     "start": 3.454,
+     "end": 3.574
+    },
+    {
+     "text": "device",
+     "start": 3.587,
+     "end": 4.265
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_62.mp3",
+   "duration": 1.0,
+   "words": [
+    {
+     "text": "Seriously",
+     "start": 0.05,
+     "end": 0.85
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_63.mp3",
+   "duration": 1.212,
+   "words": [
+    {
+     "text": "I'll",
+     "start": 0.1,
+     "end": 0.4
+    },
+    {
+     "text": "send",
+     "start": 0.412,
+     "end": 0.637
+    },
+    {
+     "text": "it",
+     "start": 0.65,
+     "end": 0.713
+    },
+    {
+     "text": "to",
+     "start": 0.725,
+     "end": 0.812
+    },
+    {
+     "text": "you",
+     "start": 0.825,
+     "end": 1.062
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_64.mp3",
+   "duration": 2.913,
+   "words": [
+    {
+     "text": "Four",
+     "start": 0.075,
+     "end": 0.338
+    },
+    {
+     "text": "Eight",
+     "start": 0.7,
+     "end": 0.9
+    },
+    {
+     "text": "Two",
+     "start": 1.262,
+     "end": 1.512
+    },
+    {
+     "text": "Heart",
+     "start": 1.9,
+     "end": 2.137
+    },
+    {
+     "text": "emoji",
+     "start": 2.15,
+     "end": 2.763
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_65.mp3",
+   "duration": 1.563,
+   "words": [
+    {
+     "text": "That's",
+     "start": 0.1,
+     "end": 0.412
+    },
+    {
+     "text": "not",
+     "start": 0.425,
+     "end": 0.65
+    },
+    {
+     "text": "part",
+     "start": 0.662,
+     "end": 0.85
+    },
+    {
+     "text": "of",
+     "start": 0.863,
+     "end": 0.938
+    },
+    {
+     "text": "the",
+     "start": 0.95,
+     "end": 1.025
+    },
+    {
+     "text": "code",
+     "start": 1.038,
+     "end": 1.413
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_66.mp3",
+   "duration": 0.619,
+   "words": [
+    {
+     "text": "I",
+     "start": 0.057,
+     "end": 0.128
+    },
+    {
+     "text": "know",
+     "start": 0.142,
+     "end": 0.469
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_67.mp3",
+   "duration": 4.866,
+   "words": [
+    {
+     "text": "See",
+     "start": 0.095,
+     "end": 0.584
+    },
+    {
+     "text": "You're",
+     "start": 1.375,
+     "end": 1.614
+    },
+    {
+     "text": "welcome",
+     "start": 1.636,
+     "end": 2.114
+    },
+    {
+     "text": "Rizz",
+     "start": 2.92,
+     "end": 3.182
+    },
+    {
+     "text": "dot",
+     "start": 3.205,
+     "end": 3.409
+    },
+    {
+     "text": "exe",
+     "start": 3.432,
+     "end": 3.886
+    },
+    {
+     "text": "totally",
+     "start": 3.909,
+     "end": 4.307
+    },
+    {
+     "text": "worked",
+     "start": 4.33,
+     "end": 4.716
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_68.mp3",
+   "duration": 1.975,
+   "words": [
+    {
+     "text": "It",
+     "start": 0.05,
+     "end": 0.2
+    },
+    {
+     "text": "absolutely",
+     "start": 0.212,
+     "end": 0.825
+    },
+    {
+     "text": "did",
+     "start": 0.838,
+     "end": 1.0
+    },
+    {
+     "text": "not",
+     "start": 1.012,
+     "end": 1.288
+    },
+    {
+     "text": "work",
+     "start": 1.3,
+     "end": 1.825
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_69.mp3",
+   "duration": 8.262,
+   "words": [
+    {
+     "text": "Thank",
+     "start": 0.103,
+     "end": 0.369
+    },
+    {
+     "text": "you",
+     "start": 0.382,
+     "end": 0.489
+    },
+    {
+     "text": "for",
+     "start": 0.502,
+     "end": 0.648
+    },
+    {
+     "text": "using",
+     "start": 0.662,
+     "end": 1.007
+    },
+    {
+     "text": "Rizz",
+     "start": 1.021,
+     "end": 1.26
+    },
+    {
+     "text": "dot",
+     "start": 1.273,
+     "end": 1.526
+    },
+    {
+     "text": "exe",
+     "start": 1.539,
+     "end": 2.204
+    },
+    {
+     "text": "Your",
+     "start": 3.125,
+     "end": 3.338
+    },
+    {
+     "text": "free",
+     "start": 3.351,
+     "end": 3.577
+    },
+    {
+     "text": "trial",
+     "start": 3.59,
+     "end": 4.003
+    },
+    {
+     "text": "has",
+     "start": 4.016,
+     "end": 4.215
+    },
+    {
+     "text": "ended",
+     "start": 4.229,
+     "end": 4.681
+    },
+    {
+     "text": "Charging",
+     "start": 5.598,
+     "end": 6.09
+    },
+    {
+     "text": "four",
+     "start": 6.104,
+     "end": 6.37
+    },
+    {
+     "text": "hundred",
+     "start": 6.383,
+     "end": 6.702
+    },
+    {
+     "text": "dollars",
+     "start": 6.715,
+     "end": 7.154
+    },
+    {
+     "text": "to",
+     "start": 7.168,
+     "end": 7.42
+    },
+    {
+     "text": "Bolt",
+     "start": 7.633,
+     "end": 8.112
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_70.mp3",
+   "duration": 2.752,
+   "words": [
+    {
+     "text": "Wait",
+     "start": 0.095,
+     "end": 0.436
+    },
+    {
+     "text": "what",
+     "start": 0.698,
+     "end": 1.073
+    },
+    {
+     "text": "I",
+     "start": 1.852,
+     "end": 2.023
+    },
+    {
+     "text": "didn't",
+     "start": 2.045,
+     "end": 2.602
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_71.mp3",
+   "duration": 4.06,
+   "words": [
+    {
+     "text": "Payment",
+     "start": 0.103,
+     "end": 0.502
+    },
+    {
+     "text": "complete",
+     "start": 0.515,
+     "end": 1.194
+    },
+    {
+     "text": "Also",
+     "start": 2.114,
+     "end": 2.7
+    },
+    {
+     "text": "you",
+     "start": 2.859,
+     "end": 2.992
+    },
+    {
+     "text": "are",
+     "start": 3.005,
+     "end": 3.178
+    },
+    {
+     "text": "out",
+     "start": 3.192,
+     "end": 3.324
+    },
+    {
+     "text": "of",
+     "start": 3.338,
+     "end": 3.431
+    },
+    {
+     "text": "bread",
+     "start": 3.444,
+     "end": 3.91
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering/line_72.mp3",
+   "duration": 1.575,
+   "words": [
+    {
+     "text": "I",
+     "start": 0.095,
+     "end": 0.255
+    },
+    {
+     "text": "don't",
+     "start": 0.266,
+     "end": 0.459
+    },
+    {
+     "text": "even",
+     "start": 0.47,
+     "end": 0.664
+    },
+    {
+     "text": "have",
+     "start": 0.686,
+     "end": 0.834
+    },
+    {
+     "text": "a",
+     "start": 0.845,
+     "end": 0.914
+    },
+    {
+     "text": "toaster",
+     "start": 0.925,
+     "end": 1.425
+    }
+   ]
+  }
+ ]
+}

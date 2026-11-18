@@ -45,6 +45,9 @@ import {Blood} from './blood/Blood';
 import {PrintSheet} from './prints/PrintSheet';
 import {Prints} from './prints/Prints';
 import {Liar} from './liar/Liar';
+import {Buffering, BufferEpisode, bufferFrames} from './buffer/Buffering';
+import bufEp from '../episodes/buffering.json';
+import bufTiming from '../episodes/buffering.timing.json';
 import liarEp from '../episodes/liar.json';
 import liarTiming from '../episodes/liar.timing.json';
 import printEp from '../episodes/fingerprint.json';
@@ -211,6 +214,33 @@ export const RemotionRoot: React.FC = () => (
       durationInFrames={storyFrames(karmaEp as StoryEpisode, karmaTiming as FightTiming)}
     />
     <Composition id="PrintSheet" component={PrintSheet} fps={30} width={1080} height={1920} durationInFrames={1} />
+    <Composition
+      id="BufferingDub"
+      component={Buffering}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: bufEp as unknown as BufferEpisode, timing: bufTiming as FightTiming, mode: 'dub' as const}}
+      durationInFrames={bufferFrames(bufEp as unknown as BufferEpisode, bufTiming as FightTiming)}
+    />
+    <Composition
+      id="BufferingClean"
+      component={Buffering}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: bufEp as unknown as BufferEpisode, timing: bufTiming as FightTiming, mode: 'clean' as const}}
+      durationInFrames={bufferFrames(bufEp as unknown as BufferEpisode, bufTiming as FightTiming)}
+    />
+    <Composition
+      id="BufferingGuide"
+      component={Buffering}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: bufEp as unknown as BufferEpisode, timing: bufTiming as FightTiming, mode: 'guide' as const}}
+      durationInFrames={bufferFrames(bufEp as unknown as BufferEpisode, bufTiming as FightTiming)}
+    />
     <Composition
       id="SpotLiar"
       component={Liar}
