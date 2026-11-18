@@ -7,18 +7,18 @@ import {captions, FightEpisode, Timing} from '../fight/timeline';
 import {FPS, StoryEpisode, at, buildPlan, lineAt} from '../story/timeline';
 import {Bust, Icon} from './art';
 
-// SPOT THE LIAR. Teach-then-test #3: bust two body-language myths (looking
-// away, fidgeting), teach two research-backed VERBAL signs — checkable details
-// (Nahari, Vrij & Fisher 2014) and the backwards retelling (Vrij et al. 2008) —
-// then 8 s to read three alibis and pick the liar. The body language is a
-// deliberate decoy: A sweats and fidgets but tells the truth; calm B lies.
-// Kicker: 54% accuracy over 206 studies (Bond & DePaulo 2006).
+// SPOT THE LIAR (hard). Teach-then-test #3: bust two body-language myths,
+// then ONE real tool, the backwards retelling (Vrij et al. 2008, hedged on
+// screen). Nobody offers evidence, so the only key is comparing each story
+// with its rewind: honest A says "um" but keeps every detail, honest C adds
+// colour ("video games") but changes nothing, calm B is smooth but drove ->
+// bus. Kicker: 54% accuracy over 206 studies (Bond & DePaulo 2006).
 const heavy = loadMontserrat('normal', {weights: ['800', '900'], subsets: ['latin']}).fontFamily;
 const MONO = '"Courier New", Courier, monospace';
 const W = 1080;
 const H = 1920;
-const TEST_SECS = 8;
-const BACK_AT = 3.2; // the backwards lines appear this far into the test
+const TEST_SECS = 10;
+const BACK_AT = 3.5; // the backwards lines appear this far into the test
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
@@ -32,10 +32,14 @@ const PAPER = '#f4f1ea';
 
 const ROW_Y = [815, 1085, 1355];
 type Chip = {icon: 'name' | 'receipt' | 'camera'; text: string};
-const ALIBI: Array<{fwd: string; chips: Chip[]; back: string}> = [
-  {fwd: 'PIZZA WITH MY SISTER JEN', chips: [{icon: 'receipt', text: 'RECEIPT 9:04'}, {icon: 'name', text: 'JEN'}], back: 'PAID 9:04 ← PIZZA ← GOT JEN'},
-  {fwd: 'JUST HOME. TV. BED.', chips: [], back: 'BED... UH... TV? UM... HOME?'},
-  {fwd: 'SPIN CLASS AT 9 PM', chips: [{icon: 'name', text: 'COACH DEV'}, {icon: 'camera', text: 'GYM CAM'}], back: 'SHOWER ← CLASS ← PARKED 8:50'},
+const CWF = 16.8; // Courier advance at 28px
+const CWB = 15.6; // ... at 26px
+const BACK_X = 392;
+// fi/fl + bi/bl: the changed word (forward / backwards) for the proof
+const ALIBI: Array<{fwd: string; back: string; fi: number; fl: number; bi: number; bl: number}> = [
+  {fwd: 'BUS TO GYM → TACOS → HOME', back: 'UM... HOME ← TACOS ← UH, BUS TO GYM', fi: 0, fl: 0, bi: 0, bl: 0},
+  {fwd: 'DROVE TO MALL → MOVIE → PIZZA', back: 'PIZZA ← MOVIE ← BUS TO MALL', fi: 0, fl: 5, bi: 16, bl: 3},
+  {fwd: "WALKED TO SAM'S → GAMES → CAKE", back: 'CAKE ← VIDEO GAMES ← WALKED OVER', fi: 0, fl: 0, bi: 0, bl: 0},
 ];
 
 const ChipBox: React.FC<{x: number; y: number; c: Chip; k: number; tick?: number; dim?: boolean}> = ({x, y, c, k, tick = 0, dim}) => {
@@ -126,12 +130,13 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
         const isLiar = i === 1;
         const border = answered && isLiar ? BAD : twist && i === 0 && s >= T('truth') ? GOOD : '#2c3a55';
         const fwdK = inTest ? inK(s, T('test') + 0.2 + i * 0.25, 0.3) : 0;
-        const backK = inTest ? inK(s, tBack + i * 0.25, 0.3) : 0;
-        const wob = isLiar && s >= T('apart') && li === 7 ? Math.sin(s * 40) * 4 * Math.exp(-(s - T('apart')) * 2) : 0;
+        const backK = inTest ? inK(s, tBack + i * 0.3, 0.3) : 0;
+        const proof = isLiar && li === 7;
+        const fX = 354 + al.fi * CWF;
+        const bX = BACK_X + al.bi * CWB;
         return (
           <g key={i} opacity={1 - dimTwist} transform={`translate(${(1 - rowIn(i)) * (i % 2 ? 1100 : -1100)} 0)`}>
             <rect x={120} y={ry - 125} width={840} height={250} rx={18} fill="#16223a" stroke={border} strokeWidth={border === '#2c3a55' ? 4 : 10} />
-            {/* height lines behind the suspect */}
             {[-90, -50, -10, 30, 70].map((dy) => <rect key={dy} x={132} y={ry + dy} width={186} height={2} fill="#2c3a55" />)}
             <g>
               <defs><clipPath id={`tc${i}`}><rect x={124} y={ry - 121} width={832} height={242} rx={15} /></clipPath></defs>
@@ -143,7 +148,6 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
               <circle r={26} fill={YEL} stroke={OL} strokeWidth={5} />
               <text y={12} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={32} fill={OL}>{'ABC'[i]}</text>
             </g>
-            {/* bubble */}
             <path d={`M 340 ${ry - 112} L 940 ${ry - 112} Q 948 ${ry - 112} 948 ${ry - 104} L 948 ${ry + 104} Q 948 ${ry + 112} 940 ${ry + 112} L 340 ${ry + 112} Q 332 ${ry + 112} 332 ${ry + 104} L 332 ${ry + 10} L 310 ${ry - 4} L 332 ${ry - 18} L 332 ${ry - 104} Q 332 ${ry - 112} 340 ${ry - 112} Z`}
               fill={PAPER} stroke={OL} strokeWidth={5} />
             {!inTest ? (
@@ -151,35 +155,46 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
             ) : (
               <g>
                 <g opacity={fwdK} transform={`translate(${(1 - fwdK) * 30} 0)`}>
-                  <text x={354} y={ry - 62} fontFamily={heavy} fontWeight={900} fontSize={34} fill={OL}>“{al.fwd}”</text>
-                  {al.chips.map((c, j) => (
-                    <ChipBox key={j} x={354 + j * 290} y={ry - 6} c={c} k={inK(s, T('test') + 0.45 + i * 0.25 + j * 0.12, 0.25)}
-                      tick={s >= T('nocheck') && li === 7 ? pop(s, T('nocheck') + 0.1 + j * 0.1) : 0} dim={twist && i !== 0} />
-                  ))}
-                  {al.chips.length === 0 && s >= T('nocheck') && li === 7 ? <Tag x={500} y={ry - 2} text="0 CHECKABLE" bg={BAD} fg={OL} size={26} k={pop(s, T('nocheck'))} /> : null}
+                  <text x={354} y={ry - 80} fontFamily={heavy} fontWeight={900} fontSize={20} fill="#8a8172" letterSpacing={2}>LAST NIGHT:</text>
+                  {proof && s >= T('drove') ? <rect x={fX - 4} y={ry - 66} width={al.fl * CWF + 8} height={36} rx={6} fill={YEL} /> : null}
+                  <text x={354} y={ry - 38} fontFamily={MONO} fontWeight={900} fontSize={28} fill={OL}>{al.fwd}</text>
                 </g>
                 {backK > 0 ? (
-                  <g opacity={backK} transform={`translate(${wob} 0)`}>
-                    <rect x={348} y={ry + 34} width={584} height={2} fill="#d0c8b6" />
-                    <g transform={`translate(370 ${ry + 70})`}><Icon k="rewind" col={isLiar && s >= T('apart') ? BAD : '#2f6fd6'} /></g>
-                    <text x={398} y={ry + 80} fontFamily={MONO} fontWeight={900} fontSize={27} fill={isLiar && s >= T('apart') && li >= 7 ? BAD : '#2f3a52'}>{al.back}</text>
-                    {isLiar && s >= T('apart') && li === 7 ? <rect x={396} y={ry + 70} width={520 * inK(s, T('apart'), 0.3)} height={5} fill={BAD} /> : null}
+                  <g opacity={backK} transform={`translate(${(1 - backK) * 30} 0)`}>
+                    <rect x={348} y={ry - 10} width={584} height={2} fill="#d0c8b6" />
+                    <g transform={`translate(368 ${ry + 44})`}><Icon k="rewind" col="#2f6fd6" /></g>
+                    {proof && s >= T('bus') ? <rect x={bX - 4} y={ry + 26} width={al.bl * CWB + 8} height={34} rx={6} fill={BAD} /> : null}
+                    <text x={BACK_X} y={ry + 53} fontFamily={MONO} fontWeight={900} fontSize={26} fill="#2f3a52">{al.back}</text>
                   </g>
                 ) : null}
+                {proof && s >= T('bus') ? (() => {
+                  const k = inK(s, T('bus'), 0.3);
+                  const x1 = fX + (al.fl * CWF) / 2;
+                  const x2 = bX + (al.bl * CWB) / 2;
+                  const y1 = ry - 30;
+                  const y2 = ry + 26;
+                  return (
+                    <g>
+                      <line x1={x1} y1={y1} x2={lerp(x1, x2, k)} y2={lerp(y1, y2, k)} stroke={BAD} strokeWidth={6} strokeLinecap="round" />
+                      <g transform={`translate(${(x1 + x2) / 2} ${(y1 + y2) / 2}) scale(${pop(s, T('bus') + 0.25)})`}>
+                        <circle r={22} fill={BAD} stroke={OL} strokeWidth={4} />
+                        <text y={12} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={34} fill={OL}>≠</text>
+                      </g>
+                    </g>
+                  );
+                })() : null}
               </g>
             )}
-            {/* verdict stamps */}
             {isLiar && answered && li <= 7 ? <Stamp x={228} y={ry + 40} text="LIAR" col={BAD} k={clamp01((s - T('answer')) / 0.18)} /> : null}
-            {isLiar && s >= T('apart') && li === 7 ? <Tag x={800} y={ry - 2} text="FELL APART" bg={BAD} fg={OL} size={26} k={pop(s, T('apart') + 0.2)} /> : null}
             {i === 0 && s >= T('truth') ? <Stamp x={228} y={ry + 40} text="TRUTH" col="#2a8a5a" k={clamp01((s - T('truth')) / 0.18)} size={40} /> : null}
           </g>
         );
       })}
       {s >= tBack && s < T('answer') ? (
         <g transform={`translate(540 ${ROW_Y[0] - 150}) scale(${pop(s, tBack)})`}>
-          <rect x={-210} y={-30} width={420} height={56} rx={28} fill="#2f6fd6" stroke={OL} strokeWidth={5} />
-          <g transform="translate(-168 -2)"><Icon k="rewind" col="#fff" /></g>
-          <text x={14} y={10} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={30} fill="#fff">NOW BACKWARDS</text>
+          <rect x={-250} y={-30} width={500} height={56} rx={28} fill="#2f6fd6" stroke={OL} strokeWidth={5} />
+          <g transform="translate(-205 -2)"><Icon k="rewind" col="#fff" /></g>
+          <text x={18} y={10} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={30} fill="#fff">NOW TELL IT BACKWARDS</text>
         </g>
       ) : null}
       {s >= T('nerves') && li === 9 ? <Tag x={540} y={ROW_Y[1] + 20} text="NERVES ≠ LIES" size={56} k={pop(s, T('nerves'))} /> : null}
@@ -196,19 +211,41 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
   const dGaze = gazeOn ? (Math.sin((s - T('gaze')) * 9) > 0 ? 1 : -1) : 0;
   const dJit = fidgetOn ? Math.sin(s * 34) * 5 : 0;
   const talking = li >= 2 && li <= 5 ? Math.max(0, Math.sin(s * 15)) * 0.8 : 0;
-  const bubbleK = li >= 2 ? inK(s, T('say') - 0.15, 0.3) : 0;
+  const bubbleK = li >= 2 ? inK(s, T('trick') - 0.15, 0.3) : 0;
   const BX0 = 420;
   const BX1 = 950;
   const BY0 = 690;
   const BY1 = 1000;
-  const lessonText = li <= 2 ? '' : li === 3 ? '“I WAS AT ROSA’S DINER.”' : li === 4 ? (s >= T('vague') ? '“I WAS JUST... OUT.”' : '“I WAS AT ROSA’S DINER.”') : '';
-  const LCHIPS: Array<[Chip, string]> = [[{icon: 'name', text: 'ROSA'}, 'name'], [{icon: 'receipt', text: '8:52 PM'}, 'receipt'], [{icon: 'camera', text: 'CCTV'}, 'camera']];
-  const revK = inK(s, T('rewind'), 0.6);
-  const STEPS = ['DROVE', 'ATE', 'PAID'];
+  const XS = [500, 685, 870];
+  // a 3-step story whose words hop from one order to another
+  const seq = (y: number, from: string[], to: string[], k: number, back: boolean, red: string[] = [], size = 34) => (
+    <g>
+      {from.map((w, j) => {
+        const tj = to.indexOf(w);
+        const x = lerp(XS[j], XS[tj], k);
+        const dy = tj === j ? 0 : (tj > j ? -1 : 1) * 46 * Math.sin(Math.PI * k);
+        const isRed = red.includes(w);
+        return (
+          <g key={w}>
+            {isRed ? <rect x={x - w.length * size * 0.36 - 8} y={y + dy - size * 0.95} width={w.length * size * 0.72 + 16} height={size * 1.25} rx={8} fill={BAD} /> : null}
+            <text x={x} y={y + dy} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={size} fill={OL}>{w}</text>
+          </g>
+        );
+      })}
+      {[0, 1].map((j) => (
+        <text key={j} x={(XS[j] + XS[j + 1]) / 2} y={y - 2} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={28} fill="#2f6fd6">{back ? '←' : '→'}</text>
+      ))}
+    </g>
+  );
+  const STORY = ['BUS', 'MOVIE', 'PIZZA'];
+  const REV = ['PIZZA', 'MOVIE', 'BUS'];
+  const SLIP = ['PIZZA', 'BUS', 'MOVIE'];
+  const cleanK = inK(s, T('clean'), 0.6);
+  const slipK = inK(s, T('slip'), 0.6);
+  const slipShake = s >= T('slip') + 0.6 && li === 4 ? Math.sin(s * 40) * 5 * Math.exp(-(s - T('slip') - 0.6) * 3) : 0;
   const lessons = lessonOn ? (
     <g opacity={lessonK}>
       <Bust x={DX + dJit} y={DY} s={1.15} who="D" gaze={dGaze} sweat={fidgetOn ? 1 : 0} mood={li === 1 && s >= T('fidget') ? 'nervous' : 'neutral'} talk={talking} />
-      {/* myths */}
       {li === 1 ? (
         <g>
           {s >= T('gaze') ? (
@@ -228,40 +265,51 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
           <Stamp x={760} y={1170} text="MYTHS" col={BAD} k={clamp01((s - T('myth')) / 0.18)} size={64} rot={-8} />
         </g>
       ) : null}
-      {/* the speech bubble */}
       {bubbleK > 0 ? (
         <g opacity={bubbleK} transform={`translate(${(BX0 + BX1) / 2} ${BY1}) scale(${0.6 + 0.4 * bubbleK}) translate(${-(BX0 + BX1) / 2} ${-BY1})`}>
           <path d={`M ${BX0 + 14} ${BY0} L ${BX1 - 14} ${BY0} Q ${BX1} ${BY0} ${BX1} ${BY0 + 14} L ${BX1} ${BY1 - 14} Q ${BX1} ${BY1} ${BX1 - 14} ${BY1} L ${BX0 + 130} ${BY1} L ${DX + 70} ${DY - 110} L ${BX0 + 60} ${BY1} L ${BX0 + 14} ${BY1} Q ${BX0} ${BY1} ${BX0} ${BY1 - 14} L ${BX0} ${BY0 + 14} Q ${BX0} ${BY0} ${BX0 + 14} ${BY0} Z`}
             fill={PAPER} stroke={OL} strokeWidth={6} />
-          {li === 2 ? [0, 1, 2].map((k) => <circle key={k} cx={640 + k * 46} cy={845 - 12 * Math.max(0, Math.sin(s * 9 - k))} r={13} fill="#8a8172" />) : null}
-          {lessonText ? <text x={(BX0 + BX1) / 2} y={782} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={li === 4 && s >= T('vague') ? 44 : 32} fill={OL}>{lessonText}</text> : null}
-          {li === 3 || (li === 4 && s < T('vague')) ? LCHIPS.map(([c, cue], j) => (
-            <ChipBox key={j} x={BX0 + 22 + LCHIPS.slice(0, j).reduce((a, [cc]) => a + 64 + cc.text.length * 17 + 22, 0)} y={872} c={{...c, text: c.text}} k={s >= T(cue) ? pop(s, T(cue)) : 0} tick={s >= T(cue) + 0.25 ? 1 : 0} />
-          )) : null}
-          {li === 4 && s >= T('vague') ? <Tag x={(BX0 + BX1) / 2} y={884} text="NOTHING TO CHECK" bg={BAD} fg={OL} size={32} k={pop(s, T('vague') + 0.1)} /> : null}
-          {li === 5 ? (
+          {li === 2 ? (
             <g>
-              {STEPS.map((w, j) => {
-                const xs = [520, 685, 850];
-                const x = lerp(xs[j], xs[2 - j], revK);
-                return <text key={w} x={x} y={792 + (j === 1 ? 0 : (j === 0 ? -1 : 1) * 46 * Math.sin(Math.PI * revK))} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={40} fill={OL}>{w}</text>;
-              })}
-              {[0, 1].map((j) => (
-                <text key={j} x={602 + j * 165} y={790} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={36} fill="#2f6fd6">{revK > 0.5 ? '←' : '→'}</text>
-              ))}
+              {seq(800, STORY, STORY, 0, false)}
               {s >= T('back') ? (
-                <g transform={`translate(${(BX0 + BX1) / 2} 890) scale(${pop(s, T('back'))})`}>
+                <g transform={`translate(${(BX0 + BX1) / 2} 900) scale(${pop(s, T('back'))})`}>
                   <rect x={-150} y={-36} width={300} height={66} rx={33} fill="#2f6fd6" stroke={OL} strokeWidth={5} />
-                  <g transform={`translate(-104 -3) rotate(${s >= T('rewind') ? -(s - T('rewind')) * 0 : 0})`}><Icon k="rewind" col="#fff" /></g>
+                  <g transform="translate(-104 -3)"><Icon k="rewind" col="#fff" /></g>
                   <text x={16} y={9} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={30} fill="#fff">BACKWARDS</text>
                 </g>
               ) : null}
             </g>
-          ) : null}
+          ) : li === 3 ? (
+            <g>
+              {seq(800, STORY, REV, cleanK, cleanK > 0.5)}
+              {s >= T('mem') ? <text x={(BX0 + BX1) / 2} y={735} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={24} fill="#2a8a5a" letterSpacing={2}>TRUTH</text> : null}
+              {cleanK >= 1 ? <Tag x={(BX0 + BX1) / 2} y={905} text="SAME STORY ✓" bg={GOOD} fg={OL} size={34} k={pop(s, T('clean') + 0.6)} /> : null}
+            </g>
+          ) : li === 4 ? (
+            <g transform={`translate(${slipShake} 0)`}>
+              {seq(800, STORY, SLIP, slipK, slipK > 0.5, slipK >= 1 ? ['BUS', 'MOVIE'] : [])}
+              <text x={(BX0 + BX1) / 2} y={735} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={24} fill={BAD} letterSpacing={2}>LIE</text>
+              {slipK >= 1 ? <Tag x={(BX0 + BX1) / 2} y={905} text="THINGS SLIP" bg={BAD} fg={OL} size={34} k={pop(s, T('slip') + 0.6)} /> : null}
+            </g>
+          ) : (
+            <g>
+              {s >= T('moves') ? (
+                <g opacity={inK(s, T('moves'), 0.25)}>
+                  {seq(782, SLIP, SLIP, 0, true, ['BUS', 'MOVIE'], 30)}
+                  <text x={(BX0 + BX1) / 2} y={828} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={24} fill={BAD}>A STEP MOVED</text>
+                </g>
+              ) : null}
+              {s >= T('changes') ? (
+                <g opacity={inK(s, T('changes'), 0.25)}>
+                  {seq(915, ['PIZZA', 'MOVIE', 'CAR'], ['PIZZA', 'MOVIE', 'CAR'], 0, true, ['CAR'], 30)}
+                  <text x={(BX0 + BX1) / 2} y={961} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={24} fill={BAD}>BUS BECAME CAR</text>
+                </g>
+              ) : null}
+            </g>
+          )}
         </g>
       ) : null}
-      {li === 5 && s >= T('rewind') ? <Tag x={720} y={1110} text="HARDER TO FAKE" size={38} k={pop(s, T('rewind') + 0.3)} /> : null}
-      {li === 3 && s >= T('check') ? <Tag x={720} y={1110} text="YOU CAN CHECK IT" size={38} bg={GOOD} fg={OL} k={pop(s, T('check'))} /> : null}
     </g>
   ) : null;
 
@@ -310,14 +358,14 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
   if (li === 0) body = <>{bigText('WHO IS LYING?', '#d6293a', 58)}{subText('LEARN THE SIGNS, THEN YOU TRY')}</>;
   else if (li === 1) body = <>{bigText(s >= T('myth') ? 'BODY LANGUAGE: MYTH' : 'BODY LANGUAGE?')}{subText('LOOKING AWAY · FIDGETING')}</>;
   else if (li <= 5) {
-    const got = [s >= T('check'), s >= T('back')];
+    const got = [s >= T('moves'), s >= T('changes')];
     body = (
       <>
-        {bigText(li === 2 ? 'LISTEN, DON’T WATCH' : 'WHAT THEY SAY', OL, 46)}
-        {['1 · CHECKABLE DETAILS', '2 · BACKWARDS TEST'].map((n, k) => (
+        {bigText('THE BACKWARDS TRICK', OL, 46)}
+        {['A STEP MOVES', 'A DETAIL CHANGES'].map((n, k) => (
           <div key={n} style={{position: 'absolute', left: 26 + k * 400, top: 120, width: 380, height: 42, borderRadius: 8, border: '4px solid #1b1b22', boxSizing: 'border-box',
             background: got[k] ? YEL : '#e2ddd2', fontFamily: heavy, fontWeight: 900, fontSize: 23, lineHeight: '34px', textAlign: 'center', color: got[k] ? OL : '#aaa39a',
-            transform: `scale(${got[k] ? pop(s, k ? T('back') : T('check')) : 1})`}}>{got[k] ? n : '?'}</div>
+            transform: `scale(${got[k] ? pop(s, k ? T('changes') : T('moves')) : 1})`}}>{got[k] ? n : '?'}</div>
         ))}
       </>
     );
@@ -354,7 +402,7 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
       {body}
     </div>
   );
-  const note = li === 5 ? '* CAN HELP IN STUDIES, NOT A LIE DETECTOR' : li === 3 ? '* NAHARI, VRIJ & FISHER 2014' : li === 10 && s >= T('studies') ? 'PERSONALITY & SOCIAL PSYCHOLOGY REVIEW, 2006' : '';
+  const note = li >= 2 && li <= 5 ? '* VRIJ ET AL. 2008 · HELPS IN STUDIES, NOT A LIE DETECTOR' : li === 7 && s >= T('drove') ? 'EVERYONE ELSE KEPT THEIR DETAILS' : li === 10 && s >= T('studies') ? 'PERSONALITY & SOCIAL PSYCHOLOGY REVIEW, 2006' : '';
 
   // ── captions
   const caps = captions(ep as unknown as FightEpisode, timing, {lineStarts: plan.lineStarts, lineEnds: plan.lineEnds, events: [], hits: [], end: plan.end});
@@ -412,11 +460,11 @@ export const Liar: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode
       {([
         [0.05, 'sfx/whoosh.wav', 0.5], [T('lying'), 'sfx/ding.wav', 0.4], [hookOut, 'sfx/whoosh.wav', 0.6],
         [T('gaze'), 'sfx/pop.wav', 0.6], [T('fidget'), 'sfx/pop.wav', 0.6], [T('myth'), 'sfx/slam.wav', 0.75], [T('myth') + 0.05, 'sfx/fail.wav', 0.35],
-        [T('say'), 'sfx/pop.wav', 0.55], [T('check'), 'sfx/ding.wav', 0.5], [T('name'), 'sfx/pop.wav', 0.6], [T('receipt'), 'sfx/printer.wav', 0.35], [T('camera'), 'sfx/shutter.wav', 0.6],
-        [T('vague'), 'sfx/fail.wav', 0.45], [T('back'), 'sfx/pop.wav', 0.6], [T('rewind'), 'sfx/scratch.wav', 0.55],
+        [T('trick'), 'sfx/pop.wav', 0.55], [T('back'), 'sfx/pop.wav', 0.6], [T('mem'), 'sfx/ding.wav', 0.4], [T('clean'), 'sfx/scratch.wav', 0.5], [T('clean') + 0.6, 'sfx/ding.wav', 0.6],
+        [T('built'), 'sfx/pop.wav', 0.5], [T('slip'), 'sfx/scratch.wav', 0.5], [T('slip') + 0.6, 'sfx/fail.wav', 0.45], [T('moves'), 'sfx/pop.wav', 0.6], [T('changes'), 'sfx/pop.wav', 0.6],
         [T('test'), 'sfx/slam.wav', 0.8], [tBack, 'sfx/scratch.wav', 0.5], [tTest + TEST_SECS, 'sfx/fail.wav', 0.5],
         [T('answer'), 'sfx/ding.wav', 0.8], [T('answer'), 'sfx/shine.wav', 0.6], [T('answer') + 0.05, 'sfx/slam.wav', 0.6],
-        [T('nocheck'), 'sfx/pop.wav', 0.55], [T('apart'), 'sfx/crack.wav', 0.6],
+        [T('drove'), 'sfx/pop.wav', 0.6], [T('bus'), 'sfx/crack.wav', 0.6], [T('bus') + 0.25, 'sfx/fail.wav', 0.4],
         [T('a'), 'sfx/whoosh.wav', 0.5], [T('truth'), 'sfx/slam.wav', 0.8], [T('truth') + 0.05, 'sfx/ding.wav', 0.6], [T('nerves'), 'sfx/pop.wav', 0.6],
         [T('studies'), 'sfx/printer.wav', 0.35], [T('pct'), 'sfx/slam.wav', 0.85], [T('coin'), 'sfx/coins.wav', 0.6], [T('coin') + 1.1, 'sfx/boom.wav', 0.45],
       ] as Array<[number, string, number]>).map(([t, f, v], i) => (

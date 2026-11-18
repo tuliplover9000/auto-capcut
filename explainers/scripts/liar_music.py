@@ -31,7 +31,7 @@ SNEAK = [65, None, 69, None, 65, None, 72, None, 70, None, 69, None, 67, None, 6
          64, None, 67, None, 64, None, 70, None, 69, None, 67, None, 64, None, None, None]
 BOUNCE = [77, None, 72, 74, None, 72, 69, None, 72, None, 74, 77, None, 79, 77, None,
           76, None, 72, 74, None, 72, 67, None, 69, None, 72, 74, None, 76, None, None]
-TEST = 8
+TEST = 10
 
 
 def main() -> int:
@@ -102,7 +102,7 @@ def main() -> int:
     add(chords, E["myth"], brass([38, 45, 50, 53], 0.6), 0.8)
     # ---- the real signs: driving groove, a climbing stab per reveal
     groove(E["myth"] + 0.3, LS[6] - 0.1, 0.65, D_MIN, CREEP, pizz=True, gain=0.9)
-    for j, k in enumerate(("say", "check", "name", "receipt", "camera", "vague", "back", "rewind")):
+    for j, k in enumerate(("trick", "back", "mem", "clean", "built", "slip", "moves", "changes")):
         stab(E[k], (50 + j, 57 + j, 62 + j), 0.55)
         add(lead, E[k], bell(79 + j, 0.5), 0.22)
 
@@ -113,7 +113,7 @@ def main() -> int:
     stab(E["test"], (38, 45, 50, 53), 0.85)
     groove(E["test"] + 0.3, t_test, 0.5, D_MIN, None, half=True, gain=0.8)
     groove(t_test, t_test + TEST, 0.9, D_MIN, PULSE, toms=True, gain=0.95)
-    add(fx, t_test + 3.2, impact(0.8), 0.5)
+    add(fx, t_test + 3.5, impact(0.8), 0.5)
     add(fx, t_test + TEST - 1.6, noise_riser(1.6), 0.55)
     for buf in (drums, bass, chords, lead):
         tape_stop(buf, t_test + TEST - 0.05, t_test + TEST + 0.25)
@@ -124,8 +124,8 @@ def main() -> int:
     add(fx, E["answer"], crash(2.0), 0.55)
     add(chords, E["answer"], brass([38, 45, 50, 54, 57], 0.8), 0.9)
     groove(E["answer"] + 0.4, E["a"] - 0.05, 0.8, D_MIN, CREEP, toms=True, up=12, gain=0.9)
-    stab(E["nocheck"], (52, 59, 64), 0.55)
-    stab(E["apart"], (54, 61, 66), 0.6)
+    stab(E["drove"], (52, 59, 64), 0.55)
+    stab(E["bus"], (54, 61, 66), 0.6)
 
     # ---- the twist: drop, creep, TRUTH hit
     gap(E["a"], 0.25)
