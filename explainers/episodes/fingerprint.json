@@ -1,0 +1,33 @@
+{
+  "id": "fingerprint",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "title": "Fingerprint match: which suspect left the print?",
+  "hot": ["fingerprint", "thief", "three", "loops", "whorls", "circles", "arches", "rarest", "wave", "ends", "splits", "dot", "suspect", "c", "whorl", "out", "off", "exactly", "twist", "twins", "dna", "apart", "fingerprints"],
+  "lines": [
+    {"text": "Police lifted this fingerprint at a crime scene. Learn to read it, then you catch the thief.", "scene": "lab", "chapter": "FINGERPRINTS 101", "note": "",
+      "events": [{"cue": "fingerprint", "kind": "dust"}, {"cue": "read", "kind": "wipe"}]},
+    {"text": "Every print is one of three types. Loops are the most common.", "scene": "lab", "chapter": "1 · LOOP", "note": "",
+      "events": [{"cue": "three", "kind": "three"}, {"cue": "Loops", "kind": "loop"}]},
+    {"text": "Whorls spin in circles.", "scene": "lab", "chapter": "2 · WHORL", "note": "", "pause": 0.2,
+      "events": [{"cue": "Whorls", "kind": "whorl"}, {"cue": "circles", "kind": "spin"}]},
+    {"text": "And arches, the rarest, roll like a wave.", "scene": "lab", "chapter": "3 · ARCH", "note": "", "pause": 0.2,
+      "events": [{"cue": "arches", "kind": "arch"}, {"cue": "wave", "kind": "wave"}]},
+    {"text": "Then experts zoom in on tiny details. A ridge that ends,", "scene": "lab", "chapter": "DETAILS", "note": "", "pause": 0.2,
+      "events": [{"cue": "zoom", "kind": "zoom"}, {"cue": "ends", "kind": "end"}]},
+    {"text": "a ridge that splits, and a dot.", "scene": "lab", "chapter": "DETAILS", "note": "", "pause": 0.05,
+      "events": [{"cue": "splits", "kind": "fork"}, {"cue": "dot", "kind": "dot"}]},
+    {"text": "Your turn. Which suspect left the print?", "scene": "lab", "chapter": "YOUR TURN", "note": "", "pause": 0.3,
+      "events": [{"cue": "turn", "kind": "test"}, {"cue": "suspect", "kind": "ask"}]},
+    {"text": "C! A is a whorl, so it's out.", "scene": "lab", "chapter": "THE ANSWER", "note": "", "pause": 6.0,
+      "events": [{"cue": "C", "kind": "answer"}, {"cue": "whorl", "kind": "outA"}]},
+    {"text": "B is a loop too, but its details are off. C lines up exactly.", "scene": "lab", "chapter": "THE ANSWER", "note": "", "pause": 0.2,
+      "events": [{"cue": "B", "kind": "b"}, {"cue": "off", "kind": "off"}, {"cue": "lines", "kind": "lineup"}, {"cue": "exactly", "kind": "exact"}]},
+    {"text": "Here's the twist. B and C are identical twins.", "scene": "lab", "chapter": "THE TWIST", "note": "", "pause": 0.35,
+      "events": [{"cue": "twist", "kind": "twist"}, {"cue": "twins", "kind": "twins"}]},
+    {"text": "A standard DNA test can't tell them apart.", "scene": "lab", "chapter": "THE TWIST", "note": "", "pause": 0.2,
+      "events": [{"cue": "DNA", "kind": "dna"}, {"cue": "apart", "kind": "same"}]},
+    {"text": "Their fingerprints can.", "scene": "lab", "chapter": "THE TWIST", "note": "", "pause": 0.25,
+      "events": [{"cue": "fingerprints", "kind": "kicker"}]}
+  ]
+}

@@ -42,6 +42,10 @@ import {Party} from './chain/Party';
 import partyEp from '../episodes/chain-party.json';
 import partyTiming from '../episodes/chain-party.timing.json';
 import {Blood} from './blood/Blood';
+import {PrintSheet} from './prints/PrintSheet';
+import {Prints} from './prints/Prints';
+import printEp from '../episodes/fingerprint.json';
+import printTiming from '../episodes/fingerprint.timing.json';
 import bloodEp from '../episodes/blood-spatter.json';
 import bloodTiming from '../episodes/blood-spatter.timing.json';
 import {Horde} from './horde/Horde';
@@ -202,6 +206,16 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: karmaEp as StoryEpisode, timing: karmaTiming as FightTiming}}
       durationInFrames={storyFrames(karmaEp as StoryEpisode, karmaTiming as FightTiming)}
+    />
+    <Composition id="PrintSheet" component={PrintSheet} fps={30} width={1080} height={1920} durationInFrames={1} />
+    <Composition
+      id="Fingerprint"
+      component={Prints}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: printEp as StoryEpisode, timing: printTiming as FightTiming}}
+      durationInFrames={storyFrames(printEp as StoryEpisode, printTiming as FightTiming)}
     />
     <Composition
       id="BloodSpatter"
