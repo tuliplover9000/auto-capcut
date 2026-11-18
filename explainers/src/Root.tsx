@@ -44,6 +44,9 @@ import partyTiming from '../episodes/chain-party.timing.json';
 import {Blood} from './blood/Blood';
 import {PrintSheet} from './prints/PrintSheet';
 import {Prints} from './prints/Prints';
+import {Liar} from './liar/Liar';
+import liarEp from '../episodes/liar.json';
+import liarTiming from '../episodes/liar.timing.json';
 import printEp from '../episodes/fingerprint.json';
 import printTiming from '../episodes/fingerprint.timing.json';
 import bloodEp from '../episodes/blood-spatter.json';
@@ -208,6 +211,15 @@ export const RemotionRoot: React.FC = () => (
       durationInFrames={storyFrames(karmaEp as StoryEpisode, karmaTiming as FightTiming)}
     />
     <Composition id="PrintSheet" component={PrintSheet} fps={30} width={1080} height={1920} durationInFrames={1} />
+    <Composition
+      id="SpotLiar"
+      component={Liar}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: liarEp as StoryEpisode, timing: liarTiming as FightTiming}}
+      durationInFrames={storyFrames(liarEp as StoryEpisode, liarTiming as FightTiming)}
+    />
     <Composition
       id="Fingerprint"
       component={Prints}
