@@ -48,6 +48,8 @@ import {Liar} from './liar/Liar';
 import {Buffering, BufferEpisode, bufferFrames} from './buffer/Buffering';
 import bufEp from '../episodes/buffering.json';
 import bufTiming from '../episodes/buffering.timing.json';
+import bufEsEp from '../episodes/buffering-es.json';
+import bufEsTiming from '../episodes/buffering-es.timing.json';
 import liarEp from '../episodes/liar.json';
 import liarTiming from '../episodes/liar.timing.json';
 import printEp from '../episodes/fingerprint.json';
@@ -214,6 +216,24 @@ export const RemotionRoot: React.FC = () => (
       durationInFrames={storyFrames(karmaEp as StoryEpisode, karmaTiming as FightTiming)}
     />
     <Composition id="PrintSheet" component={PrintSheet} fps={30} width={1080} height={1920} durationInFrames={1} />
+    <Composition
+      id="CargandoTikTok"
+      component={Buffering}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: bufEsEp as unknown as BufferEpisode, timing: bufEsTiming as FightTiming, mode: 'tiktok' as const}}
+      durationInFrames={bufferFrames(bufEsEp as unknown as BufferEpisode, bufEsTiming as FightTiming)}
+    />
+    <Composition
+      id="BufferingTikTok"
+      component={Buffering}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: bufEp as unknown as BufferEpisode, timing: bufTiming as FightTiming, mode: 'tiktok' as const}}
+      durationInFrames={bufferFrames(bufEp as unknown as BufferEpisode, bufTiming as FightTiming)}
+    />
     <Composition
       id="BufferingDub"
       component={Buffering}

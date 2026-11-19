@@ -3,6 +3,7 @@
     python scripts/make_buffering.py          # -> episodes/buffering.json
     python scripts/narrate.py episodes/buffering.json
     python scripts/make_buffering.py trim     # cut TTS tail silence from the timing
+    (add `es` to either command for the Spanish version, episodes/buffering-es.json)
 
 Each line names a SPEAKER + STYLE. The guide-track TTS voice comes from
 VOICES; `text` is what shows on screen and `say` is what the TTS reads.
@@ -105,10 +106,16 @@ L = [
     ("BOLT", "normal", "end", 0.2, "I DON'T EVEN HAVE A TOASTER!", "I don't even have a toaster!"),
 ]
 
-def build() -> None:
+def build(lang: str = "en") -> None:
+    if lang == "es":
+        from buffering_es import L_ES as lines_src, VOICES_ES as voices
+        eid, title = "buffering-es", "Cargando"
+    else:
+        lines_src, voices, eid, title = L, VOICES, "buffering", "Buffering"
+    assert len(lines_src) == len(L) and [x[2] for x in lines_src] == [x[2] for x in L], "line count/scenes must match (gags are keyed to line index)"
     lines = []
-    for spk, style, scene, pause, text, say in L:
-        v, r, p = VOICES[(spk, style)]
+    for spk, style, scene, pause, text, say in lines_src:
+        v, r, p = voices[(spk, style)]
         ln = {"speaker": spk, "style": style, "text": text, "scene": scene, "chapter": scene.upper(), "note": "",
               "pause": pause, "voice": v, "rate": r, "pitch": p, "events": []}
         if say:
@@ -116,17 +123,17 @@ def build() -> None:
         lines.append(ln)
     lines[0]["pause"] = 0
     # intro: seconds of title card before line 0 (Buffering.tsx + buffer_music.py both read it)
-    ep = {"id": "buffering", "title": "Buffering", "voice": "en-US-BrianNeural", "intro": 3.0, "outro": 2.5, "lines": lines}
-    out = os.path.join(ROOT, "episodes", "buffering.json")
+    ep = {"id": eid, "lang": lang, "title": title, "voice": lines[0]["voice"], "intro": 3.0, "outro": 2.5, "lines": lines}
+    out = os.path.join(ROOT, "episodes", f"{eid}.json")
     json.dump(ep, open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
     print(f"{len(lines)} lines -> {out}")
 
 
-def trim() -> None:
+def trim(eid: str = "buffering") -> None:
     """After narrate.py: edge-tts pads every mp3 with 0.4-1.3 s of trailing
     silence; cut each line's timeline duration to its last word + 0.15 s so the
     skit moves (the audio file still plays whole; the tail is silent)."""
-    p = os.path.join(ROOT, "episodes", "buffering.timing.json")
+    p = os.path.join(ROOT, "episodes", f"{eid}.timing.json")
     t = json.load(open(p, encoding="utf-8"))
     for ln in t["lines"]:
         ln["duration"] = round(min(ln["duration"], ln["words"][-1]["end"] + 0.15), 3)
@@ -136,4 +143,10 @@ def trim() -> None:
 
 if __name__ == "__main__":
     import sys
-    trim() if sys.argv[1:] == ["trim"] else build()
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    args = sys.argv[1:]
+    lang = "es" if "es" in args else "en"
+    if "trim" in args:
+        trim("buffering-es" if lang == "es" else "buffering")
+    else:
+        build(lang)

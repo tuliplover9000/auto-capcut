@@ -1,0 +1,2787 @@
+{
+ "lines": [
+  {
+   "file": "narration/buffering-es/line_0.mp3",
+   "duration": 2.425,
+   "words": [
+    {
+     "text": "Ugh",
+     "start": 0.1,
+     "end": 0.35
+    },
+    {
+     "text": "Ya",
+     "start": 1.212,
+     "end": 1.5
+    },
+    {
+     "text": "es",
+     "start": 1.512,
+     "end": 1.65
+    },
+    {
+     "text": "de",
+     "start": 1.663,
+     "end": 1.738
+    },
+    {
+     "text": "ma\u00f1ana",
+     "start": 1.75,
+     "end": 2.275
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_1.mp3",
+   "duration": 9.446,
+   "words": [
+    {
+     "text": "Buenos",
+     "start": 0.101,
+     "end": 0.531
+    },
+    {
+     "text": "d\u00edas",
+     "start": 0.544,
+     "end": 1.0
+    },
+    {
+     "text": "Dex",
+     "start": 1.253,
+     "end": 1.696
+    },
+    {
+     "text": "Tu",
+     "start": 2.584,
+     "end": 2.698
+    },
+    {
+     "text": "ritmo",
+     "start": 2.71,
+     "end": 3.027
+    },
+    {
+     "text": "card\u00edaco",
+     "start": 3.039,
+     "end": 3.647
+    },
+    {
+     "text": "est\u00e1",
+     "start": 3.66,
+     "end": 3.977
+    },
+    {
+     "text": "elevado",
+     "start": 3.989,
+     "end": 4.509
+    },
+    {
+     "text": "Anoche",
+     "start": 5.395,
+     "end": 5.75
+    },
+    {
+     "text": "buscaste",
+     "start": 5.762,
+     "end": 6.358
+    },
+    {
+     "text": "Nova",
+     "start": 6.712,
+     "end": 6.953
+    },
+    {
+     "text": "est\u00e1",
+     "start": 6.966,
+     "end": 7.181
+    },
+    {
+     "text": "soltera",
+     "start": 7.194,
+     "end": 7.687
+    },
+    {
+     "text": "cuarenta",
+     "start": 7.941,
+     "end": 8.295
+    },
+    {
+     "text": "y",
+     "start": 8.308,
+     "end": 8.359
+    },
+    {
+     "text": "siete",
+     "start": 8.371,
+     "end": 8.739
+    },
+    {
+     "text": "veces",
+     "start": 8.751,
+     "end": 9.296
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_2.mp3",
+   "duration": 1.037,
+   "words": [
+    {
+     "text": "Borra",
+     "start": 0.1,
+     "end": 0.525
+    },
+    {
+     "text": "eso",
+     "start": 0.537,
+     "end": 0.887
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_3.mp3",
+   "duration": 1.707,
+   "words": [
+    {
+     "text": "Public\u00e1ndolo",
+     "start": 0.101,
+     "end": 0.861
+    },
+    {
+     "text": "en",
+     "start": 0.873,
+     "end": 0.975
+    },
+    {
+     "text": "tu",
+     "start": 0.987,
+     "end": 1.076
+    },
+    {
+     "text": "perfil",
+     "start": 1.089,
+     "end": 1.557
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_4.mp3",
+   "duration": 3.638,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.1,
+     "end": 0.475
+    },
+    {
+     "text": "Borra",
+     "start": 1.337,
+     "end": 1.825
+    },
+    {
+     "text": "Dije",
+     "start": 2.7,
+     "end": 3.062
+    },
+    {
+     "text": "borra",
+     "start": 3.075,
+     "end": 3.488
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_5.mp3",
+   "duration": 5.377,
+   "words": [
+    {
+     "text": "Dex",
+     "start": 0.098,
+     "end": 0.66
+    },
+    {
+     "text": "Noticias",
+     "start": 1.483,
+     "end": 2.213
+    },
+    {
+     "text": "Nova",
+     "start": 3.05,
+     "end": 3.361
+    },
+    {
+     "text": "va",
+     "start": 3.373,
+     "end": 3.517
+    },
+    {
+     "text": "a",
+     "start": 3.529,
+     "end": 3.565
+    },
+    {
+     "text": "estar",
+     "start": 3.577,
+     "end": 3.899
+    },
+    {
+     "text": "hoy",
+     "start": 3.912,
+     "end": 4.079
+    },
+    {
+     "text": "en",
+     "start": 4.091,
+     "end": 4.175
+    },
+    {
+     "text": "la",
+     "start": 4.187,
+     "end": 4.258
+    },
+    {
+     "text": "Estaci\u00f3n",
+     "start": 4.27,
+     "end": 4.701
+    },
+    {
+     "text": "de",
+     "start": 4.713,
+     "end": 4.797
+    },
+    {
+     "text": "Carga",
+     "start": 4.809,
+     "end": 5.227
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_6.mp3",
+   "duration": 1.375,
+   "words": [
+    {
+     "text": "Y",
+     "start": 0.1,
+     "end": 0.238
+    },
+    {
+     "text": "t\u00fa",
+     "start": 0.25,
+     "end": 0.375
+    },
+    {
+     "text": "c\u00f3mo",
+     "start": 0.388,
+     "end": 0.637
+    },
+    {
+     "text": "sabes",
+     "start": 0.65,
+     "end": 1.225
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_7.mp3",
+   "duration": 1.695,
+   "words": [
+    {
+     "text": "Su",
+     "start": 0.098,
+     "end": 0.313
+    },
+    {
+     "text": "ubicaci\u00f3n",
+     "start": 0.325,
+     "end": 0.887
+    },
+    {
+     "text": "es",
+     "start": 0.899,
+     "end": 1.031
+    },
+    {
+     "text": "p\u00fablica",
+     "start": 1.043,
+     "end": 1.545
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_8.mp3",
+   "duration": 7.825,
+   "words": [
+    {
+     "text": "La",
+     "start": 0.1,
+     "end": 0.263
+    },
+    {
+     "text": "ubicaci\u00f3n",
+     "start": 0.275,
+     "end": 0.812
+    },
+    {
+     "text": "de",
+     "start": 0.825,
+     "end": 0.925
+    },
+    {
+     "text": "todos",
+     "start": 0.938,
+     "end": 1.3
+    },
+    {
+     "text": "es",
+     "start": 1.312,
+     "end": 1.462
+    },
+    {
+     "text": "p\u00fablica",
+     "start": 1.475,
+     "end": 1.938
+    },
+    {
+     "text": "Bolt",
+     "start": 2.237,
+     "end": 2.55
+    },
+    {
+     "text": "Vivimos",
+     "start": 3.413,
+     "end": 3.9
+    },
+    {
+     "text": "en",
+     "start": 3.913,
+     "end": 4.025
+    },
+    {
+     "text": "Tecnotop\u00eda",
+     "start": 4.037,
+     "end": 4.825
+    },
+    {
+     "text": "Hasta",
+     "start": 5.688,
+     "end": 6.0
+    },
+    {
+     "text": "mi",
+     "start": 6.013,
+     "end": 6.138
+    },
+    {
+     "text": "tostadora",
+     "start": 6.15,
+     "end": 6.7
+    },
+    {
+     "text": "sabe",
+     "start": 6.713,
+     "end": 7.013
+    },
+    {
+     "text": "d\u00f3nde",
+     "start": 7.025,
+     "end": 7.275
+    },
+    {
+     "text": "estoy",
+     "start": 7.287,
+     "end": 7.675
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_9.mp3",
+   "duration": 4.025,
+   "words": [
+    {
+     "text": "Est\u00e1s",
+     "start": 0.101,
+     "end": 0.544
+    },
+    {
+     "text": "en",
+     "start": 0.557,
+     "end": 0.645
+    },
+    {
+     "text": "la",
+     "start": 0.658,
+     "end": 0.747
+    },
+    {
+     "text": "cocina",
+     "start": 0.759,
+     "end": 1.316
+    },
+    {
+     "text": "Adem\u00e1s",
+     "start": 2.191,
+     "end": 2.824
+    },
+    {
+     "text": "no",
+     "start": 3.027,
+     "end": 3.179
+    },
+    {
+     "text": "tienes",
+     "start": 3.192,
+     "end": 3.559
+    },
+    {
+     "text": "pan",
+     "start": 3.571,
+     "end": 3.875
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_10.mp3",
+   "duration": 0.8,
+   "words": [
+    {
+     "text": "Ves",
+     "start": 0.1,
+     "end": 0.65
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_11.mp3",
+   "duration": 3.344,
+   "words": [
+    {
+     "text": "Hoy",
+     "start": 0.098,
+     "end": 0.325
+    },
+    {
+     "text": "es",
+     "start": 0.337,
+     "end": 0.469
+    },
+    {
+     "text": "el",
+     "start": 0.481,
+     "end": 0.588
+    },
+    {
+     "text": "d\u00eda",
+     "start": 0.6,
+     "end": 0.935
+    },
+    {
+     "text": "La",
+     "start": 1.758,
+     "end": 1.914
+    },
+    {
+     "text": "vas",
+     "start": 1.926,
+     "end": 2.165
+    },
+    {
+     "text": "a",
+     "start": 2.177,
+     "end": 2.225
+    },
+    {
+     "text": "invitar",
+     "start": 2.237,
+     "end": 2.667
+    },
+    {
+     "text": "a",
+     "start": 2.679,
+     "end": 2.715
+    },
+    {
+     "text": "salir",
+     "start": 2.727,
+     "end": 3.194
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_12.mp3",
+   "duration": 8.312,
+   "words": [
+    {
+     "text": "Ni",
+     "start": 0.1,
+     "end": 0.275
+    },
+    {
+     "text": "loco",
+     "start": 0.287,
+     "end": 0.712
+    },
+    {
+     "text": "La",
+     "start": 1.587,
+     "end": 1.762
+    },
+    {
+     "text": "\u00faltima",
+     "start": 1.775,
+     "end": 2.112
+    },
+    {
+     "text": "vez",
+     "start": 2.125,
+     "end": 2.325
+    },
+    {
+     "text": "que",
+     "start": 2.337,
+     "end": 2.438
+    },
+    {
+     "text": "habl\u00e9",
+     "start": 2.45,
+     "end": 2.663
+    },
+    {
+     "text": "con",
+     "start": 2.675,
+     "end": 2.862
+    },
+    {
+     "text": "ella",
+     "start": 2.875,
+     "end": 3.15
+    },
+    {
+     "text": "mi",
+     "start": 3.45,
+     "end": 3.538
+    },
+    {
+     "text": "pantalla",
+     "start": 3.55,
+     "end": 4.037
+    },
+    {
+     "text": "de",
+     "start": 4.05,
+     "end": 4.162
+    },
+    {
+     "text": "la",
+     "start": 4.175,
+     "end": 4.275
+    },
+    {
+     "text": "frente",
+     "start": 4.287,
+     "end": 4.587
+    },
+    {
+     "text": "dijo",
+     "start": 4.6,
+     "end": 4.962
+    },
+    {
+     "text": "error",
+     "start": 5.2,
+     "end": 5.525
+    },
+    {
+     "text": "cr\u00edtico",
+     "start": 5.537,
+     "end": 6.062
+    },
+    {
+     "text": "en",
+     "start": 6.275,
+     "end": 6.45
+    },
+    {
+     "text": "letra",
+     "start": 6.463,
+     "end": 6.788
+    },
+    {
+     "text": "tama\u00f1o",
+     "start": 6.8,
+     "end": 7.225
+    },
+    {
+     "text": "setenta",
+     "start": 7.237,
+     "end": 7.675
+    },
+    {
+     "text": "y",
+     "start": 7.688,
+     "end": 7.725
+    },
+    {
+     "text": "dos",
+     "start": 7.737,
+     "end": 8.162
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_13.mp3",
+   "duration": 7.925,
+   "words": [
+    {
+     "text": "Por",
+     "start": 0.098,
+     "end": 0.253
+    },
+    {
+     "text": "eso",
+     "start": 0.265,
+     "end": 0.481
+    },
+    {
+     "text": "te",
+     "start": 0.493,
+     "end": 0.612
+    },
+    {
+     "text": "traje",
+     "start": 0.624,
+     "end": 0.995
+    },
+    {
+     "text": "esto",
+     "start": 1.007,
+     "end": 1.342
+    },
+    {
+     "text": "Riz",
+     "start": 2.165,
+     "end": 2.476
+    },
+    {
+     "text": "punto",
+     "start": 2.488,
+     "end": 2.823
+    },
+    {
+     "text": "exe",
+     "start": 2.835,
+     "end": 3.146
+    },
+    {
+     "text": "versi\u00f3n",
+     "start": 3.433,
+     "end": 3.876
+    },
+    {
+     "text": "dos",
+     "start": 3.888,
+     "end": 4.127
+    },
+    {
+     "text": "punto",
+     "start": 4.139,
+     "end": 4.45
+    },
+    {
+     "text": "cero",
+     "start": 4.462,
+     "end": 4.844
+    },
+    {
+     "text": "Se",
+     "start": 5.67,
+     "end": 5.885
+    },
+    {
+     "text": "descarga",
+     "start": 5.897,
+     "end": 6.34
+    },
+    {
+     "text": "directo",
+     "start": 6.352,
+     "end": 6.746
+    },
+    {
+     "text": "a",
+     "start": 6.758,
+     "end": 6.806
+    },
+    {
+     "text": "tu",
+     "start": 6.818,
+     "end": 6.962
+    },
+    {
+     "text": "chip",
+     "start": 6.974,
+     "end": 7.213
+    },
+    {
+     "text": "cerebral",
+     "start": 7.225,
+     "end": 7.775
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_14.mp3",
+   "duration": 1.375,
+   "words": [
+    {
+     "text": "De",
+     "start": 0.1,
+     "end": 0.238
+    },
+    {
+     "text": "d\u00f3nde",
+     "start": 0.25,
+     "end": 0.525
+    },
+    {
+     "text": "lo",
+     "start": 0.537,
+     "end": 0.625
+    },
+    {
+     "text": "sacaste",
+     "start": 0.637,
+     "end": 1.225
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_15.mp3",
+   "duration": 1.001,
+   "words": [
+    {
+     "text": "De",
+     "start": 0.098,
+     "end": 0.277
+    },
+    {
+     "text": "un",
+     "start": 0.289,
+     "end": 0.445
+    },
+    {
+     "text": "tipo",
+     "start": 0.457,
+     "end": 0.851
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_16.mp3",
+   "duration": 0.838,
+   "words": [
+    {
+     "text": "Qu\u00e9",
+     "start": 0.1,
+     "end": 0.25
+    },
+    {
+     "text": "tipo",
+     "start": 0.263,
+     "end": 0.688
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_17.mp3",
+   "duration": 2.102,
+   "words": [
+    {
+     "text": "Un",
+     "start": 0.098,
+     "end": 0.277
+    },
+    {
+     "text": "tipo",
+     "start": 0.289,
+     "end": 0.564
+    },
+    {
+     "text": "de",
+     "start": 0.576,
+     "end": 0.684
+    },
+    {
+     "text": "un",
+     "start": 0.696,
+     "end": 0.851
+    },
+    {
+     "text": "anuncio",
+     "start": 0.863,
+     "end": 1.306
+    },
+    {
+     "text": "pop",
+     "start": 1.318,
+     "end": 1.569
+    },
+    {
+     "text": "op.",
+     "start": 1.581,
+     "end": 1.952
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_18.mp3",
+   "duration": 0.638,
+   "words": [
+    {
+     "text": "Bolt",
+     "start": 0.1,
+     "end": 0.488
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_19.mp3",
+   "duration": 2.748,
+   "words": [
+    {
+     "text": "Ten\u00eda",
+     "start": 0.098,
+     "end": 0.409
+    },
+    {
+     "text": "much\u00edsimas",
+     "start": 0.421,
+     "end": 1.043
+    },
+    {
+     "text": "rese\u00f1as",
+     "start": 1.055,
+     "end": 1.521
+    },
+    {
+     "text": "de",
+     "start": 1.533,
+     "end": 1.617
+    },
+    {
+     "text": "cinco",
+     "start": 1.629,
+     "end": 1.952
+    },
+    {
+     "text": "estrellas",
+     "start": 1.964,
+     "end": 2.598
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_20.mp3",
+   "duration": 0.838,
+   "words": [
+    {
+     "text": "De",
+     "start": 0.1,
+     "end": 0.275
+    },
+    {
+     "text": "qui\u00e9n",
+     "start": 0.287,
+     "end": 0.688
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_21.mp3",
+   "duration": 1.516,
+   "words": [
+    {
+     "text": "Casi",
+     "start": 0.098,
+     "end": 0.409
+    },
+    {
+     "text": "todas",
+     "start": 0.421,
+     "end": 0.768
+    },
+    {
+     "text": "de",
+     "start": 0.78,
+     "end": 0.863
+    },
+    {
+     "text": "\u00e9l",
+     "start": 0.875,
+     "end": 0.959
+    },
+    {
+     "text": "mismo",
+     "start": 0.971,
+     "end": 1.366
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_22.mp3",
+   "duration": 3.302,
+   "words": [
+    {
+     "text": "Ah\u00ed",
+     "start": 0.105,
+     "end": 0.447
+    },
+    {
+     "text": "est\u00e1",
+     "start": 0.461,
+     "end": 0.927
+    },
+    {
+     "text": "A",
+     "start": 1.891,
+     "end": 2.028
+    },
+    {
+     "text": "las",
+     "start": 2.042,
+     "end": 2.289
+    },
+    {
+     "text": "dos",
+     "start": 2.303,
+     "end": 2.536
+    },
+    {
+     "text": "en",
+     "start": 2.549,
+     "end": 2.673
+    },
+    {
+     "text": "punto",
+     "start": 2.686,
+     "end": 3.152
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_23.mp3",
+   "duration": 1.563,
+   "words": [
+    {
+     "text": "Son",
+     "start": 0.1,
+     "end": 0.387
+    },
+    {
+     "text": "las",
+     "start": 0.4,
+     "end": 0.562
+    },
+    {
+     "text": "cuatro",
+     "start": 0.575,
+     "end": 0.9
+    },
+    {
+     "text": "y",
+     "start": 0.912,
+     "end": 0.963
+    },
+    {
+     "text": "media",
+     "start": 0.975,
+     "end": 1.413
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_24.mp3",
+   "duration": 5.18,
+   "words": [
+    {
+     "text": "Su",
+     "start": 0.105,
+     "end": 0.352
+    },
+    {
+     "text": "posici\u00f3n",
+     "start": 0.365,
+     "end": 1.023
+    },
+    {
+     "text": "Dex",
+     "start": 1.366,
+     "end": 1.873
+    },
+    {
+     "text": "Inst\u00e1lalo",
+     "start": 2.823,
+     "end": 3.646
+    },
+    {
+     "text": "Ya",
+     "start": 4.592,
+     "end": 5.03
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_25.mp3",
+   "duration": 1.375,
+   "words": [
+    {
+     "text": "Ugh",
+     "start": 0.1,
+     "end": 0.325
+    },
+    {
+     "text": "est\u00e1",
+     "start": 0.575,
+     "end": 0.862
+    },
+    {
+     "text": "bien",
+     "start": 0.875,
+     "end": 1.225
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_26.mp3",
+   "duration": 4.912,
+   "words": [
+    {
+     "text": "Instalando",
+     "start": 0.101,
+     "end": 0.734
+    },
+    {
+     "text": "Riz",
+     "start": 0.747,
+     "end": 1.038
+    },
+    {
+     "text": "punto",
+     "start": 1.05,
+     "end": 1.38
+    },
+    {
+     "text": "exe",
+     "start": 1.392,
+     "end": 1.798
+    },
+    {
+     "text": "Tiempo",
+     "start": 2.672,
+     "end": 2.951
+    },
+    {
+     "text": "estimado",
+     "start": 2.964,
+     "end": 3.546
+    },
+    {
+     "text": "tres",
+     "start": 3.837,
+     "end": 4.091
+    },
+    {
+     "text": "minutos",
+     "start": 4.103,
+     "end": 4.762
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_27.mp3",
+   "duration": 3.392,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.098,
+     "end": 0.301
+    },
+    {
+     "text": "hay",
+     "start": 0.313,
+     "end": 0.433
+    },
+    {
+     "text": "tiempo",
+     "start": 0.445,
+     "end": 0.875
+    },
+    {
+     "text": "Ve",
+     "start": 1.699,
+     "end": 2.057
+    },
+    {
+     "text": "Ve",
+     "start": 2.883,
+     "end": 3.242
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_28.mp3",
+   "duration": 1.313,
+   "words": [
+    {
+     "text": "Hola",
+     "start": 0.1,
+     "end": 0.45
+    },
+    {
+     "text": "Nova",
+     "start": 0.762,
+     "end": 1.163
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_29.mp3",
+   "duration": 4.825,
+   "words": [
+    {
+     "text": "Ah",
+     "start": 0.1,
+     "end": 0.387
+    },
+    {
+     "text": "hola",
+     "start": 0.637,
+     "end": 0.875
+    },
+    {
+     "text": "Dex",
+     "start": 0.887,
+     "end": 1.375
+    },
+    {
+     "text": "Eh",
+     "start": 2.25,
+     "end": 2.487
+    },
+    {
+     "text": "tu",
+     "start": 2.725,
+     "end": 2.863
+    },
+    {
+     "text": "frente",
+     "start": 2.875,
+     "end": 3.25
+    },
+    {
+     "text": "dice",
+     "start": 3.263,
+     "end": 3.638
+    },
+    {
+     "text": "instalando",
+     "start": 3.888,
+     "end": 4.675
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_30.mp3",
+   "duration": 2.413,
+   "words": [
+    {
+     "text": "Ja",
+     "start": 0.1,
+     "end": 0.412
+    },
+    {
+     "text": "s\u00ed",
+     "start": 0.688,
+     "end": 0.95
+    },
+    {
+     "text": "es",
+     "start": 1.238,
+     "end": 1.35
+    },
+    {
+     "text": "solo",
+     "start": 1.363,
+     "end": 1.613
+    },
+    {
+     "text": "un",
+     "start": 1.625,
+     "end": 1.738
+    },
+    {
+     "text": "poquito",
+     "start": 1.75,
+     "end": 2.263
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_31.mp3",
+   "duration": 4.426,
+   "words": [
+    {
+     "text": "Eres",
+     "start": 0.107,
+     "end": 0.476
+    },
+    {
+     "text": "se\u00f1al",
+     "start": 0.49,
+     "end": 0.888
+    },
+    {
+     "text": "de",
+     "start": 0.902,
+     "end": 1.002
+    },
+    {
+     "text": "wifi",
+     "start": 1.016,
+     "end": 1.499
+    },
+    {
+     "text": "Porque",
+     "start": 2.486,
+     "end": 2.812
+    },
+    {
+     "text": "siento",
+     "start": 2.827,
+     "end": 3.267
+    },
+    {
+     "text": "una",
+     "start": 3.281,
+     "end": 3.537
+    },
+    {
+     "text": "conexi\u00f3n",
+     "start": 3.551,
+     "end": 4.276
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_32.mp3",
+   "duration": 2.425,
+   "words": [
+    {
+     "text": "Acabas",
+     "start": 0.1,
+     "end": 0.525
+    },
+    {
+     "text": "de",
+     "start": 0.537,
+     "end": 0.612
+    },
+    {
+     "text": "descargar",
+     "start": 0.625,
+     "end": 1.175
+    },
+    {
+     "text": "frases",
+     "start": 1.188,
+     "end": 1.625
+    },
+    {
+     "text": "para",
+     "start": 1.637,
+     "end": 1.8
+    },
+    {
+     "text": "ligar",
+     "start": 1.812,
+     "end": 2.275
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_33.mp3",
+   "duration": 2.75,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.1,
+     "end": 0.475
+    },
+    {
+     "text": "No",
+     "start": 1.337,
+     "end": 1.662
+    },
+    {
+     "text": "yo",
+     "start": 1.975,
+     "end": 2.113
+    },
+    {
+     "text": "nunca",
+     "start": 2.125,
+     "end": 2.6
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_34.mp3",
+   "duration": 4.326,
+   "words": [
+    {
+     "text": "Eres",
+     "start": 0.107,
+     "end": 0.49
+    },
+    {
+     "text": "un",
+     "start": 0.505,
+     "end": 0.647
+    },
+    {
+     "text": "buscador",
+     "start": 0.661,
+     "end": 1.371
+    },
+    {
+     "text": "Porque",
+     "start": 2.372,
+     "end": 2.713
+    },
+    {
+     "text": "tienes",
+     "start": 2.727,
+     "end": 3.139
+    },
+    {
+     "text": "todo",
+     "start": 3.153,
+     "end": 3.437
+    },
+    {
+     "text": "lo",
+     "start": 3.452,
+     "end": 3.565
+    },
+    {
+     "text": "que",
+     "start": 3.58,
+     "end": 3.693
+    },
+    {
+     "text": "busco",
+     "start": 3.707,
+     "end": 4.176
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_35.mp3",
+   "duration": 1.313,
+   "words": [
+    {
+     "text": "Totalmente",
+     "start": 0.1,
+     "end": 0.838
+    },
+    {
+     "text": "s\u00ed",
+     "start": 0.85,
+     "end": 1.163
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_36.mp3",
+   "duration": 2.313,
+   "words": [
+    {
+     "text": "Bolt",
+     "start": 0.1,
+     "end": 0.488
+    },
+    {
+     "text": "C\u00f3mo",
+     "start": 1.363,
+     "end": 1.613
+    },
+    {
+     "text": "lo",
+     "start": 1.625,
+     "end": 1.712
+    },
+    {
+     "text": "apago",
+     "start": 1.725,
+     "end": 2.163
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_37.mp3",
+   "duration": 1.97,
+   "words": [
+    {
+     "text": "Ap\u00e1galo",
+     "start": 0.098,
+     "end": 0.636
+    },
+    {
+     "text": "y",
+     "start": 0.648,
+     "end": 0.708
+    },
+    {
+     "text": "pr\u00e9ndelo",
+     "start": 0.72,
+     "end": 1.174
+    },
+    {
+     "text": "otra",
+     "start": 1.186,
+     "end": 1.426
+    },
+    {
+     "text": "vez",
+     "start": 1.438,
+     "end": 1.82
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_38.mp3",
+   "duration": 2.262,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.1,
+     "end": 0.287
+    },
+    {
+     "text": "me",
+     "start": 0.3,
+     "end": 0.425
+    },
+    {
+     "text": "puedo",
+     "start": 0.438,
+     "end": 0.637
+    },
+    {
+     "text": "apagar",
+     "start": 0.65,
+     "end": 1.025
+    },
+    {
+     "text": "y",
+     "start": 1.038,
+     "end": 1.088
+    },
+    {
+     "text": "prender",
+     "start": 1.1,
+     "end": 1.488
+    },
+    {
+     "text": "a",
+     "start": 1.5,
+     "end": 1.538
+    },
+    {
+     "text": "m\u00ed",
+     "start": 1.55,
+     "end": 1.675
+    },
+    {
+     "text": "mismo",
+     "start": 1.688,
+     "end": 2.112
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_39.mp3",
+   "duration": 1.253,
+   "words": [
+    {
+     "text": "Ya",
+     "start": 0.098,
+     "end": 0.289
+    },
+    {
+     "text": "lo",
+     "start": 0.301,
+     "end": 0.385
+    },
+    {
+     "text": "intentaste",
+     "start": 0.397,
+     "end": 1.103
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_40.mp3",
+   "duration": 1.541,
+   "words": [
+    {
+     "text": "Apagando",
+     "start": 0.141,
+     "end": 1.391
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_41.mp3",
+   "duration": 3.812,
+   "words": [
+    {
+     "text": "Hola",
+     "start": 0.1,
+     "end": 0.537
+    },
+    {
+     "text": "D\u00f3nde",
+     "start": 1.413,
+     "end": 1.713
+    },
+    {
+     "text": "estoy",
+     "start": 1.725,
+     "end": 2.15
+    },
+    {
+     "text": "Qui\u00e9n",
+     "start": 3.013,
+     "end": 3.288
+    },
+    {
+     "text": "soy",
+     "start": 3.3,
+     "end": 3.662
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_42.mp3",
+   "duration": 5.976,
+   "words": [
+    {
+     "text": "Bienvenido",
+     "start": 0.101,
+     "end": 0.772
+    },
+    {
+     "text": "de",
+     "start": 0.785,
+     "end": 0.899
+    },
+    {
+     "text": "nuevo",
+     "start": 0.911,
+     "end": 1.278
+    },
+    {
+     "text": "Dex",
+     "start": 1.57,
+     "end": 2.0
+    },
+    {
+     "text": "Por",
+     "start": 2.888,
+     "end": 3.027
+    },
+    {
+     "text": "favor",
+     "start": 3.039,
+     "end": 3.331
+    },
+    {
+     "text": "acepta",
+     "start": 3.343,
+     "end": 3.787
+    },
+    {
+     "text": "los",
+     "start": 3.799,
+     "end": 3.977
+    },
+    {
+     "text": "nuevos",
+     "start": 3.989,
+     "end": 4.407
+    },
+    {
+     "text": "T\u00e9rminos",
+     "start": 4.42,
+     "end": 4.901
+    },
+    {
+     "text": "y",
+     "start": 4.914,
+     "end": 4.965
+    },
+    {
+     "text": "Condiciones",
+     "start": 4.977,
+     "end": 5.826
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_43.mp3",
+   "duration": 2.85,
+   "words": [
+    {
+     "text": "S\u00ed",
+     "start": 0.1,
+     "end": 0.488
+    },
+    {
+     "text": "s\u00ed",
+     "start": 0.762,
+     "end": 1.012
+    },
+    {
+     "text": "acepto",
+     "start": 1.275,
+     "end": 1.787
+    },
+    {
+     "text": "lo",
+     "start": 2.087,
+     "end": 2.188
+    },
+    {
+     "text": "que",
+     "start": 2.2,
+     "end": 2.3
+    },
+    {
+     "text": "sea",
+     "start": 2.312,
+     "end": 2.7
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_44.mp3",
+   "duration": 4.279,
+   "words": [
+    {
+     "text": "Gracias",
+     "start": 0.101,
+     "end": 0.911
+    },
+    {
+     "text": "Ahora",
+     "start": 1.786,
+     "end": 2.166
+    },
+    {
+     "text": "Dex",
+     "start": 2.178,
+     "end": 2.457
+    },
+    {
+     "text": "solo",
+     "start": 2.47,
+     "end": 2.736
+    },
+    {
+     "text": "hablar\u00e1",
+     "start": 2.748,
+     "end": 3.166
+    },
+    {
+     "text": "en",
+     "start": 3.179,
+     "end": 3.255
+    },
+    {
+     "text": "comerciales",
+     "start": 3.267,
+     "end": 4.129
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_45.mp3",
+   "duration": 1.388,
+   "words": [
+    {
+     "text": "Espera",
+     "start": 0.1,
+     "end": 0.65
+    },
+    {
+     "text": "qu\u00e9",
+     "start": 0.988,
+     "end": 1.238
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_46.mp3",
+   "duration": 8.053,
+   "words": [
+    {
+     "text": "Hola",
+     "start": 0.092,
+     "end": 0.389
+    },
+    {
+     "text": "Nova",
+     "start": 0.654,
+     "end": 1.003
+    },
+    {
+     "text": "Cansada",
+     "start": 1.737,
+     "end": 2.15
+    },
+    {
+     "text": "de",
+     "start": 2.161,
+     "end": 2.256
+    },
+    {
+     "text": "estar",
+     "start": 2.267,
+     "end": 2.521
+    },
+    {
+     "text": "soltera",
+     "start": 2.532,
+     "end": 3.008
+    },
+    {
+     "text": "Prueba",
+     "start": 3.739,
+     "end": 4.004
+    },
+    {
+     "text": "una",
+     "start": 4.015,
+     "end": 4.195
+    },
+    {
+     "text": "cena",
+     "start": 4.205,
+     "end": 4.481
+    },
+    {
+     "text": "con",
+     "start": 4.492,
+     "end": 4.661
+    },
+    {
+     "text": "Dex",
+     "start": 4.672,
+     "end": 5.053
+    },
+    {
+     "text": "Ahora",
+     "start": 5.784,
+     "end": 6.049
+    },
+    {
+     "text": "con",
+     "start": 6.059,
+     "end": 6.197
+    },
+    {
+     "text": "cincuenta",
+     "start": 6.208,
+     "end": 6.621
+    },
+    {
+     "text": "por",
+     "start": 6.631,
+     "end": 6.79
+    },
+    {
+     "text": "ciento",
+     "start": 6.801,
+     "end": 7.087
+    },
+    {
+     "text": "menos",
+     "start": 7.097,
+     "end": 7.373
+    },
+    {
+     "text": "inc\u00f3modo",
+     "start": 7.383,
+     "end": 7.903
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_47.mp3",
+   "duration": 1.487,
+   "words": [
+    {
+     "text": "Ay",
+     "start": 0.1,
+     "end": 0.438
+    },
+    {
+     "text": "Dios",
+     "start": 0.688,
+     "end": 0.988
+    },
+    {
+     "text": "m\u00edo",
+     "start": 1.0,
+     "end": 1.337
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_48.mp3",
+   "duration": 2.658,
+   "words": [
+    {
+     "text": "Efectos",
+     "start": 0.092,
+     "end": 0.495
+    },
+    {
+     "text": "secundarios",
+     "start": 0.505,
+     "end": 1.088
+    },
+    {
+     "text": "sudar",
+     "start": 1.289,
+     "end": 1.618
+    },
+    {
+     "text": "y",
+     "start": 1.628,
+     "end": 1.671
+    },
+    {
+     "text": "llorar",
+     "start": 1.681,
+     "end": 1.967
+    },
+    {
+     "text": "en",
+     "start": 1.978,
+     "end": 2.063
+    },
+    {
+     "text": "el",
+     "start": 2.073,
+     "end": 2.169
+    },
+    {
+     "text": "ba\u00f1o",
+     "start": 2.179,
+     "end": 2.508
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_49.mp3",
+   "duration": 4.157,
+   "words": [
+    {
+     "text": "Okay",
+     "start": 0.098,
+     "end": 0.528
+    },
+    {
+     "text": "okay",
+     "start": 0.804,
+     "end": 1.162
+    },
+    {
+     "text": "yo",
+     "start": 1.426,
+     "end": 1.581
+    },
+    {
+     "text": "me",
+     "start": 1.593,
+     "end": 1.689
+    },
+    {
+     "text": "encargo",
+     "start": 1.701,
+     "end": 2.215
+    },
+    {
+     "text": "Lo",
+     "start": 3.038,
+     "end": 3.206
+    },
+    {
+     "text": "puedo",
+     "start": 3.218,
+     "end": 3.469
+    },
+    {
+     "text": "arreglar",
+     "start": 3.481,
+     "end": 4.007
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_50.mp3",
+   "duration": 2.638,
+   "words": [
+    {
+     "text": "Ay",
+     "start": 0.1,
+     "end": 0.475
+    },
+    {
+     "text": "Me",
+     "start": 1.337,
+     "end": 1.5
+    },
+    {
+     "text": "acabas",
+     "start": 1.512,
+     "end": 1.925
+    },
+    {
+     "text": "de",
+     "start": 1.938,
+     "end": 2.025
+    },
+    {
+     "text": "pegar",
+     "start": 2.038,
+     "end": 2.488
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_51.mp3",
+   "duration": 0.894,
+   "words": [
+    {
+     "text": "Arreglado",
+     "start": 0.098,
+     "end": 0.744
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_52.mp3",
+   "duration": 1.375,
+   "words": [
+    {
+     "text": "De",
+     "start": 0.1,
+     "end": 0.238
+    },
+    {
+     "text": "verdad",
+     "start": 0.25,
+     "end": 0.625
+    },
+    {
+     "text": "funcion\u00f3",
+     "start": 0.637,
+     "end": 1.225
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_53.mp3",
+   "duration": 2.497,
+   "words": [
+    {
+     "text": "Tecnolog\u00eda",
+     "start": 0.098,
+     "end": 0.768
+    },
+    {
+     "text": "de",
+     "start": 0.78,
+     "end": 0.899
+    },
+    {
+     "text": "la",
+     "start": 0.911,
+     "end": 0.983
+    },
+    {
+     "text": "vieja",
+     "start": 0.995,
+     "end": 1.282
+    },
+    {
+     "text": "escuela",
+     "start": 1.294,
+     "end": 1.725
+    },
+    {
+     "text": "beb\u00e9",
+     "start": 1.988,
+     "end": 2.347
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_54.mp3",
+   "duration": 12.85,
+   "words": [
+    {
+     "text": "Okay",
+     "start": 0.1,
+     "end": 0.588
+    },
+    {
+     "text": "Sin",
+     "start": 1.462,
+     "end": 1.775
+    },
+    {
+     "text": "apps",
+     "start": 1.788,
+     "end": 2.238
+    },
+    {
+     "text": "Sin",
+     "start": 3.112,
+     "end": 3.387
+    },
+    {
+     "text": "actualizaciones",
+     "start": 3.4,
+     "end": 4.425
+    },
+    {
+     "text": "Nova",
+     "start": 5.287,
+     "end": 5.725
+    },
+    {
+     "text": "me",
+     "start": 6.025,
+     "end": 6.1
+    },
+    {
+     "text": "gustas",
+     "start": 6.112,
+     "end": 6.712
+    },
+    {
+     "text": "Pero",
+     "start": 7.575,
+     "end": 7.788
+    },
+    {
+     "text": "de",
+     "start": 7.8,
+     "end": 7.888
+    },
+    {
+     "text": "verdad",
+     "start": 7.9,
+     "end": 8.287
+    },
+    {
+     "text": "en",
+     "start": 8.488,
+     "end": 8.613
+    },
+    {
+     "text": "la",
+     "start": 8.625,
+     "end": 8.7
+    },
+    {
+     "text": "vida",
+     "start": 8.713,
+     "end": 9.0
+    },
+    {
+     "text": "real",
+     "start": 9.012,
+     "end": 9.387
+    },
+    {
+     "text": "sin",
+     "start": 9.637,
+     "end": 9.862
+    },
+    {
+     "text": "wifi",
+     "start": 9.875,
+     "end": 10.262
+    },
+    {
+     "text": "Quieres",
+     "start": 11.137,
+     "end": 11.537
+    },
+    {
+     "text": "ir",
+     "start": 11.55,
+     "end": 11.675
+    },
+    {
+     "text": "a",
+     "start": 11.688,
+     "end": 11.738
+    },
+    {
+     "text": "comer",
+     "start": 11.75,
+     "end": 12.062
+    },
+    {
+     "text": "alg\u00fan",
+     "start": 12.075,
+     "end": 12.35
+    },
+    {
+     "text": "d\u00eda",
+     "start": 12.363,
+     "end": 12.7
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_55.mp3",
+   "duration": 2.725,
+   "words": [
+    {
+     "text": "Dex",
+     "start": 0.1,
+     "end": 0.75
+    },
+    {
+     "text": "Mira",
+     "start": 1.613,
+     "end": 1.938
+    },
+    {
+     "text": "mi",
+     "start": 1.95,
+     "end": 2.087
+    },
+    {
+     "text": "frente",
+     "start": 2.1,
+     "end": 2.575
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_56.mp3",
+   "duration": 1.625,
+   "words": [
+    {
+     "text": "Dice",
+     "start": 0.1,
+     "end": 0.562
+    },
+    {
+     "text": "cargando",
+     "start": 0.863,
+     "end": 1.475
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_57.mp3",
+   "duration": 6.25,
+   "words": [
+    {
+     "text": "S\u00ed",
+     "start": 0.1,
+     "end": 0.55
+    },
+    {
+     "text": "Hace",
+     "start": 1.4,
+     "end": 1.737
+    },
+    {
+     "text": "eso",
+     "start": 1.75,
+     "end": 2.0
+    },
+    {
+     "text": "cada",
+     "start": 2.013,
+     "end": 2.288
+    },
+    {
+     "text": "vez",
+     "start": 2.3,
+     "end": 2.537
+    },
+    {
+     "text": "que",
+     "start": 2.55,
+     "end": 2.7
+    },
+    {
+     "text": "entras",
+     "start": 2.712,
+     "end": 3.2
+    },
+    {
+     "text": "Desde",
+     "start": 4.075,
+     "end": 4.438
+    },
+    {
+     "text": "hace",
+     "start": 4.45,
+     "end": 4.675
+    },
+    {
+     "text": "como",
+     "start": 4.688,
+     "end": 4.975
+    },
+    {
+     "text": "tres",
+     "start": 5.287,
+     "end": 5.537
+    },
+    {
+     "text": "meses",
+     "start": 5.55,
+     "end": 6.1
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_58.mp3",
+   "duration": 1.372,
+   "words": [
+    {
+     "text": "Ha",
+     "start": 0.098,
+     "end": 0.253
+    },
+    {
+     "text": "estado",
+     "start": 0.265,
+     "end": 0.648
+    },
+    {
+     "text": "cargando",
+     "start": 0.66,
+     "end": 1.222
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_59.mp3",
+   "duration": 2.063,
+   "words": [
+    {
+     "text": "Entonces",
+     "start": 0.1,
+     "end": 0.812
+    },
+    {
+     "text": "eso",
+     "start": 1.075,
+     "end": 1.337
+    },
+    {
+     "text": "es",
+     "start": 1.35,
+     "end": 1.488
+    },
+    {
+     "text": "un",
+     "start": 1.5,
+     "end": 1.613
+    },
+    {
+     "text": "s\u00ed",
+     "start": 1.625,
+     "end": 1.913
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_60.mp3",
+   "duration": 0.95,
+   "words": [
+    {
+     "text": "Es",
+     "start": 0.1,
+     "end": 0.312
+    },
+    {
+     "text": "un",
+     "start": 0.325,
+     "end": 0.475
+    },
+    {
+     "text": "s\u00ed",
+     "start": 0.487,
+     "end": 0.8
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_61.mp3",
+   "duration": 5.139,
+   "words": [
+    {
+     "text": "Para",
+     "start": 0.101,
+     "end": 0.253
+    },
+    {
+     "text": "confirmar",
+     "start": 0.265,
+     "end": 0.785
+    },
+    {
+     "text": "tu",
+     "start": 0.797,
+     "end": 0.899
+    },
+    {
+     "text": "cita",
+     "start": 0.911,
+     "end": 1.278
+    },
+    {
+     "text": "ingresa",
+     "start": 1.582,
+     "end": 2.026
+    },
+    {
+     "text": "el",
+     "start": 2.038,
+     "end": 2.152
+    },
+    {
+     "text": "c\u00f3digo",
+     "start": 2.165,
+     "end": 2.558
+    },
+    {
+     "text": "de",
+     "start": 2.57,
+     "end": 2.684
+    },
+    {
+     "text": "seis",
+     "start": 2.697,
+     "end": 3.026
+    },
+    {
+     "text": "d\u00edgitos",
+     "start": 3.039,
+     "end": 3.545
+    },
+    {
+     "text": "enviado",
+     "start": 3.558,
+     "end": 3.976
+    },
+    {
+     "text": "a",
+     "start": 3.989,
+     "end": 4.039
+    },
+    {
+     "text": "tu",
+     "start": 4.052,
+     "end": 4.166
+    },
+    {
+     "text": "dispositivo",
+     "start": 4.179,
+     "end": 4.989
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_62.mp3",
+   "duration": 0.925,
+   "words": [
+    {
+     "text": "En",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "serio",
+     "start": 0.312,
+     "end": 0.775
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_63.mp3",
+   "duration": 1.162,
+   "words": [
+    {
+     "text": "Yo",
+     "start": 0.1,
+     "end": 0.338
+    },
+    {
+     "text": "te",
+     "start": 0.35,
+     "end": 0.487
+    },
+    {
+     "text": "lo",
+     "start": 0.5,
+     "end": 0.588
+    },
+    {
+     "text": "mando",
+     "start": 0.6,
+     "end": 1.012
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_64.mp3",
+   "duration": 5.563,
+   "words": [
+    {
+     "text": "Cuatro",
+     "start": 0.1,
+     "end": 0.612
+    },
+    {
+     "text": "Ocho",
+     "start": 1.488,
+     "end": 1.962
+    },
+    {
+     "text": "Dos",
+     "start": 2.825,
+     "end": 3.375
+    },
+    {
+     "text": "Emoji",
+     "start": 4.237,
+     "end": 4.7
+    },
+    {
+     "text": "de",
+     "start": 4.713,
+     "end": 4.825
+    },
+    {
+     "text": "coraz\u00f3n",
+     "start": 4.838,
+     "end": 5.413
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_65.mp3",
+   "duration": 1.975,
+   "words": [
+    {
+     "text": "Eso",
+     "start": 0.1,
+     "end": 0.412
+    },
+    {
+     "text": "no",
+     "start": 0.425,
+     "end": 0.613
+    },
+    {
+     "text": "es",
+     "start": 0.625,
+     "end": 0.8
+    },
+    {
+     "text": "parte",
+     "start": 0.812,
+     "end": 1.125
+    },
+    {
+     "text": "del",
+     "start": 1.137,
+     "end": 1.312
+    },
+    {
+     "text": "c\u00f3digo",
+     "start": 1.325,
+     "end": 1.825
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_66.mp3",
+   "duration": 0.924,
+   "words": [
+    {
+     "text": "Ya",
+     "start": 0.107,
+     "end": 0.362
+    },
+    {
+     "text": "s\u00e9",
+     "start": 0.377,
+     "end": 0.774
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_67.mp3",
+   "duration": 5.006,
+   "words": [
+    {
+     "text": "Ves",
+     "start": 0.098,
+     "end": 0.624
+    },
+    {
+     "text": "De",
+     "start": 1.447,
+     "end": 1.615
+    },
+    {
+     "text": "nada",
+     "start": 1.627,
+     "end": 2.022
+    },
+    {
+     "text": "Riz",
+     "start": 2.847,
+     "end": 3.158
+    },
+    {
+     "text": "punto",
+     "start": 3.17,
+     "end": 3.505
+    },
+    {
+     "text": "exe",
+     "start": 3.517,
+     "end": 3.792
+    },
+    {
+     "text": "funcion\u00f3",
+     "start": 3.804,
+     "end": 4.27
+    },
+    {
+     "text": "perfecto",
+     "start": 4.282,
+     "end": 4.856
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_68.mp3",
+   "duration": 1.588,
+   "words": [
+    {
+     "text": "No",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "funcion\u00f3",
+     "start": 0.312,
+     "end": 0.825
+    },
+    {
+     "text": "para",
+     "start": 0.838,
+     "end": 1.05
+    },
+    {
+     "text": "nada",
+     "start": 1.062,
+     "end": 1.438
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_69.mp3",
+   "duration": 7.774,
+   "words": [
+    {
+     "text": "Gracias",
+     "start": 0.101,
+     "end": 0.582
+    },
+    {
+     "text": "por",
+     "start": 0.595,
+     "end": 0.721
+    },
+    {
+     "text": "usar",
+     "start": 0.734,
+     "end": 1.013
+    },
+    {
+     "text": "Riz",
+     "start": 1.025,
+     "end": 1.278
+    },
+    {
+     "text": "punto",
+     "start": 1.291,
+     "end": 1.608
+    },
+    {
+     "text": "exe",
+     "start": 1.62,
+     "end": 2.026
+    },
+    {
+     "text": "Tu",
+     "start": 2.9,
+     "end": 3.039
+    },
+    {
+     "text": "prueba",
+     "start": 3.052,
+     "end": 3.356
+    },
+    {
+     "text": "gratis",
+     "start": 3.369,
+     "end": 3.863
+    },
+    {
+     "text": "termin\u00f3",
+     "start": 3.875,
+     "end": 4.357
+    },
+    {
+     "text": "Cobrando",
+     "start": 5.231,
+     "end": 5.661
+    },
+    {
+     "text": "cuatrocientos",
+     "start": 5.674,
+     "end": 6.434
+    },
+    {
+     "text": "d\u00f3lares",
+     "start": 6.446,
+     "end": 6.978
+    },
+    {
+     "text": "a",
+     "start": 6.991,
+     "end": 7.08
+    },
+    {
+     "text": "Bolt",
+     "start": 7.282,
+     "end": 7.624
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_70.mp3",
+   "duration": 1.849,
+   "words": [
+    {
+     "text": "Qu\u00e9",
+     "start": 0.098,
+     "end": 0.373
+    },
+    {
+     "text": "Yo",
+     "start": 1.208,
+     "end": 1.423
+    },
+    {
+     "text": "no",
+     "start": 1.435,
+     "end": 1.699
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_71.mp3",
+   "duration": 3.861,
+   "words": [
+    {
+     "text": "Pago",
+     "start": 0.101,
+     "end": 0.417
+    },
+    {
+     "text": "completado",
+     "start": 0.43,
+     "end": 1.152
+    },
+    {
+     "text": "Adem\u00e1s",
+     "start": 2.026,
+     "end": 2.66
+    },
+    {
+     "text": "no",
+     "start": 2.862,
+     "end": 3.014
+    },
+    {
+     "text": "tienes",
+     "start": 3.027,
+     "end": 3.394
+    },
+    {
+     "text": "pan",
+     "start": 3.407,
+     "end": 3.711
+    }
+   ]
+  },
+  {
+   "file": "narration/buffering-es/line_72.mp3",
+   "duration": 1.755,
+   "words": [
+    {
+     "text": "Ni",
+     "start": 0.098,
+     "end": 0.265
+    },
+    {
+     "text": "siquiera",
+     "start": 0.277,
+     "end": 0.684
+    },
+    {
+     "text": "tengo",
+     "start": 0.696,
+     "end": 0.995
+    },
+    {
+     "text": "tostadora",
+     "start": 1.007,
+     "end": 1.605
+    }
+   ]
+  }
+ ]
+}

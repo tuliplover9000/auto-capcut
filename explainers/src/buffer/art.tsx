@@ -53,7 +53,7 @@ const ForeheadScreen: React.FC<{sc: Screen; t: number}> = ({sc, t}) => {
   );
 };
 
-export const Toon: React.FC<{x: number; y: number; s?: number; who: Who; mood?: Mood; talk?: number; blink?: number; gaze?: number; screen?: Screen; rot?: number; t?: number; sweat?: number; dim?: number}> = ({x, y, s = 1, who, mood = 'neutral', talk = 0, blink = 0, gaze = 0, screen, rot = 0, t = 0, sweat = 0, dim = 0}) => {
+export const Toon: React.FC<{x: number; y: number; s?: number; who: Who; mood?: Mood; talk?: number; blink?: number; gaze?: number; screen?: Screen; rot?: number; t?: number; sweat?: number; dim?: number; torso?: boolean}> = ({x, y, s = 1, who, mood = 'neutral', talk = 0, blink = 0, gaze = 0, screen, rot = 0, t = 0, sweat = 0, dim = 0, torso = false}) => {
   const L = LOOKS[who];
   const eh = 11 * (1 - 0.9 * blink);
   const px = gaze * 7;
@@ -62,7 +62,13 @@ export const Toon: React.FC<{x: number; y: number; s?: number; who: Who; mood?: 
   return (
     <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s})`} opacity={1 - dim}>
       {/* shoulders: DEX hoodie, BOLT jacket, NOVA cropped jacket */}
-      <path d="M -132 175 Q -128 92 -42 76 L 42 76 Q 128 92 132 175 Z" fill={L.top} stroke={OL} strokeWidth={6} />
+      {torso ? (
+        <g>
+          <path d="M -96 292 L -102 122 Q -98 80 -42 74 L 42 74 Q 98 80 102 122 L 96 292 Q 0 302 -96 292 Z" fill={L.top} stroke={OL} strokeWidth={6} />
+          {who === 'DEX' ? <path d="M -50 222 L 50 222 L 60 270 L -60 270 Z" fill={L.trim} stroke={OL} strokeWidth={4} /> : null}
+          {who === 'NOVA' ? <path d="M -96 250 L 96 250 L 96 292 Q 0 302 -96 292 Z" fill={L.trim} stroke={OL} strokeWidth={4} /> : null}
+        </g>
+      ) : <path d="M -132 175 Q -128 92 -42 76 L 42 76 Q 128 92 132 175 Z" fill={L.top} stroke={OL} strokeWidth={6} />}
       {who === 'DEX' ? (
         <g>
           <path d="M -54 78 Q 0 120 54 78" fill="none" stroke={L.trim} strokeWidth={10} strokeLinecap="round" />
@@ -218,3 +224,81 @@ export const Toaster: React.FC<{x: number; y: number; s?: number; talk?: number;
 export const Heart: React.FC<{x: number; y: number; s?: number; col?: string; op?: number}> = ({x, y, s = 1, col = '#ff5d8f', op = 1}) => (
   <path d={heartPath(3)} transform={`translate(${x} ${y}) scale(${s})`} fill={col} stroke={OL} strokeWidth={3} opacity={op} />
 );
+
+
+/* ── full-body rig ─────────────────────────────────────────────────────────
+   Figure stands with its FEET at (x, y). Body units: head-bust origin is 480
+   above the feet (hips y 285, thigh 100, shin 95). Arms: shoulder (±90, 104),
+   upper 92, forearm 82. Arm angles are degrees from hanging straight down,
+   swung OUTWARD for positive values (90 = straight out to that side, 180 =
+   straight up); the forearm angle = shoulder + elbow (270 = across the body). */
+export type Arm = [number, number];
+export type Legs = 'stand' | 'walk' | 'crouch' | 'tuck';
+export const PANTS: Record<Who, string> = {DEX: '#2a3550', BOLT: '#22222c', NOVA: '#3a3f6a'};
+export const SHOE: Record<Who, string> = {DEX: '#f4f1ea', BOLT: '#ffb02e', NOVA: '#b98cff'};
+const rad = (d: number) => (d * Math.PI) / 180;
+export const armGeom = (side: -1 | 1, a: Arm) => {
+  const sh = [side * 90, 104];
+  const el = [sh[0] + side * Math.sin(rad(a[0])) * 92, sh[1] + Math.cos(rad(a[0])) * 92];
+  const f = a[0] + a[1];
+  const ha = [el[0] + side * Math.sin(rad(f)) * 82, el[1] + Math.cos(rad(f)) * 82];
+  return {sh, el, ha};
+};
+export const FEET = 480;
+
+export const Figure: React.FC<React.ComponentProps<typeof Toon> & {armL?: Arm; armR?: Arm; legs?: Legs; phase?: number; hold?: 'phone' | null}> = (p) => {
+  const {x, y, s = 1, who, armL = [8, 6], armR = [8, 6], legs = 'stand', phase = 0, rot = 0, dim = 0, hold = null} = p;
+  const L = LOOKS[who];
+  const crouch = legs === 'crouch' ? 70 : legs === 'tuck' ? 40 : 0;
+  const leg = (side: -1 | 1) => {
+    const hip = [side * 38, 285];
+    let th = side * 4;
+    let sh = 0;
+    if (legs === 'walk') {
+      const w = Math.sin(phase + (side > 0 ? Math.PI : 0));
+      th = w * 24;
+      sh = Math.max(0, -w) * -34;
+    } else if (legs === 'crouch') {
+      th = side * 48;
+      sh = -side * 92;
+    } else if (legs === 'tuck') {
+      th = side * 30 - 30;
+      sh = 70;
+    }
+    const kn = [hip[0] + Math.sin(rad(th)) * 100, hip[1] + Math.cos(rad(th)) * 100];
+    const ft = [kn[0] + Math.sin(rad(th + sh)) * 95, kn[1] + Math.cos(rad(th + sh)) * 95];
+    return (
+      <g key={side}>
+        <path d={`M ${hip[0]} ${hip[1]} L ${kn[0]} ${kn[1]} L ${ft[0]} ${ft[1]}`} fill="none" stroke={OL} strokeWidth={42} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={`M ${hip[0]} ${hip[1]} L ${kn[0]} ${kn[1]} L ${ft[0]} ${ft[1]}`} fill="none" stroke={PANTS[who]} strokeWidth={30} strokeLinecap="round" strokeLinejoin="round" />
+        <ellipse cx={ft[0] + side * 14} cy={ft[1] + 6} rx={30} ry={15} fill={SHOE[who]} stroke={OL} strokeWidth={5} />
+      </g>
+    );
+  };
+  const arm = (side: -1 | 1, a: Arm) => {
+    const g = armGeom(side, a);
+    const d = `M ${g.sh[0]} ${g.sh[1]} L ${g.el[0]} ${g.el[1]} L ${g.ha[0]} ${g.ha[1]}`;
+    return (
+      <g key={side}>
+        <path d={d} fill="none" stroke={OL} strokeWidth={40} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={d} fill="none" stroke={L.top} strokeWidth={28} strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx={g.ha[0]} cy={g.ha[1]} r={17} fill={L.skin} stroke={OL} strokeWidth={5} />
+        {hold === 'phone' && side === 1 ? (
+          <g transform={`translate(${g.ha[0] - 8} ${g.ha[1] - 40})`}>
+            <rect x={-20} y={-34} width={40} height={68} rx={8} fill="#0b1422" stroke={OL} strokeWidth={5} />
+            <rect x={-14} y={-26} width={28} height={48} rx={4} fill="#6fe3ff" opacity={0.85} />
+          </g>
+        ) : null}
+      </g>
+    );
+  };
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rot}) scale(${s}) translate(0 ${-FEET + crouch})`} opacity={1 - dim}>
+      {leg(-1)}
+      {leg(1)}
+      <Toon {...p} x={0} y={0} s={1} rot={0} dim={0} torso />
+      {arm(-1, armL)}
+      {arm(1, armR)}
+    </g>
+  );
+};
