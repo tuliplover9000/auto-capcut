@@ -50,6 +50,9 @@ import bufEp from '../episodes/buffering.json';
 import bufTiming from '../episodes/buffering.timing.json';
 import bufEsEp from '../episodes/buffering-es.json';
 import bufEsTiming from '../episodes/buffering-es.timing.json';
+import {RizzMeter, RizzEpisode, rizzFrames} from './rizz/RizzMeter';
+import rzEp from '../episodes/rizz-meter.json';
+import rzTiming from '../episodes/rizz-meter.timing.json';
 import liarEp from '../episodes/liar.json';
 import liarTiming from '../episodes/liar.timing.json';
 import printEp from '../episodes/fingerprint.json';
@@ -216,6 +219,15 @@ export const RemotionRoot: React.FC = () => (
       durationInFrames={storyFrames(karmaEp as StoryEpisode, karmaTiming as FightTiming)}
     />
     <Composition id="PrintSheet" component={PrintSheet} fps={30} width={1080} height={1920} durationInFrames={1} />
+    <Composition
+      id="RizzMeterTikTok"
+      component={RizzMeter}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: rzEp as unknown as RizzEpisode, timing: rzTiming as FightTiming, mode: 'tiktok' as const}}
+      durationInFrames={rizzFrames(rzEp as unknown as RizzEpisode, rzTiming as FightTiming)}
+    />
     <Composition
       id="CargandoTikTok"
       component={Buffering}
