@@ -41,6 +41,9 @@ import karmaTiming from '../episodes/chain-karma.timing.json';
 import {Party} from './chain/Party';
 import partyEp from '../episodes/chain-party.json';
 import partyTiming from '../episodes/chain-party.timing.json';
+import {ChainBeach} from './chain/Beach';
+import beachEp from '../episodes/chain-beach.json';
+import beachTiming from '../episodes/chain-beach.timing.json';
 import {Blood} from './blood/Blood';
 import {PrintSheet} from './prints/PrintSheet';
 import {Prints} from './prints/Prints';
@@ -208,6 +211,15 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: partyEp as StoryEpisode, timing: partyTiming as FightTiming}}
       durationInFrames={storyFrames(partyEp as StoryEpisode, partyTiming as FightTiming)}
+    />
+    <Composition
+      id="ChainBeach"
+      component={ChainBeach}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: beachEp as StoryEpisode, timing: beachTiming as FightTiming}}
+      durationInFrames={storyFrames(beachEp as StoryEpisode, beachTiming as FightTiming)}
     />
     <Composition
       id="ChainKarma"

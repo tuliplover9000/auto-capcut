@@ -1,0 +1,33 @@
+{
+  "id": "chain-beach",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "title": "Chain reaction: find what starts it (beach, 10 links)",
+  "hot": ["15", "sandcastle", "flattened", "starts", "late", "back", "tower", "lifeguard", "ball", "surfboard", "surfer", "umbrella", "sunbather", "crab", "nope", "wave", "before", "timer", "ten", "fine"],
+  "lines": [
+    {"text": "In 15 seconds, this sandcastle gets flattened. Find what starts it.", "scene": "beach", "chapter": "CHAIN REACTION", "note": "",
+      "events": [{"cue": "sandcastle", "kind": "arrow"}, {"cue": "starts", "kind": "go"}]},
+    {"text": "Too late! Did you catch it?", "scene": "beach", "chapter": "TIME'S UP", "note": "", "pause": 15.0,
+      "events": [{"cue": "late", "kind": "late"}]},
+    {"text": "Let's trace it back.", "scene": "beach", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "back", "kind": "rewind"}]},
+    {"text": "The sandcastle got flattened by a lifeguard tower.", "scene": "beach", "chapter": "REPLAY", "note": "",
+      "events": [{"cue": "flattened", "kind": "l10"}, {"cue": "tower", "kind": "l9"}]},
+    {"text": "It tipped when the lifeguard got hit by a beach ball.", "scene": "beach", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "lifeguard", "kind": "l8"}, {"cue": "ball", "kind": "l7"}]},
+    {"text": "The ball got smacked by a surfboard, dropped by a surfer.", "scene": "beach", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "surfboard", "kind": "l6"}, {"cue": "surfer", "kind": "l5"}]},
+    {"text": "He tripped on an umbrella, kicked loose by a sunbather.", "scene": "beach", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "umbrella", "kind": "l4"}, {"cue": "sunbather", "kind": "l3"}]},
+    {"text": "And the sunbather got pinched by a crab.", "scene": "beach", "chapter": "REPLAY", "note": "", "pause": 0.25,
+      "events": [{"cue": "crab", "kind": "l2"}]},
+    {"text": "Think the crab started it? Nope. A wave washed it out.", "scene": "beach", "chapter": "THE TWIST", "note": "", "pause": 0.3,
+      "events": [{"cue": "Nope", "kind": "nope"}, {"cue": "wave", "kind": "l1"}]},
+    {"text": "It started before the timer did.", "scene": "beach", "chapter": "IT STARTED HERE", "note": "", "pause": 0.2,
+      "events": [{"cue": "before", "kind": "here"}, {"cue": "timer", "kind": "first"}]},
+    {"text": "Ten links, while you watched the sandcastle.", "scene": "beach", "chapter": "THE CHAIN", "note": "", "pause": 0.4,
+      "events": [{"cue": "Ten", "kind": "map"}, {"cue": "sandcastle", "kind": "ten"}]},
+    {"text": "The crab is fine.", "scene": "beach", "chapter": "THE CHAIN", "note": "", "pause": 0.35,
+      "events": [{"cue": "fine", "kind": "fine"}]}
+  ]
+}
