@@ -1,0 +1,729 @@
+{
+ "lines": [
+  {
+   "file": "narration/irredeemable/line_0.mp3",
+   "duration": 4.937,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "GTA",
+     "start": 0.312,
+     "end": 0.812
+    },
+    {
+     "text": "6",
+     "start": 0.825,
+     "end": 1.325
+    },
+    {
+     "text": "go",
+     "start": 1.475,
+     "end": 1.613
+    },
+    {
+     "text": "too",
+     "start": 1.625,
+     "end": 1.837
+    },
+    {
+     "text": "far",
+     "start": 1.85,
+     "end": 2.275
+    },
+    {
+     "text": "and",
+     "start": 2.4,
+     "end": 2.462
+    },
+    {
+     "text": "the",
+     "start": 2.475,
+     "end": 2.55
+    },
+    {
+     "text": "game",
+     "start": 2.562,
+     "end": 2.837
+    },
+    {
+     "text": "ranks",
+     "start": 2.85,
+     "end": 3.087
+    },
+    {
+     "text": "you",
+     "start": 3.1,
+     "end": 3.188
+    },
+    {
+     "text": "Irredeemable",
+     "start": 3.2,
+     "end": 3.875
+    },
+    {
+     "text": "Forever",
+     "start": 4.237,
+     "end": 4.787
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_1.mp3",
+   "duration": 3.538,
+   "words": [
+    {
+     "text": "Real",
+     "start": 0.1,
+     "end": 0.412
+    },
+    {
+     "text": "federal",
+     "start": 0.425,
+     "end": 0.775
+    },
+    {
+     "text": "courts",
+     "start": 0.787,
+     "end": 1.15
+    },
+    {
+     "text": "rank",
+     "start": 1.163,
+     "end": 1.375
+    },
+    {
+     "text": "criminals",
+     "start": 1.387,
+     "end": 1.837
+    },
+    {
+     "text": "too",
+     "start": 1.85,
+     "end": 2.175
+    },
+    {
+     "text": "One",
+     "start": 2.538,
+     "end": 2.775
+    },
+    {
+     "text": "to",
+     "start": 2.788,
+     "end": 2.837
+    },
+    {
+     "text": "six",
+     "start": 2.85,
+     "end": 3.388
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_2.mp3",
+   "duration": 1.987,
+   "words": [
+    {
+     "text": "Every",
+     "start": 0.1,
+     "end": 0.425
+    },
+    {
+     "text": "past",
+     "start": 0.438,
+     "end": 0.812
+    },
+    {
+     "text": "sentence",
+     "start": 0.825,
+     "end": 1.137
+    },
+    {
+     "text": "adds",
+     "start": 1.15,
+     "end": 1.325
+    },
+    {
+     "text": "points",
+     "start": 1.337,
+     "end": 1.837
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_3.mp3",
+   "duration": 3.012,
+   "words": [
+    {
+     "text": "Over",
+     "start": 0.1,
+     "end": 0.412
+    },
+    {
+     "text": "thirteen",
+     "start": 0.425,
+     "end": 0.887
+    },
+    {
+     "text": "months",
+     "start": 0.9,
+     "end": 1.137
+    },
+    {
+     "text": "in",
+     "start": 1.15,
+     "end": 1.225
+    },
+    {
+     "text": "prison",
+     "start": 1.238,
+     "end": 1.638
+    },
+    {
+     "text": "Three",
+     "start": 2.0,
+     "end": 2.288
+    },
+    {
+     "text": "points",
+     "start": 2.3,
+     "end": 2.862
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_4.mp3",
+   "duration": 2.925,
+   "words": [
+    {
+     "text": "Sixty",
+     "start": 0.1,
+     "end": 0.537
+    },
+    {
+     "text": "days",
+     "start": 0.55,
+     "end": 0.938
+    },
+    {
+     "text": "or",
+     "start": 0.988,
+     "end": 1.062
+    },
+    {
+     "text": "more",
+     "start": 1.075,
+     "end": 1.238
+    },
+    {
+     "text": "behind",
+     "start": 1.25,
+     "end": 1.625
+    },
+    {
+     "text": "bars",
+     "start": 1.637,
+     "end": 2.025
+    },
+    {
+     "text": "Two",
+     "start": 2.388,
+     "end": 2.775
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_5.mp3",
+   "duration": 4.562,
+   "words": [
+    {
+     "text": "Anything",
+     "start": 0.1,
+     "end": 0.575
+    },
+    {
+     "text": "less",
+     "start": 0.588,
+     "end": 0.988
+    },
+    {
+     "text": "even",
+     "start": 1.225,
+     "end": 1.388
+    },
+    {
+     "text": "probation",
+     "start": 1.4,
+     "end": 1.962
+    },
+    {
+     "text": "One",
+     "start": 2.325,
+     "end": 2.7
+    },
+    {
+     "text": "But",
+     "start": 3.062,
+     "end": 3.25
+    },
+    {
+     "text": "only",
+     "start": 3.275,
+     "end": 3.475
+    },
+    {
+     "text": "four",
+     "start": 3.487,
+     "end": 3.75
+    },
+    {
+     "text": "of",
+     "start": 3.763,
+     "end": 3.825
+    },
+    {
+     "text": "those",
+     "start": 3.837,
+     "end": 4.037
+    },
+    {
+     "text": "count",
+     "start": 4.05,
+     "end": 4.412
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_6.mp3",
+   "duration": 3.75,
+   "words": [
+    {
+     "text": "Thirteen",
+     "start": 0.1,
+     "end": 0.637
+    },
+    {
+     "text": "points",
+     "start": 0.65,
+     "end": 1.125
+    },
+    {
+     "text": "and",
+     "start": 1.375,
+     "end": 1.5
+    },
+    {
+     "text": "you're",
+     "start": 1.512,
+     "end": 1.6
+    },
+    {
+     "text": "Category",
+     "start": 1.613,
+     "end": 2.112
+    },
+    {
+     "text": "six",
+     "start": 2.125,
+     "end": 2.675
+    },
+    {
+     "text": "The",
+     "start": 3.038,
+     "end": 3.212
+    },
+    {
+     "text": "top",
+     "start": 3.225,
+     "end": 3.6
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_7.mp3",
+   "duration": 2.838,
+   "words": [
+    {
+     "text": "Your",
+     "start": 0.1,
+     "end": 0.312
+    },
+    {
+     "text": "turn",
+     "start": 0.325,
+     "end": 0.725
+    },
+    {
+     "text": "Which",
+     "start": 1.087,
+     "end": 1.325
+    },
+    {
+     "text": "one",
+     "start": 1.337,
+     "end": 1.462
+    },
+    {
+     "text": "is",
+     "start": 1.475,
+     "end": 1.588
+    },
+    {
+     "text": "Category",
+     "start": 1.6,
+     "end": 2.125
+    },
+    {
+     "text": "six",
+     "start": 2.138,
+     "end": 2.688
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_8.mp3",
+   "duration": 5.538,
+   "words": [
+    {
+     "text": "C",
+     "start": 0.1,
+     "end": 0.537
+    },
+    {
+     "text": "Three",
+     "start": 0.9,
+     "end": 1.4
+    },
+    {
+     "text": "three",
+     "start": 1.8,
+     "end": 2.225
+    },
+    {
+     "text": "two",
+     "start": 2.525,
+     "end": 2.825
+    },
+    {
+     "text": "two",
+     "start": 3.013,
+     "end": 3.312
+    },
+    {
+     "text": "two",
+     "start": 3.425,
+     "end": 3.737
+    },
+    {
+     "text": "one",
+     "start": 4.138,
+     "end": 4.388
+    },
+    {
+     "text": "Thirteen",
+     "start": 4.75,
+     "end": 5.388
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_9.mp3",
+   "duration": 3.363,
+   "words": [
+    {
+     "text": "B's",
+     "start": 0.1,
+     "end": 0.363
+    },
+    {
+     "text": "four",
+     "start": 0.375,
+     "end": 0.575
+    },
+    {
+     "text": "prison",
+     "start": 0.588,
+     "end": 0.85
+    },
+    {
+     "text": "terms",
+     "start": 0.863,
+     "end": 1.388
+    },
+    {
+     "text": "Twelve",
+     "start": 1.75,
+     "end": 2.2
+    },
+    {
+     "text": "One",
+     "start": 2.562,
+     "end": 2.812
+    },
+    {
+     "text": "short",
+     "start": 2.825,
+     "end": 3.213
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_10.mp3",
+   "duration": 4.4,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.1,
+     "end": 0.325
+    },
+    {
+     "text": "A's",
+     "start": 0.338,
+     "end": 0.5
+    },
+    {
+     "text": "long",
+     "start": 0.512,
+     "end": 0.762
+    },
+    {
+     "text": "list",
+     "start": 0.775,
+     "end": 1.15
+    },
+    {
+     "text": "The",
+     "start": 1.512,
+     "end": 1.7
+    },
+    {
+     "text": "small",
+     "start": 1.712,
+     "end": 2.0
+    },
+    {
+     "text": "stuff",
+     "start": 2.013,
+     "end": 2.275
+    },
+    {
+     "text": "caps",
+     "start": 2.288,
+     "end": 2.587
+    },
+    {
+     "text": "at",
+     "start": 2.6,
+     "end": 2.675
+    },
+    {
+     "text": "four",
+     "start": 2.688,
+     "end": 3.1
+    },
+    {
+     "text": "Eight",
+     "start": 3.462,
+     "end": 3.712
+    },
+    {
+     "text": "points",
+     "start": 3.725,
+     "end": 4.25
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_11.mp3",
+   "duration": 3.35,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "two",
+     "start": 0.312,
+     "end": 0.525
+    },
+    {
+     "text": "of",
+     "start": 0.537,
+     "end": 0.65
+    },
+    {
+     "text": "A's",
+     "start": 0.662,
+     "end": 0.9
+    },
+    {
+     "text": "are",
+     "start": 0.912,
+     "end": 1.0
+    },
+    {
+     "text": "drug",
+     "start": 1.012,
+     "end": 1.325
+    },
+    {
+     "text": "felonies",
+     "start": 1.337,
+     "end": 1.925
+    },
+    {
+     "text": "Caught",
+     "start": 2.288,
+     "end": 2.587
+    },
+    {
+     "text": "selling",
+     "start": 2.6,
+     "end": 2.875
+    },
+    {
+     "text": "again",
+     "start": 2.888,
+     "end": 3.2
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_12.mp3",
+   "duration": 3.4,
+   "words": [
+    {
+     "text": "Career",
+     "start": 0.1,
+     "end": 0.438
+    },
+    {
+     "text": "offender",
+     "start": 0.45,
+     "end": 0.887
+    },
+    {
+     "text": "Category",
+     "start": 1.25,
+     "end": 1.8
+    },
+    {
+     "text": "six",
+     "start": 1.812,
+     "end": 2.312
+    },
+    {
+     "text": "automatically",
+     "start": 2.587,
+     "end": 3.25
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_13.mp3",
+   "duration": 5.938,
+   "words": [
+    {
+     "text": "Unlike",
+     "start": 0.1,
+     "end": 0.525
+    },
+    {
+     "text": "GTA",
+     "start": 0.537,
+     "end": 1.112
+    },
+    {
+     "text": "real",
+     "start": 1.512,
+     "end": 1.7
+    },
+    {
+     "text": "courts",
+     "start": 1.712,
+     "end": 2.0
+    },
+    {
+     "text": "forget",
+     "start": 2.013,
+     "end": 2.425
+    },
+    {
+     "text": "Old",
+     "start": 2.788,
+     "end": 3.113
+    },
+    {
+     "text": "sentences",
+     "start": 3.125,
+     "end": 3.638
+    },
+    {
+     "text": "stop",
+     "start": 3.65,
+     "end": 3.913
+    },
+    {
+     "text": "counting",
+     "start": 3.925,
+     "end": 4.325
+    },
+    {
+     "text": "after",
+     "start": 4.338,
+     "end": 4.575
+    },
+    {
+     "text": "ten",
+     "start": 4.588,
+     "end": 4.8
+    },
+    {
+     "text": "to",
+     "start": 4.812,
+     "end": 4.888
+    },
+    {
+     "text": "fifteen",
+     "start": 4.9,
+     "end": 5.375
+    },
+    {
+     "text": "years",
+     "start": 5.388,
+     "end": 5.788
+    }
+   ]
+  },
+  {
+   "file": "narration/irredeemable/line_14.mp3",
+   "duration": 1.838,
+   "words": [
+    {
+     "text": "GTA",
+     "start": 0.1,
+     "end": 0.688
+    },
+    {
+     "text": "6",
+     "start": 0.7,
+     "end": 1.05
+    },
+    {
+     "text": "never",
+     "start": 1.062,
+     "end": 1.288
+    },
+    {
+     "text": "does",
+     "start": 1.3,
+     "end": 1.688
+    }
+   ]
+  }
+ ]
+}
