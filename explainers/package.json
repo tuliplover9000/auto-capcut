@@ -10,11 +10,15 @@
     "sfx": "python scripts/make_sfx.py"
   },
   "dependencies": {
+    "@react-three/fiber": "9.3.0",
     "@remotion/cli": "^4.0.543",
     "@remotion/google-fonts": "^4.0.543",
+    "@remotion/three": "4.0.543",
+    "@types/three": "0.170.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "remotion": "^4.0.543"
+    "remotion": "^4.0.543",
+    "three": "0.170.0"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

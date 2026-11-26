@@ -1,5 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Composition} from 'remotion';
+import {CoolTest, COOL_FRAMES} from './three/CoolTest';
 import {Pictogram, ArtKey} from './art/Pictograms';
 import {LedText} from './lib/LedText';
 import {SpeedTrap} from './speedtrap/SpeedTrap';
@@ -135,6 +136,7 @@ const ArtSheet: React.FC = () => (
 
 export const RemotionRoot: React.FC = () => (
   <>
+    <Composition id="CoolTest" component={CoolTest} durationInFrames={COOL_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="ArtSheet" component={ArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="FightArtSheet" component={FightArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
     <Composition id="LiftArtSheet" component={LiftArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />
