@@ -1,0 +1,13 @@
+{
+  "id": "cool-test",
+  "voice": "en-US-AndrewMultilingualNeural",
+  "rate": "-4%",
+  "flow": true,
+  "title": "3D test: the body clock (kid-clear script, one-take voice)",
+  "lines": [
+    {"text": "When you're alive, your body stays warm. Ninety-eight point six degrees.", "events": []},
+    {"text": "But after a person dies, the body slowly cools down. About one and a half degrees every hour.", "events": []},
+    {"text": "So if a body is six degrees colder, that person died about four hours ago.", "events": []},
+    {"text": "Here's the trick. Count back from the time the temperature was taken. Not the time the body was found.", "events": []}
+  ]
+}

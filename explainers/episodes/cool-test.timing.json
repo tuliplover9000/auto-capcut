@@ -1,0 +1,349 @@
+{
+ "lines": [
+  {
+   "file": "narration/cool-test/line_0.wav",
+   "duration": 5.046,
+   "words": [
+    {
+     "text": "When",
+     "start": 0.091,
+     "end": 0.169
+    },
+    {
+     "text": "you're",
+     "start": 0.169,
+     "end": 0.299
+    },
+    {
+     "text": "alive",
+     "start": 0.299,
+     "end": 0.898
+    },
+    {
+     "text": "your",
+     "start": 1.328,
+     "end": 1.406
+    },
+    {
+     "text": "body",
+     "start": 1.419,
+     "end": 1.823
+    },
+    {
+     "text": "stays",
+     "start": 1.836,
+     "end": 2.214
+    },
+    {
+     "text": "warm",
+     "start": 2.214,
+     "end": 2.617
+    },
+    {
+     "text": "Ninety-eight",
+     "start": 3.034,
+     "end": 3.568
+    },
+    {
+     "text": "point",
+     "start": 3.581,
+     "end": 3.88
+    },
+    {
+     "text": "six",
+     "start": 3.88,
+     "end": 4.18
+    },
+    {
+     "text": "degrees",
+     "start": 4.193,
+     "end": 4.831
+    }
+   ],
+   "takeStart": 0.0
+  },
+  {
+   "file": "narration/cool-test/line_1.wav",
+   "duration": 7.337,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.214,
+     "end": 0.28
+    },
+    {
+     "text": "after",
+     "start": 0.28,
+     "end": 0.54
+    },
+    {
+     "text": "a",
+     "start": 0.553,
+     "end": 0.605
+    },
+    {
+     "text": "person",
+     "start": 0.605,
+     "end": 1.022
+    },
+    {
+     "text": "dies",
+     "start": 1.022,
+     "end": 1.699
+    },
+    {
+     "text": "the",
+     "start": 1.933,
+     "end": 2.05
+    },
+    {
+     "text": "body",
+     "start": 2.063,
+     "end": 2.506
+    },
+    {
+     "text": "slowly",
+     "start": 2.519,
+     "end": 3.144
+    },
+    {
+     "text": "cools",
+     "start": 3.157,
+     "end": 3.574
+    },
+    {
+     "text": "down",
+     "start": 3.587,
+     "end": 3.99
+    },
+    {
+     "text": "About",
+     "start": 4.42,
+     "end": 4.746
+    },
+    {
+     "text": "one",
+     "start": 4.746,
+     "end": 4.967
+    },
+    {
+     "text": "and",
+     "start": 4.967,
+     "end": 5.032
+    },
+    {
+     "text": "a",
+     "start": 5.032,
+     "end": 5.072
+    },
+    {
+     "text": "half",
+     "start": 5.072,
+     "end": 5.436
+    },
+    {
+     "text": "degrees",
+     "start": 5.449,
+     "end": 6.165
+    },
+    {
+     "text": "every",
+     "start": 6.425,
+     "end": 6.712
+    },
+    {
+     "text": "hour",
+     "start": 6.712,
+     "end": 7.128
+    }
+   ],
+   "takeStart": 5.046
+  },
+  {
+   "file": "narration/cool-test/line_2.wav",
+   "duration": 5.482,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.208,
+     "end": 0.377
+    },
+    {
+     "text": "if",
+     "start": 0.377,
+     "end": 0.444
+    },
+    {
+     "text": "a",
+     "start": 0.444,
+     "end": 0.508
+    },
+    {
+     "text": "body",
+     "start": 0.521,
+     "end": 1.082
+    },
+    {
+     "text": "is",
+     "start": 1.133,
+     "end": 1.277
+    },
+    {
+     "text": "six",
+     "start": 1.277,
+     "end": 1.575
+    },
+    {
+     "text": "degrees",
+     "start": 1.588,
+     "end": 2.005
+    },
+    {
+     "text": "colder",
+     "start": 2.005,
+     "end": 2.5
+    },
+    {
+     "text": "that",
+     "start": 2.929,
+     "end": 3.139
+    },
+    {
+     "text": "person",
+     "start": 3.139,
+     "end": 3.541
+    },
+    {
+     "text": "died",
+     "start": 3.556,
+     "end": 3.971
+    },
+    {
+     "text": "about",
+     "start": 3.971,
+     "end": 4.232
+    },
+    {
+     "text": "four",
+     "start": 4.245,
+     "end": 4.584
+    },
+    {
+     "text": "hours",
+     "start": 4.584,
+     "end": 4.87
+    },
+    {
+     "text": "ago",
+     "start": 4.87,
+     "end": 5.261
+    }
+   ],
+   "takeStart": 12.383
+  },
+  {
+   "file": "narration/cool-test/line_3.wav",
+   "duration": 5.776,
+   "words": [
+    {
+     "text": "Here's",
+     "start": 0.221,
+     "end": 0.495
+    },
+    {
+     "text": "the",
+     "start": 0.495,
+     "end": 0.573
+    },
+    {
+     "text": "trick",
+     "start": 0.587,
+     "end": 1.041
+    },
+    {
+     "text": "Count",
+     "start": 1.459,
+     "end": 1.706
+    },
+    {
+     "text": "back",
+     "start": 1.706,
+     "end": 1.954
+    },
+    {
+     "text": "from",
+     "start": 1.966,
+     "end": 2.11
+    },
+    {
+     "text": "the",
+     "start": 2.11,
+     "end": 2.188
+    },
+    {
+     "text": "time",
+     "start": 2.188,
+     "end": 2.488
+    },
+    {
+     "text": "the",
+     "start": 2.488,
+     "end": 2.566
+    },
+    {
+     "text": "temperature",
+     "start": 2.566,
+     "end": 2.982
+    },
+    {
+     "text": "was",
+     "start": 2.982,
+     "end": 3.113
+    },
+    {
+     "text": "taken",
+     "start": 3.113,
+     "end": 3.515
+    },
+    {
+     "text": "Not",
+     "start": 3.919,
+     "end": 4.062
+    },
+    {
+     "text": "the",
+     "start": 4.062,
+     "end": 4.128
+    },
+    {
+     "text": "time",
+     "start": 4.128,
+     "end": 4.375
+    },
+    {
+     "text": "the",
+     "start": 4.375,
+     "end": 4.441
+    },
+    {
+     "text": "body",
+     "start": 4.454,
+     "end": 4.753
+    },
+    {
+     "text": "was",
+     "start": 4.753,
+     "end": 4.909
+    },
+    {
+     "text": "found",
+     "start": 4.909,
+     "end": 5.404
+    }
+   ],
+   "takeStart": 17.864
+  }
+ ],
+ "flow": true,
+ "take": "narration/cool-test/take.mp3"
+}

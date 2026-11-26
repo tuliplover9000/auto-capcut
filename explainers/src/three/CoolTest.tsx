@@ -11,11 +11,12 @@ import {useFrame, useThree} from '@react-three/fiber';
 import {AbsoluteFill, Audio, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {loadFont as loadMontserrat} from '@remotion/google-fonts/Montserrat';
 import {PX_M, SKIN_ALIVE, SKIN_COLD, drawDetectiveKneeling, drawDetectiveStanding, drawVictimLying, drawVictimSitting, mix} from './toon';
-import timing from '../../episodes/time-of-death.timing.json';
+import timing from '../../episodes/cool-test.timing.json';
+import episode from '../../episodes/cool-test.json';
 
 const heavy = loadMontserrat('normal', {weights: ['800', '900'], subsets: ['latin']}).fontFamily;
 const MONO = '"Courier New", Courier, monospace';
-export const COOL_FRAMES = 450;
+// lengths come from the one-take narration (episodes/cool-test.json, flow mode)
 const W = 1080;
 const H = 1920;
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
@@ -27,21 +28,23 @@ const vl = (a: THREE.Vector3, b: THREE.Vector3, k: number) => a.clone().lerp(b, 
 const col = (a: string, b: string, k: number) => new THREE.Color(a).lerp(new THREE.Color(b), clamp01(k));
 
 // ───────────────────────── story clock ─────────────────────────
-type TLine = {file: string; duration: number; words: Array<{text: string; start: number}>};
-const LINES = [2, 3, 4, 5].map((i) => (timing as unknown as {lines: TLine[]}).lines[i]);
-const STARTS = [0.3, 3.6, 7.6, 10.6];
-const wt = (li: number, word: string) => {
-  const w = LINES[li].words.find((x) => x.text.toLowerCase().replace(/[^a-z0-9-]/g, '') === word);
-  return STARTS[li] + (w ? w.start : 0);
+type TLine = {file: string; duration: number; takeStart: number; words: Array<{text: string; start: number}>};
+const LINES = (timing as unknown as {lines: TLine[]}).lines;
+const LEAD = 0.3;
+const STARTS = LINES.map((l) => LEAD + l.takeStart); // one continuous take, re-assembled exactly
+const wt = (li: number, word: string, nth = 0) => {
+  const ws = LINES[li].words.filter((x) => x.text.toLowerCase().replace(/[^a-z0-9-]/g, '') === word);
+  return STARTS[li] + (ws[nth] ? ws[nth].start : 0);
 };
 const T = {
-  ninety: wt(0, 'ninety-eight'), die: 3.35, lose: wt(1, 'lose'), hour: wt(1, 'hour'),
-  six: wt(2, 'six'), four: wt(2, 'four'), measured: wt(3, 'measured'), found: wt(3, 'found'),
+  ninety: wt(0, 'ninety-eight'), die: wt(1, 'dies'), lose: wt(1, 'cools'), hour: wt(1, 'hour'),
+  six: wt(2, 'six'), four: wt(2, 'four'), measured: wt(3, 'taken'), found: wt(3, 'found'),
 };
-const TL0 = T.lose; // time-lapse 8 PM -> 12 AM
-const TL1 = T.four - 0.05;
-const DET0 = 10.05;
-const DET1 = 11.15;
+export const COOL_FRAMES = Math.ceil((STARTS[3] + LINES[3].duration + 1.2) * 30);
+const TL0 = T.lose; // time-lapse 8 PM -> 12 AM: cools down ... six degrees colder
+const TL1 = T.six + 0.1;
+const DET0 = wt(3, 'heres') - 0.15;
+const DET1 = DET0 + 1.1;
 const hoursAt = (s: number) => clamp01((s - TL0) / (TL1 - TL0)) * 4;
 const tempAt = (s: number) => 98.6 - 1.5 * hoursAt(s);
 const clockAt = (s: number) => (s < T.die ? 19.5 + s * 0.12 : 20 + hoursAt(s)); // 24 h clock
@@ -477,15 +480,18 @@ export const CoolTest: React.FC = () => {
   const clockText = `${hh}:${String(mm).padStart(2, '0')} ${ampm}`;
   const probeAt = project(pcam, V(0.75, 0.95, 0.05));
   // header card text
-  const title = s < T.die ? 'ALIVE = 98.6°F' : s < T.six ? '−1.5°F EVERY HOUR' : s < DET0 ? '6° DOWN = 4 HRS DEAD' : 'COUNT FROM THE READING';
+  const title = s < T.die ? 'ALIVE = 98.6°F' : s < T.six ? '−1.5°F EVERY HOUR' : s < DET0 ? '6° COLDER = 4 HOURS' : 'COUNT FROM THE READING';
   // captions: 1-2 words at a time
   const chunks: Array<{t: number; e: number; text: string}> = [];
   LINES.forEach((ln, li) => {
     const ws = ln.words;
+    // never pair words across a sentence/comma break ("TRICK. COUNT" read as one phrase)
+    const toks = (episode as {lines: Array<{text: string}>}).lines[li].text.split(/\s+/);
+    const stop = (i: number) => toks.length === ws.length && /[.,!?]$/.test(toks[i]);
     for (let i = 0; i < ws.length; i += 2) {
       const a = ws[i];
       const b = ws[i + 1];
-      const long = a.text.length > 7 || (b && b.text.length > 7);
+      const long = a.text.length > 7 || (b && b.text.length > 7) || stop(i);
       const take = long ? [a] : b ? [a, b] : [a];
       if (long) i -= 1;
       const next = ws[i + (long ? 1 : 2)];
@@ -496,11 +502,12 @@ export const CoolTest: React.FC = () => {
   const capSize = cap ? Math.min(118, 820 / (cap.text.length * 0.78)) : 0;
   const capPop = cap ? 0.6 + 0.4 * spring({frame: frame - Math.round(cap.t * fps), fps, config: {damping: 9, stiffness: 240}}) : 1;
   const tick = Array.from({length: 18}).map((_, k) => TL0 + k * 0.24).filter((t) => t < TL1);
+  // few, soft effects: the clock ticks ARE the story; nothing chops the flow
   const sfx: Array<[number, string, number]> = [
-    [0.05, 'sfx/whoosh.wav', 0.4], [T.ninety, 'sfx/ding.wav', 0.5], [T.die - 0.18, 'sfx/powerdown.wav', 0.55], [T.die, 'sfx/boom.wav', 0.35], [T.die + 0.05, 'sfx/whoosh.wav', 0.45],
-    ...tick.map((t) => [t, 'sfx/tick.wav', 0.38] as [number, string, number]),
-    ...[1, 2, 3, 4].map((h) => [TL0 + (h / 4) * (TL1 - TL0), 'sfx/pop.wav', 0.45] as [number, string, number]),
-    [T.four, 'sfx/slam.wav', 0.7], [DET0, 'sfx/whoosh.wav', 0.45], [DET1 + 0.1, 'sfx/pop.wav', 0.45], [T.measured, 'sfx/ding.wav', 0.7], [T.found, 'sfx/fail.wav', 0.45],
+    [T.die - 0.18, 'sfx/powerdown.wav', 0.3], [T.die + 0.02, 'sfx/whoosh.wav', 0.25],
+    ...tick.map((t) => [t, 'sfx/tick.wav', 0.22] as [number, string, number]),
+    ...[1, 2, 3, 4].map((h) => [TL0 + (h / 4) * (TL1 - TL0), 'sfx/pop.wav', 0.25] as [number, string, number]),
+    [T.measured, 'sfx/ding.wav', 0.4],
   ];
   return (
     <AbsoluteFill style={{background: '#000'}}>
@@ -553,7 +560,7 @@ export const CoolTest: React.FC = () => {
           transform: `scale(${capPop})`, textTransform: 'uppercase'}}>{cap.text}</div>
       ) : null}
       {/* audio */}
-      <Audio src={staticFile('music/time-of-death.wav')} startFrom={212} volume={0.5} />
+      <Audio src={staticFile('music/cool-test.wav')} volume={0.25} />
       {LINES.map((ln, i) => <Sequence key={i} from={Math.round(STARTS[i] * fps)}><Audio src={staticFile(ln.file)} /></Sequence>)}
       {sfx.map(([t, f, v], i) => <Sequence key={`s${i}`} from={Math.max(0, Math.round(t * fps))} durationInFrames={60}><Audio src={staticFile(f)} volume={v} /></Sequence>)}
     </AbsoluteFill>
