@@ -560,7 +560,7 @@ export const CoolTest: React.FC = () => {
           transform: `scale(${capPop})`, textTransform: 'uppercase'}}>{cap.text}</div>
       ) : null}
       {/* audio */}
-      <Audio src={staticFile('music/cool-test.wav')} volume={0.25} />
+      <Audio src={staticFile('music/cool-test.wav')} volume={0.36} />
       {LINES.map((ln, i) => <Sequence key={i} from={Math.round(STARTS[i] * fps)}><Audio src={staticFile(ln.file)} /></Sequence>)}
       {sfx.map(([t, f, v], i) => <Sequence key={`s${i}`} from={Math.max(0, Math.round(t * fps))} durationInFrames={60}><Audio src={staticFile(f)} volume={v} /></Sequence>)}
     </AbsoluteFill>

@@ -72,6 +72,120 @@ def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", s.lower())
 
 
+_ONES = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+         "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"]
+_TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+
+
+def _n2w(n: int) -> str:
+    if n < 20:
+        return _ONES[n]
+    if n < 100:
+        return _TENS[n // 10] + (_ONES[n % 10] if n % 10 else "")
+    if n < 1000:
+        return _ONES[n // 100] + "hundred" + (_n2w(n % 100) if n % 100 else "")
+    return str(n)
+
+
+def _expand(word: str) -> list[str]:
+    """Whisper writes '98.6' where the script says 'Ninety-eight point six'."""
+    import re
+    w = word.strip().lower().strip(",!?;:\"'")
+    w = w.rstrip(".") if not re.fullmatch(r"\d+\.\d+", w) else w
+    m = re.fullmatch(r"(\d+)(?:\.(\d+))?%?", w)
+    if m:
+        out = [_n2w(int(m.group(1)))]
+        if m.group(2):
+            out += ["point"] + [_n2w(int(d)) for d in m.group(2)]
+        return out
+    n = _norm(w)
+    return [n] if n else []
+
+
+def gemini_take(text: str, voice: str, style: str, out_wav: str, model: str = "gemini-2.5-flash-preview-tts") -> None:
+    """Google Gemini TTS (user pick 2026-11-26: Laomedeia, 'Say excitedly, fast and punchy: ').
+    Key: GEMINI_API_KEY in the repo-root .env (gitignored; the user typed it). The 2.5 Flash
+    model obeys a leading 'Say ...:' direction; the 3.x models READ it aloud (verified)."""
+    import base64
+    import time
+    import urllib.error
+    import urllib.request
+    import wave
+    env = os.path.join(os.path.dirname(ROOT), ".env")
+    key = next((l.split("=", 1)[1].strip() for l in open(env, encoding="utf-8-sig") if l.startswith("GEMINI_API_KEY=")), "")
+    if not key:
+        sys.exit("GEMINI_API_KEY missing from .env")
+    body = {"contents": [{"parts": [{"text": style + text}]}],
+            "generationConfig": {"responseModalities": ["AUDIO"],
+                                 "speechConfig": {"voiceConfig": {"prebuiltVoiceConfig": {"voiceName": voice}}}}}
+    for k in range(4):
+        req = urllib.request.Request(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+                                     data=json.dumps(body).encode(), headers={"x-goog-api-key": key, "Content-Type": "application/json"})
+        try:
+            d = json.load(urllib.request.urlopen(req, timeout=240))
+            break
+        except urllib.error.HTTPError as e:
+            msg = e.read().decode()[:300]
+            if e.code == 429:
+                sys.exit(f"Gemini TTS quota hit (free tier is ~10-15 takes/day): {msg}")
+            if k == 3:
+                sys.exit(f"Gemini TTS failed: {e.code} {msg}")
+            time.sleep(5 + 5 * k)
+    part = d["candidates"][0]["content"]["parts"][0]["inlineData"]
+    data = base64.b64decode(part["data"])
+    if data[:4] == b"RIFF":
+        open(out_wav, "wb").write(data)
+    else:
+        with wave.open(out_wav, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(24000)
+            w.writeframes(data)
+
+
+def align_to_script(audio_path: str, lines: list[str]) -> list[list[dict]]:
+    """Word timings for an engine that gives none: faster-whisper word stamps, matched to the
+    SCRIPT's own tokens (difflib), unmatched tokens spread evenly between their neighbours."""
+    from difflib import SequenceMatcher
+
+    from faster_whisper import WhisperModel
+    toks = [(li, t) for li, ln in enumerate(lines) for t in ln.split()]
+    ref = [_norm(t) for _, t in toks]
+    segs, _ = WhisperModel("base", device="cpu", compute_type="int8").transcribe(audio_path, word_timestamps=True, language="en")
+    hyp = []
+    for s in segs:
+        for w in s.words:
+            parts = _expand(w.word)
+            for j, p in enumerate(parts):  # split a multi-token number's time evenly
+                a = w.start + (w.end - w.start) * j / len(parts)
+                hyp.append((p, a, w.start + (w.end - w.start) * (j + 1) / len(parts)))
+    times: list = [None] * len(ref)
+    for blk in SequenceMatcher(None, ref, [h[0] for h in hyp], autojunk=False).get_matching_blocks():
+        for k in range(blk.size):
+            times[blk.a + k] = (hyp[blk.b + k][1], hyp[blk.b + k][2])
+    if not any(times):
+        sys.exit("align: speech-to-text matched none of the script")
+    i = 0
+    while i < len(times):  # fill unmatched runs
+        if times[i] is None:
+            j = i
+            while j < len(times) and times[j] is None:
+                j += 1
+            a = times[i - 1][1] if i > 0 else (times[j][0] - 0.3 * (j - i) if j < len(times) else 0)
+            z = times[j][0] if j < len(times) else a + 0.3 * (j - i)
+            step = (z - a) / (j - i)
+            for k in range(i, j):
+                times[k] = (a + step * (k - i), a + step * (k - i + 1))
+            i = j
+        i += 1
+    matched = sum(1 for blk in SequenceMatcher(None, ref, [h[0] for h in hyp], autojunk=False).get_matching_blocks() for _ in range(blk.size))
+    print(f"align: {matched}/{len(ref)} script words matched by speech-to-text, rest interpolated")
+    per: list[list[dict]] = [[] for _ in lines]
+    for (li, t), (a, z) in zip(toks, times):
+        per[li].append({"text": t.strip(".,!?;:\"“”"), "start": round(a, 3), "end": round(z, 3)})
+    return per
+
+
 def flow(ep: dict, ep_path: str, out_dir: str) -> int:
     """FLOW MODE (2026-11-26, user: "the voice is strange, it needs to be smoother").
     The whole script is spoken in ONE take, so intonation runs across sentences
@@ -89,19 +203,31 @@ def flow(ep: dict, ep_path: str, out_dir: str) -> int:
     if len(voices) != 1:
         sys.exit("flow mode needs one voice/rate/pitch for every line (multi-voice skits: use per-line mode)")
     voice, rate, pitch = voices.pop()
-    take = os.path.join(out_dir, "take.mp3")
-    words = synth_retry(" ".join(x["text"].strip() for x in L), voice, rate, take, pitch=pitch)
-    # assign boundary words to lines by consuming each line's letters in order
-    per, wi = [], 0
-    for x in L:
-        need, got, mine = len(_norm(x["text"])), 0, []
-        while wi < len(words) and got < need:
-            got += len(_norm(words[wi]["text"]))
-            mine.append(words[wi])
-            wi += 1
-        if not mine or got != need:
-            sys.exit(f"flow: could not align words to line: {x['text']!r} (got {got} of {need} letters)")
-        per.append(mine)
+    full = " ".join(x["text"].strip() for x in L)
+    if ep.get("engine") == "gemini":
+        # "--take <file>" reuses an approved take instead of spending a free-tier request
+        take = os.path.join(out_dir, "take.wav")
+        if "--take" in sys.argv:
+            import shutil
+            shutil.copyfile(sys.argv[sys.argv.index("--take") + 1], take)
+        else:
+            gemini_take(full, voice, ep.get("style", "Say excitedly, fast and punchy: "), take)
+        per = align_to_script(take, [x["text"] for x in L])
+        words = [w for ws in per for w in ws]
+    else:
+        take = os.path.join(out_dir, "take.mp3")
+        words = synth_retry(full, voice, rate, take, pitch=pitch)
+        # assign boundary words to lines by consuming each line's letters in order
+        per, wi = [], 0
+        for x in L:
+            need, got, mine = len(_norm(x["text"])), 0, []
+            while wi < len(words) and got < need:
+                got += len(_norm(words[wi]["text"]))
+                mine.append(words[wi])
+                wi += 1
+            if not mine or got != need:
+                sys.exit(f"flow: could not align words to line: {x['text']!r} (got {got} of {need} letters)")
+            per.append(mine)
     # decode once, cut at the middle of each gap between lines
     ff = imageio_ffmpeg.get_ffmpeg_exe()
     pcm = subprocess.run([ff, "-i", take, "-f", "s16le", "-ac", "1", "-ar", "24000", "-"], capture_output=True).stdout
@@ -122,7 +248,7 @@ def flow(ep: dict, ep_path: str, out_dir: str) -> int:
         lines.append({"file": f"narration/{ep['id']}/line_{i}.wav", "duration": round(z - a, 3), "words": rel, "takeStart": round(a, 3)})
         print(f"line {i}: {z - a:5.2f}s  {len(ws)} words | {L[i]['text']}")
     timing_path = os.path.splitext(ep_path)[0] + ".timing.json"
-    json.dump({"lines": lines, "flow": True, "take": f"narration/{ep['id']}/take.mp3"}, open(timing_path, "w", encoding="utf-8"), indent=1)
+    json.dump({"lines": lines, "flow": True, "take": f"narration/{ep['id']}/{os.path.basename(take)}"}, open(timing_path, "w", encoding="utf-8"), indent=1)
     span = words[-1]["end"] - words[0]["start"]
     print(f"-> {timing_path}  (one take, {len(words)} words, {span:.1f}s, {len(words) / span * 60:.0f} wpm)")
     return 0
