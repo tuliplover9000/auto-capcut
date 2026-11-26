@@ -1,0 +1,840 @@
+{
+ "lines": [
+  {
+   "file": "narration/turkey/line_0.wav",
+   "duration": 4.68,
+   "words": [
+    {
+     "text": "This",
+     "start": 0.0,
+     "end": 0.38
+    },
+    {
+     "text": "kid",
+     "start": 0.38,
+     "end": 0.66
+    },
+    {
+     "text": "lives",
+     "start": 0.66,
+     "end": 0.92
+    },
+    {
+     "text": "on",
+     "start": 0.92,
+     "end": 1.1
+    },
+    {
+     "text": "the",
+     "start": 1.1,
+     "end": 1.24
+    },
+    {
+     "text": "richest",
+     "start": 1.24,
+     "end": 1.58
+    },
+    {
+     "text": "street",
+     "start": 1.58,
+     "end": 1.92
+    },
+    {
+     "text": "in",
+     "start": 1.92,
+     "end": 2.06
+    },
+    {
+     "text": "town",
+     "start": 2.06,
+     "end": 2.32
+    },
+    {
+     "text": "But",
+     "start": 2.6,
+     "end": 2.82
+    },
+    {
+     "text": "his",
+     "start": 2.82,
+     "end": 3.0
+    },
+    {
+     "text": "family",
+     "start": 3.0,
+     "end": 3.38
+    },
+    {
+     "text": "can't",
+     "start": 3.38,
+     "end": 3.64
+    },
+    {
+     "text": "even",
+     "start": 3.64,
+     "end": 3.82
+    },
+    {
+     "text": "afford",
+     "start": 3.82,
+     "end": 4.04
+    },
+    {
+     "text": "a",
+     "start": 4.04,
+     "end": 4.18
+    },
+    {
+     "text": "turkey",
+     "start": 4.18,
+     "end": 4.48
+    }
+   ],
+   "takeStart": 0.0,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_1.wav",
+   "duration": 5.5,
+   "words": [
+    {
+     "text": "It's",
+     "start": 0.2,
+     "end": 0.38
+    },
+    {
+     "text": "Thanksgiving",
+     "start": 0.38,
+     "end": 0.78
+    },
+    {
+     "text": "Every",
+     "start": 1.36,
+     "end": 1.74
+    },
+    {
+     "text": "house",
+     "start": 1.74,
+     "end": 2.0
+    },
+    {
+     "text": "on",
+     "start": 2.0,
+     "end": 2.18
+    },
+    {
+     "text": "the",
+     "start": 2.18,
+     "end": 2.3
+    },
+    {
+     "text": "street",
+     "start": 2.3,
+     "end": 2.56
+    },
+    {
+     "text": "smells",
+     "start": 2.56,
+     "end": 2.86
+    },
+    {
+     "text": "like",
+     "start": 2.86,
+     "end": 3.08
+    },
+    {
+     "text": "roast",
+     "start": 3.08,
+     "end": 3.34
+    },
+    {
+     "text": "turkey",
+     "start": 3.34,
+     "end": 3.7
+    },
+    {
+     "text": "His",
+     "start": 4.12,
+     "end": 4.26
+    },
+    {
+     "text": "fridge",
+     "start": 4.26,
+     "end": 4.52
+    },
+    {
+     "text": "Empty",
+     "start": 5.06,
+     "end": 5.32
+    }
+   ],
+   "takeStart": 4.68,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_2.wav",
+   "duration": 4.35,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.18,
+     "end": 0.3
+    },
+    {
+     "text": "he",
+     "start": 0.3,
+     "end": 0.46
+    },
+    {
+     "text": "makes",
+     "start": 0.46,
+     "end": 0.66
+    },
+    {
+     "text": "a",
+     "start": 0.66,
+     "end": 0.88
+    },
+    {
+     "text": "plan",
+     "start": 0.88,
+     "end": 1.18
+    },
+    {
+     "text": "Mrs",
+     "start": 1.66,
+     "end": 1.8
+    },
+    {
+     "text": "Pemberton",
+     "start": 1.94,
+     "end": 2.28
+    },
+    {
+     "text": "always",
+     "start": 2.28,
+     "end": 2.72
+    },
+    {
+     "text": "cools",
+     "start": 2.72,
+     "end": 2.96
+    },
+    {
+     "text": "her",
+     "start": 2.96,
+     "end": 3.16
+    },
+    {
+     "text": "turkey",
+     "start": 3.16,
+     "end": 3.42
+    },
+    {
+     "text": "on",
+     "start": 3.42,
+     "end": 3.64
+    },
+    {
+     "text": "the",
+     "start": 3.64,
+     "end": 3.74
+    },
+    {
+     "text": "windowsill",
+     "start": 3.74,
+     "end": 4.22
+    }
+   ],
+   "takeStart": 10.18,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_3.wav",
+   "duration": 4.38,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.13,
+     "end": 0.35
+    },
+    {
+     "text": "sneaks",
+     "start": 0.35,
+     "end": 0.73
+    },
+    {
+     "text": "across",
+     "start": 0.73,
+     "end": 1.09
+    },
+    {
+     "text": "the",
+     "start": 1.09,
+     "end": 1.31
+    },
+    {
+     "text": "lawn",
+     "start": 1.31,
+     "end": 1.47
+    },
+    {
+     "text": "He",
+     "start": 1.77,
+     "end": 1.89
+    },
+    {
+     "text": "grabs",
+     "start": 1.89,
+     "end": 2.17
+    },
+    {
+     "text": "the",
+     "start": 2.17,
+     "end": 2.43
+    },
+    {
+     "text": "turkey",
+     "start": 2.43,
+     "end": 2.67
+    },
+    {
+     "text": "And",
+     "start": 2.93,
+     "end": 3.13
+    },
+    {
+     "text": "it's",
+     "start": 3.13,
+     "end": 3.33
+    },
+    {
+     "text": "heavier",
+     "start": 3.33,
+     "end": 3.59
+    },
+    {
+     "text": "than",
+     "start": 3.59,
+     "end": 3.79
+    },
+    {
+     "text": "he",
+     "start": 3.79,
+     "end": 4.01
+    },
+    {
+     "text": "is",
+     "start": 4.01,
+     "end": 4.23
+    }
+   ],
+   "takeStart": 14.53,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_4.wav",
+   "duration": 3.49,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.15,
+     "end": 0.25
+    },
+    {
+     "text": "wobbles",
+     "start": 0.25,
+     "end": 0.65
+    },
+    {
+     "text": "He",
+     "start": 0.89,
+     "end": 0.97
+    },
+    {
+     "text": "trips",
+     "start": 0.97,
+     "end": 1.17
+    },
+    {
+     "text": "over",
+     "start": 1.17,
+     "end": 1.41
+    },
+    {
+     "text": "the",
+     "start": 1.41,
+     "end": 1.53
+    },
+    {
+     "text": "garden",
+     "start": 1.53,
+     "end": 1.71
+    },
+    {
+     "text": "gnome",
+     "start": 1.71,
+     "end": 2.13
+    },
+    {
+     "text": "And",
+     "start": 2.13,
+     "end": 2.41
+    },
+    {
+     "text": "the",
+     "start": 2.41,
+     "end": 2.53
+    },
+    {
+     "text": "turkey",
+     "start": 2.53,
+     "end": 2.83
+    },
+    {
+     "text": "goes",
+     "start": 2.83,
+     "end": 3.13
+    },
+    {
+     "text": "flying",
+     "start": 3.13,
+     "end": 3.49
+    }
+   ],
+   "takeStart": 18.91,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_5.wav",
+   "duration": 1.95,
+   "words": [
+    {
+     "text": "Right",
+     "start": 0.0,
+     "end": 0.5
+    },
+    {
+     "text": "into",
+     "start": 0.5,
+     "end": 0.72
+    },
+    {
+     "text": "Mrs",
+     "start": 0.72,
+     "end": 0.96
+    },
+    {
+     "text": "Pemberton's",
+     "start": 1.1,
+     "end": 1.54
+    },
+    {
+     "text": "hands",
+     "start": 1.54,
+     "end": 1.76
+    }
+   ],
+   "takeStart": 22.4,
+   "pauseBefore": 0.3
+  },
+  {
+   "file": "narration/turkey/line_6.wav",
+   "duration": 0.69,
+   "words": [
+    {
+     "text": "Busted",
+     "start": 0.19,
+     "end": 0.53
+    }
+   ],
+   "takeStart": 24.35,
+   "pauseBefore": 0.5
+  },
+  {
+   "file": "narration/turkey/line_7.wav",
+   "duration": 4.91,
+   "words": [
+    {
+     "text": "He",
+     "start": 0.16,
+     "end": 0.38
+    },
+    {
+     "text": "doesn't",
+     "start": 0.38,
+     "end": 0.7
+    },
+    {
+     "text": "run",
+     "start": 0.7,
+     "end": 0.9
+    },
+    {
+     "text": "He",
+     "start": 1.22,
+     "end": 1.4
+    },
+    {
+     "text": "just",
+     "start": 1.4,
+     "end": 1.58
+    },
+    {
+     "text": "says",
+     "start": 1.58,
+     "end": 1.82
+    },
+    {
+     "text": "I'm",
+     "start": 1.82,
+     "end": 2.42
+    },
+    {
+     "text": "sorry",
+     "start": 2.42,
+     "end": 2.7
+    },
+    {
+     "text": "We're",
+     "start": 2.98,
+     "end": 3.26
+    },
+    {
+     "text": "so",
+     "start": 3.26,
+     "end": 3.44
+    },
+    {
+     "text": "poor",
+     "start": 3.44,
+     "end": 3.76
+    },
+    {
+     "text": "we",
+     "start": 3.76,
+     "end": 3.96
+    },
+    {
+     "text": "don't",
+     "start": 3.96,
+     "end": 4.12
+    },
+    {
+     "text": "have",
+     "start": 4.12,
+     "end": 4.28
+    },
+    {
+     "text": "a",
+     "start": 4.28,
+     "end": 4.38
+    },
+    {
+     "text": "turkey",
+     "start": 4.38,
+     "end": 4.68
+    }
+   ],
+   "takeStart": 25.04,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_8.wav",
+   "duration": 3.31,
+   "words": [
+    {
+     "text": "Mrs",
+     "start": 0.23,
+     "end": 0.47
+    },
+    {
+     "text": "Pemberton",
+     "start": 0.59,
+     "end": 0.93
+    },
+    {
+     "text": "doesn't",
+     "start": 0.93,
+     "end": 1.25
+    },
+    {
+     "text": "call",
+     "start": 1.25,
+     "end": 1.39
+    },
+    {
+     "text": "the",
+     "start": 1.39,
+     "end": 1.53
+    },
+    {
+     "text": "police",
+     "start": 1.53,
+     "end": 1.81
+    },
+    {
+     "text": "She",
+     "start": 2.21,
+     "end": 2.29
+    },
+    {
+     "text": "calls",
+     "start": 2.29,
+     "end": 2.53
+    },
+    {
+     "text": "the",
+     "start": 2.53,
+     "end": 2.73
+    },
+    {
+     "text": "neighbors",
+     "start": 2.73,
+     "end": 3.03
+    }
+   ],
+   "takeStart": 29.95,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_9.wav",
+   "duration": 4.47,
+   "words": [
+    {
+     "text": "One",
+     "start": 0.28,
+     "end": 0.38
+    },
+    {
+     "text": "brings",
+     "start": 0.38,
+     "end": 0.6
+    },
+    {
+     "text": "mashed",
+     "start": 0.6,
+     "end": 0.92
+    },
+    {
+     "text": "potatoes",
+     "start": 0.92,
+     "end": 1.28
+    },
+    {
+     "text": "One",
+     "start": 1.7,
+     "end": 1.8
+    },
+    {
+     "text": "brings",
+     "start": 1.8,
+     "end": 2.04
+    },
+    {
+     "text": "pie",
+     "start": 2.04,
+     "end": 2.28
+    },
+    {
+     "text": "One",
+     "start": 2.72,
+     "end": 2.84
+    },
+    {
+     "text": "brings",
+     "start": 2.84,
+     "end": 3.06
+    },
+    {
+     "text": "a",
+     "start": 3.06,
+     "end": 3.24
+    },
+    {
+     "text": "whole",
+     "start": 3.24,
+     "end": 3.46
+    },
+    {
+     "text": "second",
+     "start": 3.46,
+     "end": 3.88
+    },
+    {
+     "text": "turkey",
+     "start": 3.88,
+     "end": 4.3
+    }
+   ],
+   "takeStart": 33.26,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_10.wav",
+   "duration": 3.41,
+   "words": [
+    {
+     "text": "By",
+     "start": 0.17,
+     "end": 0.37
+    },
+    {
+     "text": "sunset",
+     "start": 0.37,
+     "end": 0.83
+    },
+    {
+     "text": "there's",
+     "start": 1.05,
+     "end": 1.19
+    },
+    {
+     "text": "a",
+     "start": 1.19,
+     "end": 1.29
+    },
+    {
+     "text": "giant",
+     "start": 1.29,
+     "end": 1.63
+    },
+    {
+     "text": "table",
+     "start": 1.63,
+     "end": 1.97
+    },
+    {
+     "text": "right",
+     "start": 1.97,
+     "end": 2.27
+    },
+    {
+     "text": "in",
+     "start": 2.27,
+     "end": 2.49
+    },
+    {
+     "text": "the",
+     "start": 2.49,
+     "end": 2.57
+    },
+    {
+     "text": "middle",
+     "start": 2.57,
+     "end": 2.75
+    },
+    {
+     "text": "of",
+     "start": 2.75,
+     "end": 2.91
+    },
+    {
+     "text": "the",
+     "start": 2.91,
+     "end": 2.99
+    },
+    {
+     "text": "street",
+     "start": 2.99,
+     "end": 3.27
+    }
+   ],
+   "takeStart": 37.73,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_11.wav",
+   "duration": 3.08,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.14,
+     "end": 0.32
+    },
+    {
+     "text": "the",
+     "start": 0.32,
+     "end": 0.42
+    },
+    {
+     "text": "kid",
+     "start": 0.42,
+     "end": 0.62
+    },
+    {
+     "text": "who",
+     "start": 0.62,
+     "end": 0.78
+    },
+    {
+     "text": "tried",
+     "start": 0.78,
+     "end": 1.02
+    },
+    {
+     "text": "to",
+     "start": 1.02,
+     "end": 1.16
+    },
+    {
+     "text": "steal",
+     "start": 1.16,
+     "end": 1.34
+    },
+    {
+     "text": "one",
+     "start": 1.34,
+     "end": 1.6
+    },
+    {
+     "text": "turkey",
+     "start": 1.6,
+     "end": 1.94
+    },
+    {
+     "text": "ends",
+     "start": 1.94,
+     "end": 2.32
+    },
+    {
+     "text": "up",
+     "start": 2.32,
+     "end": 2.46
+    },
+    {
+     "text": "with",
+     "start": 2.46,
+     "end": 2.62
+    },
+    {
+     "text": "twelve",
+     "start": 2.62,
+     "end": 2.86
+    }
+   ],
+   "takeStart": 41.14,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/turkey/line_12.wav",
+   "duration": 1.231,
+   "words": [
+    {
+     "text": "Happy",
+     "start": 0.22,
+     "end": 0.46
+    },
+    {
+     "text": "Thanksgiving",
+     "start": 0.46,
+     "end": 0.78
+    }
+   ],
+   "takeStart": 44.22,
+   "pauseBefore": 0.5
+  }
+ ],
+ "flow": true,
+ "take": "narration/turkey/take.wav"
+}

@@ -1,0 +1,66 @@
+{
+  "id": "turkey",
+  "engine": "gemini",
+  "voice": "Laomedeia",
+  "style": "Say this like a warm, excited storyteller, fast and punchy: ",
+  "rate": "+0%",
+  "flow": true,
+  "title": "The kid who tried to steal a Thanksgiving turkey",
+  "lines": [
+    {
+      "text": "This kid lives on the richest street in town. But his family can't even afford a turkey.",
+      "events": []
+    },
+    {
+      "text": "It's Thanksgiving. Every house on the street smells like roast turkey. His fridge? Empty.",
+      "events": []
+    },
+    {
+      "text": "So he makes a plan. Mrs. Pemberton always cools her turkey on the windowsill.",
+      "events": []
+    },
+    {
+      "text": "He sneaks across the lawn. He grabs the turkey. And it's heavier than he is.",
+      "events": []
+    },
+    {
+      "text": "He wobbles. He trips over the garden gnome. And the turkey goes flying.",
+      "events": []
+    },
+    {
+      "text": "Right into Mrs. Pemberton's hands.",
+      "events": [],
+      "pause": 0.3
+    },
+    {
+      "text": "Busted.",
+      "events": [],
+      "pause": 0.5
+    },
+    {
+      "text": "He doesn't run. He just says, I'm sorry. We're so poor, we don't have a turkey.",
+      "events": []
+    },
+    {
+      "text": "Mrs. Pemberton doesn't call the police. She calls the neighbors.",
+      "events": []
+    },
+    {
+      "text": "One brings mashed potatoes. One brings pie. One brings a whole second turkey.",
+      "events": []
+    },
+    {
+      "text": "By sunset, there's a giant table right in the middle of the street.",
+      "events": []
+    },
+    {
+      "text": "And the kid who tried to steal one turkey ends up with twelve.",
+      "events": []
+    },
+    {
+      "text": "Happy Thanksgiving.",
+      "events": [],
+      "pause": 0.5
+    }
+  ]
+}

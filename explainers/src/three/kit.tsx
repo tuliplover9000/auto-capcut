@@ -213,13 +213,13 @@ export const World: React.FC<{hr: number; night: number; book: boolean; arcs?: A
 };
 
 /** camera-facing 2D card. lie = lying card (tilted back onto the floor) */
-export const Card: React.FC<{tex: THREE.Texture; wpx: number; hpx: number; at: THREE.Vector3; cam: THREE.Vector3; tint: THREE.Color; lie?: boolean; soleOff?: number}> = ({tex, wpx, hpx, at, cam, tint, lie, soleOff = 25}) => {
+export const Card: React.FC<{tex: THREE.Texture; wpx: number; hpx: number; at: THREE.Vector3; cam: THREE.Vector3; tint: THREE.Color; lie?: boolean; soleOff?: number; roll?: number}> = ({tex, wpx, hpx, at, cam, tint, lie, soleOff = 25, roll = 0}) => {
   const w = wpx * PX_M;
   const h = hpx * PX_M;
   const yaw = Math.atan2(cam.x - at.x, cam.z - at.z);
   const setLayer = (o: THREE.Object3D | null) => { if (o) o.layers.set(1); };
   return (
-    <group position={[at.x, 0, at.z]} rotation={[0, yaw, 0]}>
+    <group position={[at.x, at.y, at.z]} rotation={[0, yaw, roll]}>
       <mesh ref={setLayer} position={[0, lie ? 0.26 : h / 2 - soleOff * PX_M, 0]} rotation={[lie ? -1.13 : 0, 0, 0]}>
         <planeGeometry args={[w, h]} />
         <meshBasicMaterial map={tex} color={tint} alphaTest={0.5} side={THREE.DoubleSide} />
@@ -340,3 +340,31 @@ export const Post: React.FC<{focus: number; coc: number}> = ({focus, coc}) => {
   return null;
 };
 
+
+// ───────────────────────── keyed camera shots (every hold creeps) ─────────────────────────
+export type Shot = {t: number; cam: CamS | ((s: number) => CamS); dur?: number; cut?: boolean; ease?: 'out' | 'smooth'};
+export const camOf = (pos: THREE.Vector3, look: THREE.Vector3, fov: number, focus: THREE.Vector3, coc = 0): CamS => ({pos, look, fov, focus, coc});
+export const lerpCam = (a: CamS, b: CamS, k: number): CamS => ({pos: vl(a.pos, b.pos, k), look: vl(a.look, b.look, k), fov: lerp(a.fov, b.fov, k), focus: vl(a.focus, b.focus, k), coc: lerp(a.coc, b.coc, k)});
+/** shots sorted by t. cut = jump; otherwise glide from wherever the camera was (smoother or ease-out). */
+export const shotCam = (shots: Shot[], s: number): CamS => {
+  const first = shots[0].cam;
+  let start: CamS = typeof first === 'function' ? first(0) : first;
+  let cur = start;
+  for (let i = 0; i < shots.length; i++) {
+    const sh = shots[i];
+    if (sh.t > s) break;
+    const next = shots[i + 1];
+    const val = (abs: number): CamS => {
+      const u = abs - sh.t;
+      const tgt = typeof sh.cam === 'function' ? sh.cam(abs) : sh.cam;
+      const d = sh.dur ?? 0.4;
+      const k = sh.cut ? 1 : sh.ease === 'smooth' ? smoother(u / d) : easeOut(u / d);
+      const c = lerpCam(start, tgt, k);
+      const creep = typeof sh.cam === 'function' ? 0 : Math.min(0.06, 0.012 * Math.max(0, u - (sh.cut ? 0 : d)));
+      return {...c, fov: c.fov * (1 - creep)};
+    };
+    cur = val(s);
+    if (next && next.t <= s) start = val(next.t);
+  }
+  return cur;
+};

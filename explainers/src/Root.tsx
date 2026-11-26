@@ -2,6 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Composition} from 'remotion';
 import {CoolTest, COOL_FRAMES} from './three/CoolTest';
 import {TodThree, TOD3_FRAMES} from './three/TodThree';
+import {Turkey, TURKEY_FRAMES} from './three/Turkey';
 import {Pictogram, ArtKey} from './art/Pictograms';
 import {LedText} from './lib/LedText';
 import {SpeedTrap} from './speedtrap/SpeedTrap';
@@ -137,6 +138,7 @@ const ArtSheet: React.FC = () => (
 
 export const RemotionRoot: React.FC = () => (
   <>
+    <Composition id="Turkey" component={Turkey} durationInFrames={TURKEY_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="TodThree" component={TodThree} durationInFrames={TOD3_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="CoolTest" component={CoolTest} durationInFrames={COOL_FRAMES} fps={30} width={1080} height={1920} />
     <Composition id="ArtSheet" component={ArtSheet} durationInFrames={1} fps={30} width={1080} height={1920} />

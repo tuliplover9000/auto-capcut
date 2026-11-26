@@ -47,7 +47,12 @@ def main() -> int:
     ap.add_argument("--tail", type=float, default=1.2)
     ap.add_argument("--bpm", type=float, default=100)
     ap.add_argument("--lift", action="append", default=[], help="word that gets a soft riser + crash (first match)")
+    ap.add_argument("--key", default="mystery", choices=["mystery", "warm"], help="mystery = Am-F-C-G, warm = C-G-Am-F (heartwarming stories)")
     a = ap.parse_args()
+    global CHORDS, ROOTS
+    if a.key == "warm":
+        CHORDS = [[60, 64, 67], [59, 62, 67], [57, 60, 64], [57, 60, 65]]
+        ROOTS = [48, 43, 45, 41]
     ep = json.load(open(a.episode, encoding="utf-8"))
     tm = json.load(open(a.episode.replace(".json", ".timing.json"), encoding="utf-8"))
     # absolute word times (flow timing: each line file starts at its takeStart)
