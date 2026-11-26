@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Audio, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {loadFont as loadMontserrat} from '@remotion/google-fonts/Montserrat';
 import {Slam} from '../fight/Fight';
-import {camAt, Shot} from '../fight/camera';
+import {Bokeh, Burst, camAt, Dust, Grade, LIGHT_LAB, LIGHT_NIGHT, LiftDefs, Whip, burstsFrom, layerStyle, whipAt} from '../look/look';
 import {captions, FightEpisode, Timing} from '../fight/timeline';
 import {FPS, StoryEpisode, at, buildPlan, lineAt} from '../story/timeline';
 
@@ -92,31 +92,42 @@ const Outline: React.FC<{k?: number}> = ({k = 1}) => (
     ))}
   </g>
 );
-const Room: React.FC = () => (
-  <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0}}>
-    <rect width={W} height={900} fill="#22383b" />
-    {Array.from({length: 13}).map((_, i) => <rect key={i} x={i * 90} y={0} width={34} height={900} fill="#2a4448" />)}
-    {/* window with moon, picture frame */}
-    <rect x={850} y={640} width={170} height={210} rx={6} fill="#0d1b2a" stroke="#4a2e1c" strokeWidth={14} />
+/* far wall: its own depth layer (parallax 0.7, soft focus); oversized so parallax never shows an edge */
+const RoomWall: React.FC = () => (
+  <svg width={W + 200} height={1100} viewBox={`-100 -180 ${W + 200} 1100`} style={{position: 'absolute', left: -100, top: -180, filter: 'blur(2.5px)'}}>
+    <rect x={-100} y={-180} width={W + 200} height={1100} fill="#2e4f52" />
+    {Array.from({length: 15}).map((_, i) => <rect key={i} x={-90 + i * 90} y={-180} width={34} height={1100} fill="#38595c" />)}
+    {/* window with moon (the key light source), picture frame */}
+    <rect x={850} y={640} width={170} height={210} rx={6} fill="#14283c" stroke="#5a3a22" strokeWidth={14} />
     <circle cx={960} cy={690} r={28} fill="#f3eccd" />
-    <line x1={935} y1={640} x2={935} y2={850} stroke="#4a2e1c" strokeWidth={8} />
-    <rect x={60} y={650} width={150} height={180} rx={4} fill="#3a2a1a" stroke="#c9a24a" strokeWidth={10} />
-    <rect x={84} y={674} width={102} height={132} fill="#5a6a4a" />
-    <rect y={890} width={W} height={28} fill="#1e130b" />
-    <rect y={918} width={W} height={H - 918} fill="#4b2f1e" />
+    <circle cx={960} cy={690} r={60} fill="#f3eccd" opacity={0.12} />
+    <line x1={935} y1={640} x2={935} y2={850} stroke="#5a3a22" strokeWidth={8} />
+    <rect x={60} y={650} width={150} height={180} rx={4} fill="#4a3620" stroke="#d4ae55" strokeWidth={10} />
+    <rect x={84} y={674} width={102} height={132} fill="#6a7a56" />
+    <rect x={-100} y={890} width={W + 200} height={30} fill="#26170d" />
+  </svg>
+);
+/* floor + rug: the action plane (depth 1) */
+const RoomFloor: React.FC = () => (
+  <svg width={W + 200} height={H} viewBox={`-100 0 ${W + 200} ${H}`} style={{position: 'absolute', left: -100, top: 0, overflow: 'visible'}}>
+    <rect x={-100} y={918} width={W + 200} height={H - 918 + 200} fill="#6a4429" />
     {Array.from({length: 14}).map((_, i) => {
       const y = 918 + Math.pow(i / 13, 1.4) * 1000;
-      return <rect key={i} x={0} y={y} width={W} height={4} fill="#3a2316" />;
+      return <rect key={i} x={-100} y={y} width={W + 200} height={4} fill="#4f3220" />;
     })}
-    <ellipse cx={580} cy={1160} rx={440} ry={205} fill="rgba(0,0,0,.3)" />
-    <ellipse cx={570} cy={1150} rx={430} ry={200} fill={RUG} stroke="#c9a24a" strokeWidth={10} />
-    <ellipse cx={570} cy={1150} rx={390} ry={168} fill="none" stroke="#c9a24a" strokeWidth={4} />
+    <ellipse cx={590} cy={1172} rx={445} ry={210} fill="rgba(10,6,20,.38)" />
+    <ellipse cx={570} cy={1150} rx={430} ry={200} fill={RUG} stroke="#d4ae55" strokeWidth={10} />
+    <ellipse cx={570} cy={1150} rx={390} ry={168} fill="none" stroke="#d4ae55" strokeWidth={4} />
   </svg>
 );
 const Silhouette: React.FC<{x: number; y: number; col: string; letter: string; k: number; known?: boolean}> = ({x, y, col, letter, k, known}) => (k <= 0 ? null : (
   <g transform={`translate(${x} ${y}) scale(${k})`}>
+    <ellipse cx={14} cy={66} rx={104} ry={13} fill="#0a0612" opacity={0.55} />
     <path d="M -86 60 Q -86 -24 0 -24 Q 86 -24 86 60 Z" fill="#0e0e14" stroke={col} strokeWidth={5} />
     <circle cx={0} cy={-78} r={48} fill="#0e0e14" stroke={col} strokeWidth={5} />
+    {/* warm rim from the key light (upper left) */}
+    <path d="M -76 40 Q -76 -12 -28 -19" fill="none" stroke="#ffcf8a" strokeWidth={5} strokeLinecap="round" opacity={0.75} />
+    <path d="M -30 -114 A 48 48 0 0 0 -47 -70" fill="none" stroke="#ffcf8a" strokeWidth={5} strokeLinecap="round" opacity={0.75} />
     {!known ? <text x={0} y={-58} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={58} fill={col}>?</text> : null}
     <circle cx={0} cy={26} r={26} fill={col} stroke={OL} strokeWidth={4} />
     <text x={0} y={37} textAnchor="middle" fontFamily={heavy} fontWeight={900} fontSize={30} fill={OL}>{letter}</text>
@@ -131,14 +142,38 @@ const Tape: React.FC<{s: number}> = ({s}) => (
   </g>
 );
 
+// camera focus per story event (world coords); burstsFrom moves ~55% of the way there
+const FOCUS: Record<string, {x?: number; y?: number; z?: number; lead?: number}> = {
+  blanc: {x: 540, y: 860, z: 1.06}, body: {x: 380, y: 1060, z: 1.12},
+  clock: {x: 680, y: 1000, z: 1.07}, alive: {x: 420, y: 880, z: 1.05}, drop: {x: 640, y: 980, z: 1.03}, rate: {x: 715, y: 1180, z: 1.06},
+  six: {x: 330, y: 1000, z: 1.08}, four: {x: 715, y: 1180, z: 1.07}, measured: {x: 840, y: 950, z: 1.07}, found: {x: 590, y: 900, z: 1.05},
+  ask: {x: 540, y: 1000, z: 1.02},
+  answer: {x: 540, y: 1125, z: 1.06}, asix: {x: 300, y: 780, z: 1.07}, midnight: {x: 760, y: 900, z: 1.05}, eight: {x: 640, y: 1080, z: 1.07},
+  ten: {x: 750, y: 780, z: 1.06}, sixpm: {x: 420, y: 1000, z: 1.05}, trap: {x: 420, y: 1080, z: 1.09},
+  c: {x: 820, y: 1230, z: 1.06}, dinner: {x: 640, y: 1250, z: 1.07},
+  heat: {x: 540, y: 1180, z: 1.04}, bend: {x: 560, y: 920, z: 1.06}, exact: {x: 560, y: 860, z: 1.07}, window: {x: 540, y: 960, z: 1.03},
+  confess: {x: 540, y: 760, z: 1.06}, range: {x: 540, y: 1300, z: 1.06},
+};
+
 export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({episode: ep, timing}) => {
-  const frame = useCurrentFrame();
+  const frameNow = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const s = frame / fps;
+  const sNow = frameNow / fps;
   const plan = buildPlan(ep, timing);
   const T = (k: string) => at(plan, k);
   const LS = plan.lineStarts;
   const LE = plan.lineEnds;
+  // scene changes: hook->lab, lab->test, test->catch, catch->ending. Whip pans, no hard cuts.
+  const BOUNDS = [LS[1], LS[6], LS[10], LS[12]];
+  const bursts: Burst[] = [
+    {t: 0, x: 560, y: 1060, z: 1.1, cut: true},
+    {t: 0.05, x: 540, y: 1000, z: 1.0, dur: 2.2},
+    ...burstsFrom(plan.events, FOCUS),
+    ...BOUNDS.map((b) => ({t: b - 0.03, x: 540, y: 980, z: 1.0, cut: true})),
+  ];
+
+  const view = (s: number) => {
+  const frame = Math.round(s * fps);
   const li = lineAt(plan, s);
   const tTest = LE[6] + 0.05;
   const answered = s >= T('answer');
@@ -160,24 +195,13 @@ export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({
   };
 
   // ── camera
-  const shots: Shot[] = [];
-  const shot = (t: number, blend: number, c: Partial<Shot>) => shots.push({t, blend, x: 540, y: 960, z: 1, r: 0, ...c});
-  shot(0, 0.01, {x: 560, y: 1100, z: 1.12});
-  shot(0.05, 2.4, {x: 540, y: 1000, z: 1.0});
-  shot(T('body') - 0.1, 0.3, {x: 520, y: 1120, z: 1.1});
-  shot(LS[1] - 0.05, 0.01, {x: 540, y: 960, z: 1.0});
-  shot(LS[10] - 0.05, 0.01, {x: 540, y: 960, z: 1.0});
-  shot(LS[12] - 0.05, 0.01, {x: 540, y: 1000, z: 1.0});
-  shot(T('range') - 0.1, 0.4, {x: 540, y: 980, z: 1.06});
-  shots.sort((a, b) => a.t - b.t);
-  const cam = camAt(shots, s);
+  const cam = camAt(bursts, s, undefined, {world: 640, screen: 628});
   const kick = (t0: number, amp: number, decay: number) => (s >= t0 ? amp * Math.exp(-(s - t0) * decay) : 0);
   const shake = kick(T('body'), 12, 6) + kick(T('four'), 8, 7) + kick(T('test'), 10, 7) + kick(T('answer'), 9, 7) + kick(T('eight'), 8, 7)
     + kick(T('trap'), 10, 7) + kick(T('window'), 6, 8) + kick(T('range'), 12, 6);
   const shx = Math.sin(frame * 2.3) * shake;
   const shy = Math.cos(frame * 2.9) * shake;
-  const camStyle: React.CSSProperties = {position: 'absolute', inset: 0, transformOrigin: `${cam.x}px ${cam.y}px`,
-    transform: `translate(${540 - cam.x + shx}px, ${960 - cam.y + shy}px) scale(${cam.z})`};
+  const camStyle = layerStyle(cam, 1, shx, shy);
 
   // ── hook + ending (room)
   const magK = li === 0 ? 1 - inK(s, T('body') + 0.2, 0.4) : 0;
@@ -187,6 +211,7 @@ export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({
   const hookScene = hook ? (
     <g>
       <Outline />
+      <g filter="url(#lift)">
       {SUS.map((u, i) => (
         <Silhouette key={u.l} x={300 + i * 240} y={830} col={u.col} letter={u.l} known={li === 12 && i === 1 && s >= T('confess')}
           k={li === 12 ? 1 : s >= T('blanc') + i * 0.18 ? pop(s, T('blanc') + i * 0.18) : 0} />
@@ -224,6 +249,7 @@ export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({
           <rect x={326} y={-46} width={20} height={92} rx={6} fill={GOOD} stroke={OL} strokeWidth={5} />
         </g>
       ) : null}
+      </g>
     </g>
   ) : null;
 
@@ -537,25 +563,38 @@ export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({
   const late = s >= tTest + TEST_SECS && s < T('answer');
   const ticks = Array.from({length: TEST_SECS}).map((_, k) => tTest + k);
 
-  return (
-    <AbsoluteFill style={{background: '#0d1424', overflow: 'hidden'}}>
-      {hook ? <Room /> : (
+  // world = everything the camera sees, in depth layers (whip-able); ui = flat overlay
+  const world = (
+    <AbsoluteFill style={{background: hook ? '#2e4f52' : '#16203a', overflow: 'hidden'}}>
+      {hook ? (
         <>
-          <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 55%, #24314f 0%, #0d1424 72%)'}} />
-          <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0, opacity: 0.1}}>
-            {Array.from({length: 24}).map((_, k) => <rect key={k} x={0} y={600 + k * 60} width={W} height={3} fill="#9fb0c8" />)}
-          </svg>
+          <div style={layerStyle(cam, 0.7, shx, shy)}><RoomWall /></div>
+          <div style={camStyle}><RoomFloor /></div>
+        </>
+      ) : (
+        <>
+          <div style={{position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, #4c68a3 0%, #2d3f6a 55%, #18233f 100%)'}} />
+          <div style={layerStyle(cam, 0.45, shx, shy)}><Bokeh s={s} /></div>
+          <div style={layerStyle(cam, 0.8, shx, shy)}>
+            <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0, opacity: 0.1, overflow: 'visible'}}>
+              {Array.from({length: 30}).map((_, k) => <rect key={k} x={-100} y={420 + k * 60} width={W + 200} height={3} fill="#9fb0c8" />)}
+            </svg>
+          </div>
         </>
       )}
       <div style={camStyle}>
         <svg width={W} height={H} style={{position: 'absolute', left: 0, top: 0, overflow: 'visible'}}>
+          <LiftDefs />
           {hookScene}
-          {labScene}
-          {testScene}
-          {realScene}
+          {!hook ? <g filter="url(#lift)">{labScene}{testScene}{realScene}</g> : null}
           {!hook ? <Tape s={s} /> : null}
         </svg>
       </div>
+      <div style={layerStyle(cam, 1.35, shx, shy)}><Dust s={s} col={hook ? '#ffe2b8' : '#dbe6ff'} /></div>
+    </AbsoluteFill>
+  );
+  const ui = (
+    <>
       {late ? <div style={{position: 'absolute', left: 0, top: 1450, width: W, textAlign: 'center', fontFamily: heavy, fontWeight: 900, fontSize: 110, color: '#fff', WebkitTextStroke: '10px #111', paintOrder: 'stroke fill', transform: `rotate(-3deg) scale(${pop(s, tTest + TEST_SECS)})`}}>TIME!</div> : null}
       {s < T('answer') && li >= 6 ? <div style={{position: 'absolute', left: 120, top: 420, width: 840 * ringK, height: 10, borderRadius: 5, background: urgent ? BAD : YEL}} /> : null}
       {card}
@@ -567,8 +606,10 @@ export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({
           transform: `scale(${capPop}) rotate(${capIdx % 2 ? 2 : -2}deg)`, textTransform: 'uppercase'}}>{cap.text}</div>
       ) : null}
       {slam}
-
-      {/* audio */}
+    </>
+  );
+  const audio = (
+    <>
       <Audio src={staticFile(`music/${ep.id}.wav`)} volume={0.55} />
       {timing.lines.map((ln, i) => (
         <Sequence key={i} from={Math.round(plan.lineStarts[i] * FPS)}><Audio src={staticFile(ln.file)} /></Sequence>
@@ -594,6 +635,19 @@ export const TimeOfDeath: React.FC<{episode: StoryEpisode; timing: Timing}> = ({
       ] as Array<[number, string, number]>).map(([t, f, v], i) => (
         <Sequence key={`f${i}`} from={Math.max(0, Math.round(t * FPS))} durationInFrames={90}><Audio src={staticFile(f)} volume={v} /></Sequence>
       ))}
+    </>
+  );
+  return {world, ui, audio, hook};
+  };
+
+  const now = view(sNow);
+  const wh = whipAt(BOUNDS, sNow);
+  return (
+    <AbsoluteFill style={{background: '#0d1424', overflow: 'hidden'}}>
+      {wh ? <Whip state={wh} fps={fps} render={(t) => view(t).world} /> : now.world}
+      <Grade light={now.hook ? LIGHT_NIGHT : LIGHT_LAB} frame={frameNow} />
+      {now.ui}
+      {now.audio}
     </AbsoluteFill>
   );
 };
