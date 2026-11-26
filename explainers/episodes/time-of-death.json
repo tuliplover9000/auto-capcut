@@ -1,0 +1,252 @@
+{
+  "id": "time-of-death",
+  "voice": "en-US-AndrewNeural",
+  "rate": "+0%",
+  "title": "Wake Up Dead Man, but real: how detectives find the time of death",
+  "hot": [
+    "blanc",
+    "body",
+    "clock",
+    "ninety-eight",
+    "six",
+    "four",
+    "hours",
+    "measured",
+    "found",
+    "turn",
+    "b",
+    "eight",
+    "trap",
+    "dinner",
+    "bend",
+    "window",
+    "range",
+    "confession"
+  ],
+  "lines": [
+    {
+      "text": "In Wake Up Dead Man, Benoit Blanc reads people. Real detectives read the body.",
+      "scene": "hook",
+      "chapter": "WAKE UP DEAD MAN",
+      "note": "",
+      "events": [
+        {
+          "cue": "Blanc",
+          "kind": "blanc"
+        },
+        {
+          "cue": "body",
+          "kind": "body"
+        }
+      ]
+    },
+    {
+      "text": "Because a dead body is a clock.",
+      "scene": "lab",
+      "chapter": "REAL LIFE",
+      "note": "",
+      "pause": 0.15,
+      "events": [
+        {
+          "cue": "clock",
+          "kind": "clock"
+        }
+      ]
+    },
+    {
+      "text": "Alive, you're ninety-eight point six degrees.",
+      "scene": "lab",
+      "chapter": "THE RULES",
+      "note": "",
+      "pause": 0.1,
+      "events": [
+        {
+          "cue": "ninety-eight",
+          "kind": "alive"
+        }
+      ]
+    },
+    {
+      "text": "After death, you lose about one and a half degrees every hour.",
+      "scene": "lab",
+      "chapter": "THE RULES",
+      "note": "",
+      "pause": 0.1,
+      "events": [
+        {
+          "cue": "lose",
+          "kind": "drop"
+        },
+        {
+          "cue": "hour",
+          "kind": "rate"
+        }
+      ]
+    },
+    {
+      "text": "Six degrees down? Four hours dead.",
+      "scene": "lab",
+      "chapter": "THE RULES",
+      "note": "",
+      "pause": 0.15,
+      "events": [
+        {
+          "cue": "Six",
+          "kind": "six"
+        },
+        {
+          "cue": "Four",
+          "kind": "four"
+        }
+      ]
+    },
+    {
+      "text": "But count back from when it was measured. Not when the body was found.",
+      "scene": "lab",
+      "chapter": "THE RULES",
+      "note": "",
+      "pause": 0.15,
+      "events": [
+        {
+          "cue": "measured",
+          "kind": "measured"
+        },
+        {
+          "cue": "found",
+          "kind": "found"
+        }
+      ]
+    },
+    {
+      "text": "Your turn. Who did it?",
+      "scene": "test",
+      "chapter": "YOUR TURN",
+      "note": "",
+      "pause": 0.3,
+      "events": [
+        {
+          "cue": "turn",
+          "kind": "test"
+        },
+        {
+          "cue": "did",
+          "kind": "ask"
+        }
+      ]
+    },
+    {
+      "text": "B! Ninety-two point six is six degrees down. Four hours before midnight. Eight PM.",
+      "scene": "test",
+      "chapter": "THE ANSWER",
+      "note": "",
+      "pause": 10.0,
+      "events": [
+        {
+          "cue": "B",
+          "kind": "answer"
+        },
+        {
+          "cue": "six",
+          "kind": "asix"
+        },
+        {
+          "cue": "midnight",
+          "kind": "midnight"
+        },
+        {
+          "cue": "Eight",
+          "kind": "eight"
+        }
+      ]
+    },
+    {
+      "text": "Counted from ten, when the body was found? Six PM. That's A. The trap.",
+      "scene": "test",
+      "chapter": "THE ANSWER",
+      "note": "",
+      "pause": 0.2,
+      "events": [
+        {
+          "cue": "ten",
+          "kind": "ten"
+        },
+        {
+          "cue": "Six",
+          "kind": "sixpm"
+        },
+        {
+          "cue": "trap",
+          "kind": "trap"
+        }
+      ]
+    },
+    {
+      "text": "And C found the body. Suspicious, but C was at dinner at eight.",
+      "scene": "test",
+      "chapter": "THE ANSWER",
+      "note": "",
+      "pause": 0.2,
+      "events": [
+        {
+          "cue": "found",
+          "kind": "c"
+        },
+        {
+          "cue": "dinner",
+          "kind": "dinner"
+        }
+      ]
+    },
+    {
+      "text": "But heat, cold, clothes and body size all bend the rule.",
+      "scene": "real",
+      "chapter": "THE CATCH",
+      "note": "",
+      "pause": 0.2,
+      "events": [
+        {
+          "cue": "heat",
+          "kind": "heat"
+        },
+        {
+          "cue": "bend",
+          "kind": "bend"
+        }
+      ]
+    },
+    {
+      "text": "So real pathologists never give an exact time. Just a window.",
+      "scene": "real",
+      "chapter": "THE CATCH",
+      "note": "",
+      "pause": 0.2,
+      "events": [
+        {
+          "cue": "exact",
+          "kind": "exact"
+        },
+        {
+          "cue": "window",
+          "kind": "window"
+        }
+      ]
+    },
+    {
+      "text": "Benoit Blanc gets a confession. Real detectives get a range.",
+      "scene": "hook",
+      "chapter": "WAKE UP DEAD MAN",
+      "note": "",
+      "pause": 0.3,
+      "events": [
+        {
+          "cue": "confession",
+          "kind": "confess"
+        },
+        {
+          "cue": "range",
+          "kind": "range"
+        }
+      ]
+    }
+  ]
+}

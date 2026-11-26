@@ -43,6 +43,9 @@ import partyEp from '../episodes/chain-party.json';
 import partyTiming from '../episodes/chain-party.timing.json';
 import {ChainBeach} from './chain/Beach';
 import {Irredeemable} from './court/Irredeemable';
+import {TimeOfDeath} from './court/TimeOfDeath';
+import todEp from '../episodes/time-of-death.json';
+import todTiming from '../episodes/time-of-death.timing.json';
 import irrEp from '../episodes/irredeemable.json';
 import irrTiming from '../episodes/irredeemable.timing.json';
 import beachEp from '../episodes/chain-beach.json';
@@ -223,6 +226,15 @@ export const RemotionRoot: React.FC = () => (
       height={1920}
       defaultProps={{episode: irrEp as StoryEpisode, timing: irrTiming as FightTiming}}
       durationInFrames={storyFrames(irrEp as StoryEpisode, irrTiming as FightTiming)}
+    />
+    <Composition
+      id="TimeOfDeath"
+      component={TimeOfDeath}
+      fps={30}
+      width={1080}
+      height={1920}
+      defaultProps={{episode: todEp as StoryEpisode, timing: todTiming as FightTiming}}
+      durationInFrames={storyFrames(todEp as StoryEpisode, todTiming as FightTiming)}
     />
     <Composition
       id="ChainBeach"

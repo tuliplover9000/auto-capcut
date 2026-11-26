@@ -1,0 +1,767 @@
+{
+ "lines": [
+  {
+   "file": "narration/time-of-death/line_0.mp3",
+   "duration": 4.887,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.1,
+     "end": 0.3
+    },
+    {
+     "text": "Wake",
+     "start": 0.312,
+     "end": 0.5
+    },
+    {
+     "text": "Up",
+     "start": 0.512,
+     "end": 0.612
+    },
+    {
+     "text": "Dead",
+     "start": 0.625,
+     "end": 0.825
+    },
+    {
+     "text": "Man",
+     "start": 0.838,
+     "end": 1.15
+    },
+    {
+     "text": "Benoit",
+     "start": 1.438,
+     "end": 1.775
+    },
+    {
+     "text": "Blanc",
+     "start": 1.788,
+     "end": 2.113
+    },
+    {
+     "text": "reads",
+     "start": 2.125,
+     "end": 2.362
+    },
+    {
+     "text": "people",
+     "start": 2.375,
+     "end": 2.775
+    },
+    {
+     "text": "Real",
+     "start": 3.138,
+     "end": 3.45
+    },
+    {
+     "text": "detectives",
+     "start": 3.462,
+     "end": 3.962
+    },
+    {
+     "text": "read",
+     "start": 3.975,
+     "end": 4.213
+    },
+    {
+     "text": "the",
+     "start": 4.225,
+     "end": 4.3
+    },
+    {
+     "text": "body",
+     "start": 4.312,
+     "end": 4.737
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_1.mp3",
+   "duration": 1.938,
+   "words": [
+    {
+     "text": "Because",
+     "start": 0.1,
+     "end": 0.438
+    },
+    {
+     "text": "a",
+     "start": 0.45,
+     "end": 0.525
+    },
+    {
+     "text": "dead",
+     "start": 0.537,
+     "end": 0.75
+    },
+    {
+     "text": "body",
+     "start": 0.762,
+     "end": 1.163
+    },
+    {
+     "text": "is",
+     "start": 1.175,
+     "end": 1.288
+    },
+    {
+     "text": "a",
+     "start": 1.3,
+     "end": 1.35
+    },
+    {
+     "text": "clock",
+     "start": 1.363,
+     "end": 1.788
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_2.mp3",
+   "duration": 2.75,
+   "words": [
+    {
+     "text": "Alive",
+     "start": 0.1,
+     "end": 0.612
+    },
+    {
+     "text": "you're",
+     "start": 0.875,
+     "end": 0.963
+    },
+    {
+     "text": "ninety-eight",
+     "start": 0.975,
+     "end": 1.4
+    },
+    {
+     "text": "point",
+     "start": 1.413,
+     "end": 1.713
+    },
+    {
+     "text": "six",
+     "start": 1.725,
+     "end": 1.988
+    },
+    {
+     "text": "degrees",
+     "start": 2.0,
+     "end": 2.6
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_3.mp3",
+   "duration": 3.663,
+   "words": [
+    {
+     "text": "After",
+     "start": 0.1,
+     "end": 0.475
+    },
+    {
+     "text": "death",
+     "start": 0.487,
+     "end": 0.9
+    },
+    {
+     "text": "you",
+     "start": 1.113,
+     "end": 1.213
+    },
+    {
+     "text": "lose",
+     "start": 1.225,
+     "end": 1.413
+    },
+    {
+     "text": "about",
+     "start": 1.425,
+     "end": 1.688
+    },
+    {
+     "text": "one",
+     "start": 1.7,
+     "end": 1.987
+    },
+    {
+     "text": "and",
+     "start": 2.087,
+     "end": 2.163
+    },
+    {
+     "text": "a",
+     "start": 2.175,
+     "end": 2.2
+    },
+    {
+     "text": "half",
+     "start": 2.212,
+     "end": 2.487
+    },
+    {
+     "text": "degrees",
+     "start": 2.5,
+     "end": 2.888
+    },
+    {
+     "text": "every",
+     "start": 2.9,
+     "end": 3.125
+    },
+    {
+     "text": "hour",
+     "start": 3.138,
+     "end": 3.513
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_4.mp3",
+   "duration": 2.487,
+   "words": [
+    {
+     "text": "Six",
+     "start": 0.1,
+     "end": 0.425
+    },
+    {
+     "text": "degrees",
+     "start": 0.438,
+     "end": 0.775
+    },
+    {
+     "text": "down",
+     "start": 0.787,
+     "end": 1.113
+    },
+    {
+     "text": "Four",
+     "start": 1.475,
+     "end": 1.713
+    },
+    {
+     "text": "hours",
+     "start": 1.725,
+     "end": 1.975
+    },
+    {
+     "text": "dead",
+     "start": 1.988,
+     "end": 2.337
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_5.mp3",
+   "duration": 3.55,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.1,
+     "end": 0.287
+    },
+    {
+     "text": "count",
+     "start": 0.3,
+     "end": 0.55
+    },
+    {
+     "text": "back",
+     "start": 0.562,
+     "end": 0.787
+    },
+    {
+     "text": "from",
+     "start": 0.8,
+     "end": 0.925
+    },
+    {
+     "text": "when",
+     "start": 0.938,
+     "end": 1.05
+    },
+    {
+     "text": "it",
+     "start": 1.062,
+     "end": 1.113
+    },
+    {
+     "text": "was",
+     "start": 1.125,
+     "end": 1.225
+    },
+    {
+     "text": "measured",
+     "start": 1.238,
+     "end": 1.663
+    },
+    {
+     "text": "Not",
+     "start": 2.025,
+     "end": 2.288
+    },
+    {
+     "text": "when",
+     "start": 2.3,
+     "end": 2.4
+    },
+    {
+     "text": "the",
+     "start": 2.413,
+     "end": 2.488
+    },
+    {
+     "text": "body",
+     "start": 2.5,
+     "end": 2.812
+    },
+    {
+     "text": "was",
+     "start": 2.825,
+     "end": 2.975
+    },
+    {
+     "text": "found",
+     "start": 2.987,
+     "end": 3.4
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_6.mp3",
+   "duration": 1.75,
+   "words": [
+    {
+     "text": "Your",
+     "start": 0.1,
+     "end": 0.312
+    },
+    {
+     "text": "turn",
+     "start": 0.325,
+     "end": 0.725
+    },
+    {
+     "text": "Who",
+     "start": 1.087,
+     "end": 1.25
+    },
+    {
+     "text": "did",
+     "start": 1.262,
+     "end": 1.438
+    },
+    {
+     "text": "it",
+     "start": 1.45,
+     "end": 1.6
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_7.mp3",
+   "duration": 6.1,
+   "words": [
+    {
+     "text": "B",
+     "start": 0.1,
+     "end": 0.412
+    },
+    {
+     "text": "Ninety-two",
+     "start": 0.775,
+     "end": 1.288
+    },
+    {
+     "text": "point",
+     "start": 1.3,
+     "end": 1.575
+    },
+    {
+     "text": "six",
+     "start": 1.587,
+     "end": 1.925
+    },
+    {
+     "text": "is",
+     "start": 1.988,
+     "end": 2.125
+    },
+    {
+     "text": "six",
+     "start": 2.138,
+     "end": 2.438
+    },
+    {
+     "text": "degrees",
+     "start": 2.45,
+     "end": 2.875
+    },
+    {
+     "text": "down",
+     "start": 2.888,
+     "end": 3.225
+    },
+    {
+     "text": "Four",
+     "start": 3.587,
+     "end": 3.825
+    },
+    {
+     "text": "hours",
+     "start": 3.837,
+     "end": 4.125
+    },
+    {
+     "text": "before",
+     "start": 4.138,
+     "end": 4.45
+    },
+    {
+     "text": "midnight",
+     "start": 4.463,
+     "end": 4.913
+    },
+    {
+     "text": "Eight",
+     "start": 5.275,
+     "end": 5.525
+    },
+    {
+     "text": "PM.",
+     "start": 5.537,
+     "end": 5.95
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_8.mp3",
+   "duration": 5.387,
+   "words": [
+    {
+     "text": "Counted",
+     "start": 0.1,
+     "end": 0.438
+    },
+    {
+     "text": "from",
+     "start": 0.45,
+     "end": 0.588
+    },
+    {
+     "text": "ten",
+     "start": 0.6,
+     "end": 0.925
+    },
+    {
+     "text": "when",
+     "start": 1.288,
+     "end": 1.388
+    },
+    {
+     "text": "the",
+     "start": 1.4,
+     "end": 1.487
+    },
+    {
+     "text": "body",
+     "start": 1.5,
+     "end": 1.788
+    },
+    {
+     "text": "was",
+     "start": 1.8,
+     "end": 1.913
+    },
+    {
+     "text": "found",
+     "start": 1.925,
+     "end": 2.3
+    },
+    {
+     "text": "Six",
+     "start": 2.663,
+     "end": 3.025
+    },
+    {
+     "text": "PM",
+     "start": 3.038,
+     "end": 3.438
+    },
+    {
+     "text": "That's",
+     "start": 3.8,
+     "end": 4.062
+    },
+    {
+     "text": "A",
+     "start": 4.075,
+     "end": 4.275
+    },
+    {
+     "text": "The",
+     "start": 4.638,
+     "end": 4.8
+    },
+    {
+     "text": "trap",
+     "start": 4.812,
+     "end": 5.237
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_9.mp3",
+   "duration": 4.225,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.1,
+     "end": 0.287
+    },
+    {
+     "text": "C",
+     "start": 0.3,
+     "end": 0.525
+    },
+    {
+     "text": "found",
+     "start": 0.537,
+     "end": 0.8
+    },
+    {
+     "text": "the",
+     "start": 0.812,
+     "end": 0.875
+    },
+    {
+     "text": "body",
+     "start": 0.887,
+     "end": 1.3
+    },
+    {
+     "text": "Suspicious",
+     "start": 1.663,
+     "end": 2.525
+    },
+    {
+     "text": "but",
+     "start": 2.75,
+     "end": 2.888
+    },
+    {
+     "text": "C",
+     "start": 2.9,
+     "end": 3.112
+    },
+    {
+     "text": "was",
+     "start": 3.125,
+     "end": 3.263
+    },
+    {
+     "text": "at",
+     "start": 3.275,
+     "end": 3.375
+    },
+    {
+     "text": "dinner",
+     "start": 3.388,
+     "end": 3.675
+    },
+    {
+     "text": "at",
+     "start": 3.688,
+     "end": 3.788
+    },
+    {
+     "text": "eight",
+     "start": 3.8,
+     "end": 4.075
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_10.mp3",
+   "duration": 3.925,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.1,
+     "end": 0.275
+    },
+    {
+     "text": "heat",
+     "start": 0.287,
+     "end": 0.6
+    },
+    {
+     "text": "cold",
+     "start": 0.912,
+     "end": 1.363
+    },
+    {
+     "text": "clothes",
+     "start": 1.625,
+     "end": 2.075
+    },
+    {
+     "text": "and",
+     "start": 2.087,
+     "end": 2.175
+    },
+    {
+     "text": "body",
+     "start": 2.188,
+     "end": 2.538
+    },
+    {
+     "text": "size",
+     "start": 2.55,
+     "end": 2.95
+    },
+    {
+     "text": "all",
+     "start": 2.962,
+     "end": 3.15
+    },
+    {
+     "text": "bend",
+     "start": 3.163,
+     "end": 3.363
+    },
+    {
+     "text": "the",
+     "start": 3.375,
+     "end": 3.45
+    },
+    {
+     "text": "rule",
+     "start": 3.462,
+     "end": 3.775
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_11.mp3",
+   "duration": 3.85,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.1,
+     "end": 0.387
+    },
+    {
+     "text": "real",
+     "start": 0.4,
+     "end": 0.588
+    },
+    {
+     "text": "pathologists",
+     "start": 0.6,
+     "end": 1.288
+    },
+    {
+     "text": "never",
+     "start": 1.3,
+     "end": 1.65
+    },
+    {
+     "text": "give",
+     "start": 1.663,
+     "end": 1.8
+    },
+    {
+     "text": "an",
+     "start": 1.812,
+     "end": 1.875
+    },
+    {
+     "text": "exact",
+     "start": 1.887,
+     "end": 2.3
+    },
+    {
+     "text": "time",
+     "start": 2.312,
+     "end": 2.612
+    },
+    {
+     "text": "Just",
+     "start": 2.975,
+     "end": 3.238
+    },
+    {
+     "text": "a",
+     "start": 3.25,
+     "end": 3.288
+    },
+    {
+     "text": "window",
+     "start": 3.3,
+     "end": 3.7
+    }
+   ]
+  },
+  {
+   "file": "narration/time-of-death/line_12.mp3",
+   "duration": 3.588,
+   "words": [
+    {
+     "text": "Benoit",
+     "start": 0.1,
+     "end": 0.475
+    },
+    {
+     "text": "Blanc",
+     "start": 0.487,
+     "end": 0.8
+    },
+    {
+     "text": "gets",
+     "start": 0.812,
+     "end": 0.975
+    },
+    {
+     "text": "a",
+     "start": 0.988,
+     "end": 1.038
+    },
+    {
+     "text": "confession",
+     "start": 1.05,
+     "end": 1.575
+    },
+    {
+     "text": "Real",
+     "start": 1.938,
+     "end": 2.212
+    },
+    {
+     "text": "detectives",
+     "start": 2.225,
+     "end": 2.688
+    },
+    {
+     "text": "get",
+     "start": 2.7,
+     "end": 2.825
+    },
+    {
+     "text": "a",
+     "start": 2.837,
+     "end": 2.875
+    },
+    {
+     "text": "range",
+     "start": 2.888,
+     "end": 3.438
+    }
+   ]
+  }
+ ]
+}
