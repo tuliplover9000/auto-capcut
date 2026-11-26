@@ -245,7 +245,8 @@ def flow(ep: dict, ep_path: str, out_dir: str) -> int:
             wf.setframerate(sr)
             wf.writeframes(audio[int(a * sr):int(z * sr)].tobytes())
         rel = [{"text": w["text"], "start": round(w["start"] - a, 3), "end": round(w["end"] - a, 3)} for w in ws]
-        lines.append({"file": f"narration/{ep['id']}/line_{i}.wav", "duration": round(z - a, 3), "words": rel, "takeStart": round(a, 3)})
+        lines.append({"file": f"narration/{ep['id']}/line_{i}.wav", "duration": round(z - a, 3), "words": rel, "takeStart": round(a, 3),
+                      "pauseBefore": float(ep["lines"][i].get("pause", 0)) if "lines" in ep else 0.0})
         print(f"line {i}: {z - a:5.2f}s  {len(ws)} words | {L[i]['text']}")
     timing_path = os.path.splitext(ep_path)[0] + ".timing.json"
     json.dump({"lines": lines, "flow": True, "take": f"narration/{ep['id']}/{os.path.basename(take)}"}, open(timing_path, "w", encoding="utf-8"), indent=1)

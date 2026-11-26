@@ -1,0 +1,26 @@
+{
+  "id": "tod-3d",
+  "engine": "gemini",
+  "voice": "Laomedeia",
+  "style": "Say excitedly, fast and punchy: ",
+  "rate": "+0%",
+  "flow": true,
+  "title": "Wake Up Dead Man, but real: how detectives find the time of death (3D)",
+  "note": "pause = seconds of silence inserted BEFORE that line (the 10 s test window).",
+  "lines": [
+    {"text": "In the movie Wake Up Dead Man, the detective solves murders by reading people.", "events": []},
+    {"text": "But real detectives have a better trick. They read the body.", "events": []},
+    {"text": "When you're alive, your body stays warm. Ninety-eight point six degrees.", "events": []},
+    {"text": "But after a person dies, the body slowly cools down. About one and a half degrees every hour.", "events": []},
+    {"text": "So if a body is six degrees colder, that person died about four hours ago.", "events": []},
+    {"text": "Here's the trick. Count back from the time the temperature was taken. Not the time the body was found.", "events": []},
+    {"text": "Now it's your turn. Look at the clues. Who did it?", "events": []},
+    {"text": "It's B! The body is six degrees colder. That means four hours.", "pause": 10.0, "events": []},
+    {"text": "The temperature was taken at midnight. Four hours before midnight is eight PM. And at eight, B was out walking, all alone.", "events": []},
+    {"text": "Did you count from ten, when the body was found? Then you got six PM. That's A. That's the trap!", "events": []},
+    {"text": "And C found the body. Suspicious! But C was at dinner at eight.", "events": []},
+    {"text": "One more thing. Hot rooms, cold rooms, clothes, and body size all change how fast a body cools.", "events": []},
+    {"text": "So real detectives never say one exact time. They give a time window.", "events": []},
+    {"text": "In the movie, the detective gets a confession. In real life, detectives get a window.", "events": []}
+  ]
+}

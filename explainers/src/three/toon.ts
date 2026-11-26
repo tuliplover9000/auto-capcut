@@ -155,6 +155,97 @@ export const drawVictimLying = (c: C, o: VictimOpts) => {
   c.restore();
 };
 
+// ───────────────────────── the suspects ─────────────────────────
+export type Suspect = {
+  letter: string; badge: string; skin: string; hair: string; style: 'bun' | 'cap' | 'side';
+  top: string; top2: string; legs: string; skirt?: boolean;
+};
+export const SUSPECTS: Suspect[] = [
+  {letter: 'A', badge: '#ff9a1f', skin: '#e8b48c', hair: '#6b3e26', style: 'bun', top: '#ff9a1f', top2: '#f6e7cf', legs: '#5a4a6a', skirt: true},
+  {letter: 'B', badge: '#b07cff', skin: '#b9825c', hair: '#2b2230', style: 'cap', top: '#8f5ae0', top2: '#b07cff', legs: '#3b5a8a'},
+  {letter: 'C', badge: '#3fd0c9', skin: '#f0c8a8', hair: '#a9a6a2', style: 'side', top: '#2aa9a3', top2: '#ffffff', legs: '#26242e'},
+];
+export type Mood = 'neutral' | 'worried' | 'smirk' | 'shock' | 'happy';
+/** a standing suspect, front view, with a letter badge on the chest */
+export const drawSuspect = (c: C, p: Suspect, mood: Mood, glow = 0) => {
+  c.clearRect(0, 0, 600, 1000);
+  if (glow > 0) { // highlight ring behind the card (answer / trap reveals)
+    c.globalAlpha = glow; c.fillStyle = p.badge;
+    c.beginPath(); c.ellipse(300, 600, 270, 420, 0, 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
+  }
+  if (p.skirt) {
+    limb(c, [[262, 760], [258, 935]], 26, p.skin);
+    limb(c, [[338, 760], [342, 935]], 26, p.skin);
+  } else {
+    limb(c, [[262, 700], [256, 935]], 36, p.legs);
+    limb(c, [[338, 700], [344, 935]], 36, p.legs);
+  }
+  ell(c, 248, 952, 38, 19, '#201a16');
+  ell(c, 352, 952, 38, 19, '#201a16');
+  // body
+  shape(c, () => {
+    c.moveTo(212, 430); c.quadraticCurveTo(300, 404, 388, 430);
+    c.lineTo(p.skirt ? 418 : 404, p.skirt ? 790 : 720); c.lineTo(p.skirt ? 182 : 196, p.skirt ? 790 : 720); c.closePath();
+  }, p.skirt ? p.legs : p.top);
+  if (p.skirt) shape(c, () => { c.moveTo(212, 430); c.quadraticCurveTo(300, 404, 388, 430); c.lineTo(396, 640); c.lineTo(204, 640); c.closePath(); }, p.top);
+  if (p.style === 'side') { // butler: white shirt + vest + bow tie
+    shape(c, () => { c.moveTo(262, 420); c.lineTo(300, 560); c.lineTo(338, 420); c.closePath(); }, p.top2, 7);
+    shape(c, () => { c.moveTo(282, 440); c.lineTo(300, 452); c.lineTo(318, 440); c.lineTo(318, 466); c.lineTo(300, 454); c.lineTo(282, 466); c.closePath(); }, '#241726', 4);
+  } else if (p.style === 'cap') { // hoodie pocket + strings
+    rrect(c, 236, 560, 128, 70, 18, p.top2, 7);
+    c.strokeStyle = '#f0ecf6'; c.lineWidth = 6; c.beginPath(); c.moveTo(284, 432); c.lineTo(280, 500); c.moveTo(316, 432); c.lineTo(320, 500); c.stroke();
+  } else {
+    shape(c, () => { c.moveTo(270, 420); c.lineTo(300, 500); c.lineTo(330, 420); c.closePath(); }, p.top2, 7);
+  }
+  // letter badge
+  ell(c, 352, 500, 34, 34, p.badge, 7);
+  c.fillStyle = INK; c.font = '900 40px Arial'; c.textAlign = 'center'; c.fillText(p.letter, 352, 514);
+  // arms (shock: hands up)
+  if (mood === 'shock') {
+    limb(c, [[214, 450], [160, 380], [150, 290]], 30, p.top);
+    limb(c, [[386, 450], [440, 380], [450, 290]], 30, p.top);
+    dot(c, 150, 272, 15); dot(c, 450, 272, 15);
+  } else {
+    limb(c, [[214, 450], [194, 570], [200, 680]], 30, p.top);
+    limb(c, [[386, 450], [406, 570], [400, 680]], 30, p.top);
+    dot(c, 200, 698, 14); dot(c, 400, 698, 14);
+  }
+  // head
+  const cx = 300;
+  const cy = 300;
+  if (p.style === 'bun') ell(c, cx, cy - 118, 46, 40, p.hair);
+  ell(c, cx - 110, cy + 8, 18, 28, p.skin);
+  ell(c, cx + 110, cy + 8, 18, 28, p.skin);
+  bean(c, cx, cy, 222, 208, p.skin);
+  if (p.style === 'bun') shape(c, () => { c.moveTo(cx - 108, cy - 10); c.quadraticCurveTo(cx - 100, cy - 104, cx, cy - 104); c.quadraticCurveTo(cx + 100, cy - 104, cx + 108, cy - 10); c.quadraticCurveTo(cx + 60, cy - 70, cx, cy - 66); c.quadraticCurveTo(cx - 60, cy - 70, cx - 108, cy - 10); }, p.hair);
+  if (p.style === 'cap') {
+    shape(c, () => { c.moveTo(cx - 104, cy - 34); c.quadraticCurveTo(cx - 96, cy - 118, cx, cy - 116); c.quadraticCurveTo(cx + 96, cy - 118, cx + 104, cy - 34); c.closePath(); }, p.top);
+    shape(c, () => { c.moveTo(cx - 20, cy - 40); c.quadraticCurveTo(cx + 120, cy - 56, cx + 150, cy - 30); c.lineTo(cx + 96, cy - 26); c.closePath(); }, p.top);
+  }
+  if (p.style === 'side') {
+    shape(c, () => { c.moveTo(cx - 112, cy - 10); c.quadraticCurveTo(cx - 116, cy - 64, cx - 76, cy - 80); c.quadraticCurveTo(cx - 86, cy - 36, cx - 90, cy); c.closePath(); }, p.hair);
+    shape(c, () => { c.moveTo(cx + 112, cy - 10); c.quadraticCurveTo(cx + 116, cy - 64, cx + 76, cy - 80); c.quadraticCurveTo(cx + 86, cy - 36, cx + 90, cy); c.closePath(); }, p.hair);
+    shape(c, () => { c.moveTo(cx - 50, cy + 58); c.quadraticCurveTo(cx, cy + 40, cx + 50, cy + 58); c.quadraticCurveTo(cx, cy + 66, cx - 50, cy + 58); }, p.hair, 6);
+  }
+  // face by mood
+  const ey = mood === 'shock' ? 10 : 6;
+  if (mood === 'shock') { ell(c, cx - 40, cy, 17, 21, '#ffffff', 6); ell(c, cx + 40, cy, 17, 21, '#ffffff', 6); }
+  dot(c, cx - 40, cy + (mood === 'shock' ? 2 : 4), ey);
+  dot(c, cx + 40, cy + (mood === 'shock' ? 2 : 4), ey);
+  c.strokeStyle = INK; c.lineWidth = 7; c.lineCap = 'round';
+  c.beginPath();
+  if (mood === 'worried') { c.moveTo(cx - 62, cy - 30); c.lineTo(cx - 24, cy - 40); c.moveTo(cx + 24, cy - 40); c.lineTo(cx + 62, cy - 30); }
+  else if (mood === 'smirk') { c.moveTo(cx - 62, cy - 34); c.lineTo(cx - 22, cy - 26); c.moveTo(cx + 22, cy - 36); c.lineTo(cx + 62, cy - 40); }
+  else { c.moveTo(cx - 60, cy - 34); c.lineTo(cx - 24, cy - 36); c.moveTo(cx + 24, cy - 36); c.lineTo(cx + 60, cy - 34); }
+  c.stroke();
+  c.beginPath();
+  if (mood === 'shock') { c.fillStyle = '#5a1f2a'; c.ellipse(cx, cy + 62, 20, 26, 0, 0, Math.PI * 2); c.fill(); c.stroke(); }
+  else if (mood === 'smirk') { c.moveTo(cx - 26, cy + 60); c.quadraticCurveTo(cx + 10, cy + 70, cx + 34, cy + 50); c.stroke(); }
+  else if (mood === 'worried') { c.moveTo(cx - 24, cy + 66); c.quadraticCurveTo(cx, cy + 54, cx + 24, cy + 66); c.stroke(); }
+  else if (mood === 'happy') { c.moveTo(cx - 30, cy + 54); c.quadraticCurveTo(cx, cy + 80, cx + 30, cy + 54); c.stroke(); }
+  else { c.moveTo(cx - 22, cy + 62); c.lineTo(cx + 22, cy + 62); c.stroke(); }
+};
+
 // ───────────────────────── the detective ─────────────────────────
 const detHead = (c: C, cx: number, cy: number, look: number) => {
   bean(c, cx, cy, 216, 202, '#c98e64');

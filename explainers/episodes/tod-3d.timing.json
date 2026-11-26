@@ -1,0 +1,1178 @@
+{
+ "lines": [
+  {
+   "file": "narration/tod-3d/line_0.wav",
+   "duration": 3.44,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.0,
+     "end": 0.26
+    },
+    {
+     "text": "the",
+     "start": 0.26,
+     "end": 0.34
+    },
+    {
+     "text": "movie",
+     "start": 0.34,
+     "end": 0.54
+    },
+    {
+     "text": "Wake",
+     "start": 0.66,
+     "end": 0.8
+    },
+    {
+     "text": "Up",
+     "start": 0.8,
+     "end": 0.86
+    },
+    {
+     "text": "Dead",
+     "start": 0.86,
+     "end": 1.14
+    },
+    {
+     "text": "Man",
+     "start": 1.14,
+     "end": 1.42
+    },
+    {
+     "text": "the",
+     "start": 1.42,
+     "end": 1.46
+    },
+    {
+     "text": "detective",
+     "start": 1.46,
+     "end": 1.7
+    },
+    {
+     "text": "solves",
+     "start": 1.7,
+     "end": 2.18
+    },
+    {
+     "text": "murders",
+     "start": 2.18,
+     "end": 2.48
+    },
+    {
+     "text": "by",
+     "start": 2.48,
+     "end": 2.72
+    },
+    {
+     "text": "reading",
+     "start": 2.72,
+     "end": 2.94
+    },
+    {
+     "text": "people",
+     "start": 2.94,
+     "end": 3.3
+    }
+   ],
+   "takeStart": 0.0,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_1.wav",
+   "duration": 2.76,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.14,
+     "end": 0.24
+    },
+    {
+     "text": "real",
+     "start": 0.24,
+     "end": 0.44
+    },
+    {
+     "text": "detectives",
+     "start": 0.44,
+     "end": 0.94
+    },
+    {
+     "text": "have",
+     "start": 0.94,
+     "end": 1.02
+    },
+    {
+     "text": "a",
+     "start": 1.02,
+     "end": 1.1
+    },
+    {
+     "text": "better",
+     "start": 1.1,
+     "end": 1.28
+    },
+    {
+     "text": "trick",
+     "start": 1.28,
+     "end": 1.52
+    },
+    {
+     "text": "They",
+     "start": 1.8,
+     "end": 1.88
+    },
+    {
+     "text": "read",
+     "start": 1.88,
+     "end": 2.08
+    },
+    {
+     "text": "the",
+     "start": 2.08,
+     "end": 2.26
+    },
+    {
+     "text": "body",
+     "start": 2.26,
+     "end": 2.54
+    }
+   ],
+   "takeStart": 3.44,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_2.wav",
+   "duration": 3.17,
+   "words": [
+    {
+     "text": "When",
+     "start": 0.22,
+     "end": 0.3
+    },
+    {
+     "text": "you're",
+     "start": 0.3,
+     "end": 0.5
+    },
+    {
+     "text": "alive",
+     "start": 0.5,
+     "end": 0.76
+    },
+    {
+     "text": "your",
+     "start": 0.88,
+     "end": 0.96
+    },
+    {
+     "text": "body",
+     "start": 0.96,
+     "end": 1.16
+    },
+    {
+     "text": "stays",
+     "start": 1.16,
+     "end": 1.42
+    },
+    {
+     "text": "warm",
+     "start": 1.42,
+     "end": 1.64
+    },
+    {
+     "text": "Ninety-eight",
+     "start": 1.94,
+     "end": 2.2
+    },
+    {
+     "text": "point",
+     "start": 2.2,
+     "end": 2.44
+    },
+    {
+     "text": "six",
+     "start": 2.44,
+     "end": 2.68
+    },
+    {
+     "text": "degrees",
+     "start": 2.68,
+     "end": 2.96
+    }
+   ],
+   "takeStart": 6.2,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_3.wav",
+   "duration": 4.33,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.21,
+     "end": 0.39
+    },
+    {
+     "text": "after",
+     "start": 0.39,
+     "end": 0.63
+    },
+    {
+     "text": "a",
+     "start": 0.63,
+     "end": 0.71
+    },
+    {
+     "text": "person",
+     "start": 0.71,
+     "end": 0.93
+    },
+    {
+     "text": "dies",
+     "start": 0.93,
+     "end": 1.15
+    },
+    {
+     "text": "the",
+     "start": 1.33,
+     "end": 1.39
+    },
+    {
+     "text": "body",
+     "start": 1.39,
+     "end": 1.59
+    },
+    {
+     "text": "slowly",
+     "start": 1.59,
+     "end": 1.93
+    },
+    {
+     "text": "cools",
+     "start": 1.93,
+     "end": 2.13
+    },
+    {
+     "text": "down",
+     "start": 2.13,
+     "end": 2.47
+    },
+    {
+     "text": "About",
+     "start": 2.65,
+     "end": 2.83
+    },
+    {
+     "text": "one",
+     "start": 2.83,
+     "end": 3.03
+    },
+    {
+     "text": "and",
+     "start": 3.03,
+     "end": 3.123
+    },
+    {
+     "text": "a",
+     "start": 3.123,
+     "end": 3.217
+    },
+    {
+     "text": "half",
+     "start": 3.217,
+     "end": 3.31
+    },
+    {
+     "text": "degrees",
+     "start": 3.31,
+     "end": 3.59
+    },
+    {
+     "text": "every",
+     "start": 3.59,
+     "end": 3.87
+    },
+    {
+     "text": "hour",
+     "start": 3.87,
+     "end": 4.15
+    }
+   ],
+   "takeStart": 9.37,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_4.wav",
+   "duration": 3.42,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.18,
+     "end": 0.36
+    },
+    {
+     "text": "if",
+     "start": 0.36,
+     "end": 0.46
+    },
+    {
+     "text": "a",
+     "start": 0.46,
+     "end": 0.52
+    },
+    {
+     "text": "body",
+     "start": 0.52,
+     "end": 0.74
+    },
+    {
+     "text": "is",
+     "start": 0.74,
+     "end": 0.88
+    },
+    {
+     "text": "six",
+     "start": 0.88,
+     "end": 1.06
+    },
+    {
+     "text": "degrees",
+     "start": 1.06,
+     "end": 1.28
+    },
+    {
+     "text": "colder",
+     "start": 1.28,
+     "end": 1.62
+    },
+    {
+     "text": "that",
+     "start": 1.86,
+     "end": 1.94
+    },
+    {
+     "text": "person",
+     "start": 1.94,
+     "end": 2.2
+    },
+    {
+     "text": "died",
+     "start": 2.2,
+     "end": 2.36
+    },
+    {
+     "text": "about",
+     "start": 2.36,
+     "end": 2.58
+    },
+    {
+     "text": "four",
+     "start": 2.58,
+     "end": 2.8
+    },
+    {
+     "text": "hours",
+     "start": 2.8,
+     "end": 3.02
+    },
+    {
+     "text": "ago",
+     "start": 3.02,
+     "end": 3.26
+    }
+   ],
+   "takeStart": 13.7,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_5.wav",
+   "duration": 4.21,
+   "words": [
+    {
+     "text": "Here's",
+     "start": 0.16,
+     "end": 0.4
+    },
+    {
+     "text": "the",
+     "start": 0.4,
+     "end": 0.48
+    },
+    {
+     "text": "trick",
+     "start": 0.48,
+     "end": 0.64
+    },
+    {
+     "text": "Count",
+     "start": 1.08,
+     "end": 1.2
+    },
+    {
+     "text": "back",
+     "start": 1.2,
+     "end": 1.38
+    },
+    {
+     "text": "from",
+     "start": 1.38,
+     "end": 1.54
+    },
+    {
+     "text": "the",
+     "start": 1.54,
+     "end": 1.64
+    },
+    {
+     "text": "time",
+     "start": 1.64,
+     "end": 1.8
+    },
+    {
+     "text": "the",
+     "start": 1.8,
+     "end": 1.94
+    },
+    {
+     "text": "temperature",
+     "start": 1.94,
+     "end": 2.18
+    },
+    {
+     "text": "was",
+     "start": 2.18,
+     "end": 2.36
+    },
+    {
+     "text": "taken",
+     "start": 2.36,
+     "end": 2.64
+    },
+    {
+     "text": "Not",
+     "start": 2.9,
+     "end": 3.02
+    },
+    {
+     "text": "the",
+     "start": 3.02,
+     "end": 3.16
+    },
+    {
+     "text": "time",
+     "start": 3.16,
+     "end": 3.32
+    },
+    {
+     "text": "the",
+     "start": 3.32,
+     "end": 3.44
+    },
+    {
+     "text": "body",
+     "start": 3.44,
+     "end": 3.62
+    },
+    {
+     "text": "was",
+     "start": 3.62,
+     "end": 3.78
+    },
+    {
+     "text": "found",
+     "start": 3.78,
+     "end": 3.96
+    }
+   ],
+   "takeStart": 17.12,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_6.wav",
+   "duration": 2.2,
+   "words": [
+    {
+     "text": "Now",
+     "start": 0.25,
+     "end": 0.37
+    },
+    {
+     "text": "it's",
+     "start": 0.37,
+     "end": 0.51
+    },
+    {
+     "text": "your",
+     "start": 0.51,
+     "end": 0.59
+    },
+    {
+     "text": "turn",
+     "start": 0.59,
+     "end": 0.81
+    },
+    {
+     "text": "Look",
+     "start": 0.99,
+     "end": 1.09
+    },
+    {
+     "text": "at",
+     "start": 1.09,
+     "end": 1.19
+    },
+    {
+     "text": "the",
+     "start": 1.19,
+     "end": 1.29
+    },
+    {
+     "text": "clues",
+     "start": 1.29,
+     "end": 1.43
+    },
+    {
+     "text": "Who",
+     "start": 1.75,
+     "end": 1.85
+    },
+    {
+     "text": "did",
+     "start": 1.85,
+     "end": 1.95
+    },
+    {
+     "text": "it",
+     "start": 1.95,
+     "end": 2.07
+    }
+   ],
+   "takeStart": 21.33,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_7.wav",
+   "duration": 3.13,
+   "words": [
+    {
+     "text": "It's",
+     "start": 0.13,
+     "end": 0.35
+    },
+    {
+     "text": "B",
+     "start": 0.35,
+     "end": 0.47
+    },
+    {
+     "text": "The",
+     "start": 0.81,
+     "end": 0.97
+    },
+    {
+     "text": "body",
+     "start": 0.97,
+     "end": 1.19
+    },
+    {
+     "text": "is",
+     "start": 1.19,
+     "end": 1.33
+    },
+    {
+     "text": "six",
+     "start": 1.33,
+     "end": 1.49
+    },
+    {
+     "text": "degrees",
+     "start": 1.49,
+     "end": 1.69
+    },
+    {
+     "text": "colder",
+     "start": 1.69,
+     "end": 1.99
+    },
+    {
+     "text": "That",
+     "start": 2.23,
+     "end": 2.31
+    },
+    {
+     "text": "means",
+     "start": 2.31,
+     "end": 2.45
+    },
+    {
+     "text": "four",
+     "start": 2.45,
+     "end": 2.71
+    },
+    {
+     "text": "hours",
+     "start": 2.71,
+     "end": 2.95
+    }
+   ],
+   "takeStart": 23.53,
+   "pauseBefore": 10.0
+  },
+  {
+   "file": "narration/tod-3d/line_8.wav",
+   "duration": 5.44,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.18,
+     "end": 0.34
+    },
+    {
+     "text": "temperature",
+     "start": 0.34,
+     "end": 0.6
+    },
+    {
+     "text": "was",
+     "start": 0.6,
+     "end": 0.8
+    },
+    {
+     "text": "taken",
+     "start": 0.8,
+     "end": 0.98
+    },
+    {
+     "text": "at",
+     "start": 0.98,
+     "end": 1.12
+    },
+    {
+     "text": "midnight",
+     "start": 1.12,
+     "end": 1.34
+    },
+    {
+     "text": "Four",
+     "start": 1.34,
+     "end": 1.72
+    },
+    {
+     "text": "hours",
+     "start": 1.72,
+     "end": 1.92
+    },
+    {
+     "text": "before",
+     "start": 1.92,
+     "end": 2.18
+    },
+    {
+     "text": "midnight",
+     "start": 2.18,
+     "end": 2.44
+    },
+    {
+     "text": "is",
+     "start": 2.44,
+     "end": 2.68
+    },
+    {
+     "text": "eight",
+     "start": 2.68,
+     "end": 2.82
+    },
+    {
+     "text": "PM",
+     "start": 2.82,
+     "end": 3.06
+    },
+    {
+     "text": "And",
+     "start": 3.46,
+     "end": 3.52
+    },
+    {
+     "text": "at",
+     "start": 3.52,
+     "end": 3.66
+    },
+    {
+     "text": "eight",
+     "start": 3.66,
+     "end": 3.8
+    },
+    {
+     "text": "B",
+     "start": 4.0,
+     "end": 4.06
+    },
+    {
+     "text": "was",
+     "start": 4.06,
+     "end": 4.22
+    },
+    {
+     "text": "out",
+     "start": 4.22,
+     "end": 4.34
+    },
+    {
+     "text": "walking",
+     "start": 4.34,
+     "end": 4.64
+    },
+    {
+     "text": "all",
+     "start": 4.64,
+     "end": 4.94
+    },
+    {
+     "text": "alone",
+     "start": 4.94,
+     "end": 5.22
+    }
+   ],
+   "takeStart": 26.66,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_9.wav",
+   "duration": 4.33,
+   "words": [
+    {
+     "text": "Did",
+     "start": 0.22,
+     "end": 0.34
+    },
+    {
+     "text": "you",
+     "start": 0.34,
+     "end": 0.44
+    },
+    {
+     "text": "count",
+     "start": 0.44,
+     "end": 0.58
+    },
+    {
+     "text": "from",
+     "start": 0.58,
+     "end": 0.72
+    },
+    {
+     "text": "ten",
+     "start": 0.72,
+     "end": 0.94
+    },
+    {
+     "text": "when",
+     "start": 0.94,
+     "end": 1.16
+    },
+    {
+     "text": "the",
+     "start": 1.16,
+     "end": 1.24
+    },
+    {
+     "text": "body",
+     "start": 1.24,
+     "end": 1.42
+    },
+    {
+     "text": "was",
+     "start": 1.42,
+     "end": 1.58
+    },
+    {
+     "text": "found",
+     "start": 1.58,
+     "end": 1.74
+    },
+    {
+     "text": "Then",
+     "start": 2.02,
+     "end": 2.08
+    },
+    {
+     "text": "you",
+     "start": 2.08,
+     "end": 2.2
+    },
+    {
+     "text": "got",
+     "start": 2.2,
+     "end": 2.3
+    },
+    {
+     "text": "six",
+     "start": 2.3,
+     "end": 2.52
+    },
+    {
+     "text": "PM",
+     "start": 2.52,
+     "end": 2.76
+    },
+    {
+     "text": "That's",
+     "start": 3.0,
+     "end": 3.22
+    },
+    {
+     "text": "A",
+     "start": 3.22,
+     "end": 3.36
+    },
+    {
+     "text": "That's",
+     "start": 3.6,
+     "end": 3.8
+    },
+    {
+     "text": "the",
+     "start": 3.8,
+     "end": 3.9
+    },
+    {
+     "text": "trap",
+     "start": 3.9,
+     "end": 4.08
+    }
+   ],
+   "takeStart": 32.1,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_10.wav",
+   "duration": 3.11,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.25,
+     "end": 0.33
+    },
+    {
+     "text": "C",
+     "start": 0.33,
+     "end": 0.49
+    },
+    {
+     "text": "found",
+     "start": 0.49,
+     "end": 0.71
+    },
+    {
+     "text": "the",
+     "start": 0.71,
+     "end": 0.83
+    },
+    {
+     "text": "body",
+     "start": 0.83,
+     "end": 1.05
+    },
+    {
+     "text": "Suspicious",
+     "start": 1.23,
+     "end": 1.45
+    },
+    {
+     "text": "But",
+     "start": 2.01,
+     "end": 2.09
+    },
+    {
+     "text": "C",
+     "start": 2.09,
+     "end": 2.25
+    },
+    {
+     "text": "was",
+     "start": 2.25,
+     "end": 2.37
+    },
+    {
+     "text": "at",
+     "start": 2.37,
+     "end": 2.51
+    },
+    {
+     "text": "dinner",
+     "start": 2.51,
+     "end": 2.67
+    },
+    {
+     "text": "at",
+     "start": 2.67,
+     "end": 2.83
+    },
+    {
+     "text": "eight",
+     "start": 2.83,
+     "end": 2.95
+    }
+   ],
+   "takeStart": 36.43,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_11.wav",
+   "duration": 4.37,
+   "words": [
+    {
+     "text": "One",
+     "start": 0.16,
+     "end": 0.3
+    },
+    {
+     "text": "more",
+     "start": 0.3,
+     "end": 0.44
+    },
+    {
+     "text": "thing",
+     "start": 0.44,
+     "end": 0.62
+    },
+    {
+     "text": "Hot",
+     "start": 0.92,
+     "end": 1.04
+    },
+    {
+     "text": "rooms",
+     "start": 1.04,
+     "end": 1.22
+    },
+    {
+     "text": "cold",
+     "start": 1.38,
+     "end": 1.46
+    },
+    {
+     "text": "rooms",
+     "start": 1.46,
+     "end": 1.66
+    },
+    {
+     "text": "clothes",
+     "start": 1.84,
+     "end": 1.96
+    },
+    {
+     "text": "and",
+     "start": 2.16,
+     "end": 2.24
+    },
+    {
+     "text": "body",
+     "start": 2.24,
+     "end": 2.46
+    },
+    {
+     "text": "size",
+     "start": 2.46,
+     "end": 2.74
+    },
+    {
+     "text": "all",
+     "start": 2.74,
+     "end": 2.96
+    },
+    {
+     "text": "change",
+     "start": 2.96,
+     "end": 3.22
+    },
+    {
+     "text": "how",
+     "start": 3.22,
+     "end": 3.4
+    },
+    {
+     "text": "fast",
+     "start": 3.4,
+     "end": 3.64
+    },
+    {
+     "text": "a",
+     "start": 3.64,
+     "end": 3.74
+    },
+    {
+     "text": "body",
+     "start": 3.74,
+     "end": 3.92
+    },
+    {
+     "text": "cools",
+     "start": 3.92,
+     "end": 4.16
+    }
+   ],
+   "takeStart": 39.54,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_12.wav",
+   "duration": 3.18,
+   "words": [
+    {
+     "text": "So",
+     "start": 0.21,
+     "end": 0.39
+    },
+    {
+     "text": "real",
+     "start": 0.39,
+     "end": 0.57
+    },
+    {
+     "text": "detectives",
+     "start": 0.57,
+     "end": 0.99
+    },
+    {
+     "text": "never",
+     "start": 0.99,
+     "end": 1.19
+    },
+    {
+     "text": "say",
+     "start": 1.19,
+     "end": 1.37
+    },
+    {
+     "text": "one",
+     "start": 1.37,
+     "end": 1.53
+    },
+    {
+     "text": "exact",
+     "start": 1.53,
+     "end": 1.73
+    },
+    {
+     "text": "time",
+     "start": 1.73,
+     "end": 2.11
+    },
+    {
+     "text": "They",
+     "start": 2.27,
+     "end": 2.33
+    },
+    {
+     "text": "give",
+     "start": 2.33,
+     "end": 2.45
+    },
+    {
+     "text": "a",
+     "start": 2.45,
+     "end": 2.57
+    },
+    {
+     "text": "time",
+     "start": 2.57,
+     "end": 2.71
+    },
+    {
+     "text": "window",
+     "start": 2.71,
+     "end": 3.01
+    }
+   ],
+   "takeStart": 43.91,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/tod-3d/line_13.wav",
+   "duration": 3.881,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.17,
+     "end": 0.35
+    },
+    {
+     "text": "the",
+     "start": 0.35,
+     "end": 0.41
+    },
+    {
+     "text": "movie",
+     "start": 0.41,
+     "end": 0.65
+    },
+    {
+     "text": "the",
+     "start": 0.83,
+     "end": 0.91
+    },
+    {
+     "text": "detective",
+     "start": 0.91,
+     "end": 1.19
+    },
+    {
+     "text": "gets",
+     "start": 1.19,
+     "end": 1.39
+    },
+    {
+     "text": "a",
+     "start": 1.39,
+     "end": 1.53
+    },
+    {
+     "text": "confession",
+     "start": 1.53,
+     "end": 1.85
+    },
+    {
+     "text": "In",
+     "start": 2.09,
+     "end": 2.19
+    },
+    {
+     "text": "real",
+     "start": 2.19,
+     "end": 2.37
+    },
+    {
+     "text": "life",
+     "start": 2.37,
+     "end": 2.61
+    },
+    {
+     "text": "detectives",
+     "start": 2.71,
+     "end": 3.11
+    },
+    {
+     "text": "get",
+     "start": 3.11,
+     "end": 3.23
+    },
+    {
+     "text": "a",
+     "start": 3.23,
+     "end": 3.33
+    },
+    {
+     "text": "window",
+     "start": 3.33,
+     "end": 3.57
+    }
+   ],
+   "takeStart": 47.09,
+   "pauseBefore": 0.0
+  }
+ ],
+ "flow": true,
+ "take": "narration/tod-3d/take.wav"
+}

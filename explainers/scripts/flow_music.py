@@ -51,9 +51,10 @@ def main() -> int:
     ep = json.load(open(a.episode, encoding="utf-8"))
     tm = json.load(open(a.episode.replace(".json", ".timing.json"), encoding="utf-8"))
     # absolute word times (flow timing: each line file starts at its takeStart)
-    words, t0 = [], a.lead
+    words, t0, gap = [], a.lead, 0.0
     for ln in tm["lines"]:
-        base = a.lead + ln.get("takeStart", 0.0) if tm.get("flow") else t0
+        gap += ln.get("pauseBefore", 0.0)  # e.g. the 10 s test window: music keeps playing through it
+        base = a.lead + gap + ln.get("takeStart", 0.0) if tm.get("flow") else t0
         for w in ln["words"]:
             words.append({"text": w["text"], "start": base + w["start"], "end": base + w["end"]})
         t0 = base + ln["duration"]
