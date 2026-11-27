@@ -472,3 +472,6 @@ export const drawDetectiveKneeling = (c: C, reach: number, reading: string) => {
   dot(c, 290, 690, 14);
   detHead(c, 270, 340, -1);
 };
+
+/** drawing primitives for other character sheets (manor-toon.ts) */
+export const T2D = {shape, limb, dot, ell, rrect, bean, detHead};

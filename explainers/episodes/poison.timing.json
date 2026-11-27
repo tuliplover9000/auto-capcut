@@ -1,0 +1,692 @@
+{
+ "lines": [
+  {
+   "file": "narration/poison/line_0.wav",
+   "duration": 3.9,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.0,
+     "end": 0.26
+    },
+    {
+     "text": "15",
+     "start": 0.26,
+     "end": 0.62
+    },
+    {
+     "text": "seconds",
+     "start": 0.62,
+     "end": 1.1
+    },
+    {
+     "text": "someone",
+     "start": 1.32,
+     "end": 1.54
+    },
+    {
+     "text": "poisons",
+     "start": 1.54,
+     "end": 2.0
+    },
+    {
+     "text": "the",
+     "start": 2.0,
+     "end": 2.2
+    },
+    {
+     "text": "rich",
+     "start": 2.2,
+     "end": 2.36
+    },
+    {
+     "text": "man's",
+     "start": 2.36,
+     "end": 2.72
+    },
+    {
+     "text": "drink",
+     "start": 2.72,
+     "end": 2.86
+    },
+    {
+     "text": "Find",
+     "start": 3.26,
+     "end": 3.34
+    },
+    {
+     "text": "out",
+     "start": 3.34,
+     "end": 3.52
+    },
+    {
+     "text": "who",
+     "start": 3.52,
+     "end": 3.72
+    }
+   ],
+   "takeStart": 0.0,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_1.wav",
+   "duration": 1.44,
+   "words": [
+    {
+     "text": "Too",
+     "start": 0.18,
+     "end": 0.26
+    },
+    {
+     "text": "late",
+     "start": 0.26,
+     "end": 0.42
+    },
+    {
+     "text": "Did",
+     "start": 0.74,
+     "end": 0.8
+    },
+    {
+     "text": "you",
+     "start": 0.8,
+     "end": 0.9
+    },
+    {
+     "text": "catch",
+     "start": 0.9,
+     "end": 1.06
+    },
+    {
+     "text": "them",
+     "start": 1.06,
+     "end": 1.28
+    }
+   ],
+   "takeStart": 3.9,
+   "pauseBefore": 14.6
+  },
+  {
+   "file": "narration/poison/line_2.wav",
+   "duration": 1.22,
+   "words": [
+    {
+     "text": "Let's",
+     "start": 0.16,
+     "end": 0.34
+    },
+    {
+     "text": "call",
+     "start": 0.34,
+     "end": 0.52
+    },
+    {
+     "text": "the",
+     "start": 0.52,
+     "end": 0.66
+    },
+    {
+     "text": "detective",
+     "start": 0.66,
+     "end": 0.98
+    }
+   ],
+   "takeStart": 5.34,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_3.wav",
+   "duration": 2.79,
+   "words": [
+    {
+     "text": "Everyone",
+     "start": 0.24,
+     "end": 0.52
+    },
+    {
+     "text": "thinks",
+     "start": 0.52,
+     "end": 0.84
+    },
+    {
+     "text": "the",
+     "start": 0.84,
+     "end": 0.98
+    },
+    {
+     "text": "butler",
+     "start": 0.98,
+     "end": 1.24
+    },
+    {
+     "text": "did",
+     "start": 1.24,
+     "end": 1.4
+    },
+    {
+     "text": "it",
+     "start": 1.4,
+     "end": 1.52
+    },
+    {
+     "text": "He",
+     "start": 1.74,
+     "end": 1.86
+    },
+    {
+     "text": "handed",
+     "start": 1.86,
+     "end": 2.12
+    },
+    {
+     "text": "over",
+     "start": 2.12,
+     "end": 2.36
+    },
+    {
+     "text": "the",
+     "start": 2.36,
+     "end": 2.5
+    },
+    {
+     "text": "drink",
+     "start": 2.5,
+     "end": 2.68
+    }
+   ],
+   "takeStart": 6.56,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_4.wav",
+   "duration": 2.92,
+   "words": [
+    {
+     "text": "But",
+     "start": 0.11,
+     "end": 0.27
+    },
+    {
+     "text": "the",
+     "start": 0.27,
+     "end": 0.41
+    },
+    {
+     "text": "poison",
+     "start": 0.41,
+     "end": 0.73
+    },
+    {
+     "text": "wasn't",
+     "start": 0.73,
+     "end": 1.15
+    },
+    {
+     "text": "in",
+     "start": 1.15,
+     "end": 1.25
+    },
+    {
+     "text": "the",
+     "start": 1.25,
+     "end": 1.35
+    },
+    {
+     "text": "drink",
+     "start": 1.35,
+     "end": 1.55
+    },
+    {
+     "text": "It",
+     "start": 1.83,
+     "end": 1.91
+    },
+    {
+     "text": "was",
+     "start": 1.91,
+     "end": 2.05
+    },
+    {
+     "text": "in",
+     "start": 2.05,
+     "end": 2.29
+    },
+    {
+     "text": "the",
+     "start": 2.29,
+     "end": 2.43
+    },
+    {
+     "text": "ice",
+     "start": 2.43,
+     "end": 2.69
+    }
+   ],
+   "takeStart": 9.35,
+   "pauseBefore": 0.2
+  },
+  {
+   "file": "narration/poison/line_5.wav",
+   "duration": 2.54,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.23,
+     "end": 0.33
+    },
+    {
+     "text": "ice",
+     "start": 0.33,
+     "end": 0.57
+    },
+    {
+     "text": "came",
+     "start": 0.57,
+     "end": 0.81
+    },
+    {
+     "text": "down",
+     "start": 0.81,
+     "end": 0.99
+    },
+    {
+     "text": "the",
+     "start": 0.99,
+     "end": 1.13
+    },
+    {
+     "text": "tiny",
+     "start": 1.13,
+     "end": 1.39
+    },
+    {
+     "text": "elevator",
+     "start": 1.39,
+     "end": 1.81
+    },
+    {
+     "text": "from",
+     "start": 1.81,
+     "end": 2.03
+    },
+    {
+     "text": "the",
+     "start": 2.03,
+     "end": 2.15
+    },
+    {
+     "text": "kitchen",
+     "start": 2.15,
+     "end": 2.37
+    }
+   ],
+   "takeStart": 12.27,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_6.wav",
+   "duration": 2.38,
+   "words": [
+    {
+     "text": "In",
+     "start": 0.17,
+     "end": 0.27
+    },
+    {
+     "text": "the",
+     "start": 0.27,
+     "end": 0.37
+    },
+    {
+     "text": "kitchen",
+     "start": 0.37,
+     "end": 0.63
+    },
+    {
+     "text": "the",
+     "start": 0.69,
+     "end": 0.83
+    },
+    {
+     "text": "maid",
+     "start": 0.83,
+     "end": 1.05
+    },
+    {
+     "text": "poured",
+     "start": 1.05,
+     "end": 1.29
+    },
+    {
+     "text": "the",
+     "start": 1.29,
+     "end": 1.45
+    },
+    {
+     "text": "poison",
+     "start": 1.45,
+     "end": 1.71
+    },
+    {
+     "text": "on",
+     "start": 1.71,
+     "end": 1.89
+    },
+    {
+     "text": "the",
+     "start": 1.89,
+     "end": 1.99
+    },
+    {
+     "text": "ice",
+     "start": 1.99,
+     "end": 2.21
+    }
+   ],
+   "takeStart": 14.81,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_7.wav",
+   "duration": 3.07,
+   "words": [
+    {
+     "text": "She",
+     "start": 0.17,
+     "end": 0.29
+    },
+    {
+     "text": "got",
+     "start": 0.29,
+     "end": 0.43
+    },
+    {
+     "text": "the",
+     "start": 0.43,
+     "end": 0.57
+    },
+    {
+     "text": "bottle",
+     "start": 0.57,
+     "end": 0.75
+    },
+    {
+     "text": "from",
+     "start": 0.75,
+     "end": 0.95
+    },
+    {
+     "text": "the",
+     "start": 0.95,
+     "end": 1.05
+    },
+    {
+     "text": "elevator",
+     "start": 1.05,
+     "end": 1.35
+    },
+    {
+     "text": "too",
+     "start": 1.35,
+     "end": 1.63
+    },
+    {
+     "text": "The",
+     "start": 1.97,
+     "end": 2.05
+    },
+    {
+     "text": "gardener",
+     "start": 2.05,
+     "end": 2.49
+    },
+    {
+     "text": "sent",
+     "start": 2.49,
+     "end": 2.63
+    },
+    {
+     "text": "it",
+     "start": 2.63,
+     "end": 2.79
+    },
+    {
+     "text": "down",
+     "start": 2.79,
+     "end": 2.99
+    }
+   ],
+   "takeStart": 17.19,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_8.wav",
+   "duration": 2.81,
+   "words": [
+    {
+     "text": "And",
+     "start": 0.08,
+     "end": 0.3
+    },
+    {
+     "text": "the",
+     "start": 0.3,
+     "end": 0.4
+    },
+    {
+     "text": "gardener",
+     "start": 0.4,
+     "end": 0.78
+    },
+    {
+     "text": "got",
+     "start": 0.78,
+     "end": 0.92
+    },
+    {
+     "text": "it",
+     "start": 0.92,
+     "end": 1.04
+    },
+    {
+     "text": "from",
+     "start": 1.04,
+     "end": 1.18
+    },
+    {
+     "text": "the",
+     "start": 1.18,
+     "end": 1.32
+    },
+    {
+     "text": "niece",
+     "start": 1.32,
+     "end": 1.5
+    },
+    {
+     "text": "She",
+     "start": 1.84,
+     "end": 1.96
+    },
+    {
+     "text": "started",
+     "start": 1.96,
+     "end": 2.28
+    },
+    {
+     "text": "it",
+     "start": 2.28,
+     "end": 2.46
+    },
+    {
+     "text": "all",
+     "start": 2.46,
+     "end": 2.66
+    }
+   ],
+   "takeStart": 20.26,
+   "pauseBefore": 0.2
+  },
+  {
+   "file": "narration/poison/line_9.wav",
+   "duration": 2.73,
+   "words": [
+    {
+     "text": "Three",
+     "start": 0.15,
+     "end": 0.39
+    },
+    {
+     "text": "people",
+     "start": 0.39,
+     "end": 0.65
+    },
+    {
+     "text": "worked",
+     "start": 0.65,
+     "end": 0.89
+    },
+    {
+     "text": "together",
+     "start": 0.89,
+     "end": 1.23
+    },
+    {
+     "text": "And",
+     "start": 1.41,
+     "end": 1.53
+    },
+    {
+     "text": "the",
+     "start": 1.53,
+     "end": 1.63
+    },
+    {
+     "text": "butler",
+     "start": 1.63,
+     "end": 1.93
+    },
+    {
+     "text": "had",
+     "start": 1.93,
+     "end": 2.13
+    },
+    {
+     "text": "no",
+     "start": 2.13,
+     "end": 2.37
+    },
+    {
+     "text": "idea",
+     "start": 2.37,
+     "end": 2.73
+    }
+   ],
+   "takeStart": 23.07,
+   "pauseBefore": 0.3
+  },
+  {
+   "file": "narration/poison/line_10.wav",
+   "duration": 3.2,
+   "words": [
+    {
+     "text": "The",
+     "start": 0.0,
+     "end": 0.5
+    },
+    {
+     "text": "doctor's",
+     "start": 0.5,
+     "end": 0.9
+    },
+    {
+     "text": "green",
+     "start": 0.9,
+     "end": 1.06
+    },
+    {
+     "text": "drink",
+     "start": 1.06,
+     "end": 1.32
+    },
+    {
+     "text": "Cough",
+     "start": 1.64,
+     "end": 1.74
+    },
+    {
+     "text": "syrup",
+     "start": 1.74,
+     "end": 2.04
+    },
+    {
+     "text": "The",
+     "start": 2.32,
+     "end": 2.38
+    },
+    {
+     "text": "chef",
+     "start": 2.38,
+     "end": 2.6
+    },
+    {
+     "text": "Just",
+     "start": 2.84,
+     "end": 2.96
+    },
+    {
+     "text": "salt",
+     "start": 2.96,
+     "end": 3.2
+    }
+   ],
+   "takeStart": 25.8,
+   "pauseBefore": 0.0
+  },
+  {
+   "file": "narration/poison/line_11.wav",
+   "duration": 1.811,
+   "words": [
+    {
+     "text": "For",
+     "start": 0.0,
+     "end": 0.42
+    },
+    {
+     "text": "once",
+     "start": 0.42,
+     "end": 0.68
+    },
+    {
+     "text": "the",
+     "start": 0.68,
+     "end": 0.86
+    },
+    {
+     "text": "butler",
+     "start": 0.86,
+     "end": 1.12
+    },
+    {
+     "text": "didn't",
+     "start": 1.12,
+     "end": 1.38
+    },
+    {
+     "text": "do",
+     "start": 1.38,
+     "end": 1.48
+    },
+    {
+     "text": "it",
+     "start": 1.48,
+     "end": 1.66
+    }
+   ],
+   "takeStart": 29.0,
+   "pauseBefore": 0.4
+  }
+ ],
+ "flow": true,
+ "take": "narration/poison/take.wav"
+}

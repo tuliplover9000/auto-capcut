@@ -1,0 +1,23 @@
+{
+  "id": "poison",
+  "engine": "gemini",
+  "voice": "Laomedeia",
+  "style": "Say this like an excited mystery storyteller, fast and punchy: ",
+  "rate": "+0%",
+  "flow": true,
+  "title": "Chain reaction whodunit: who poisoned the rich man's drink?",
+  "lines": [
+    {"text": "In 15 seconds, someone poisons the rich man's drink. Find out who.", "events": []},
+    {"text": "Too late! Did you catch them?", "events": [], "pause": 14.6},
+    {"text": "Let's call the detective.", "events": []},
+    {"text": "Everyone thinks the butler did it. He handed over the drink.", "events": []},
+    {"text": "But the poison wasn't in the drink. It was in the ice.", "events": [], "pause": 0.2},
+    {"text": "The ice came down the tiny elevator from the kitchen.", "events": []},
+    {"text": "In the kitchen, the maid poured the poison on the ice.", "events": []},
+    {"text": "She got the bottle from the elevator too. The gardener sent it down.", "events": []},
+    {"text": "And the gardener got it from the niece. She started it all.", "events": [], "pause": 0.2},
+    {"text": "Three people worked together. And the butler had no idea.", "events": [], "pause": 0.3},
+    {"text": "The doctor's green drink? Cough syrup. The chef? Just salt.", "events": []},
+    {"text": "For once, the butler didn't do it.", "events": [], "pause": 0.4}
+  ]
+}
