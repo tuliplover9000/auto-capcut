@@ -13,25 +13,25 @@ export type Look = {
   mustache?: string; glasses?: boolean; monocle?: boolean; pearls?: boolean; belly?: boolean; scale?: number; shoes?: string;
 };
 export type Arms = 'down' | 'up' | 'give' | 'pour' | 'tray' | 'drink' | 'knit' | 'shake' | 'read' | 'point' | 'hips' | 'wipe' | 'hold';
-export type Prop = 'none' | 'vial' | 'book' | 'bookVial' | 'glass' | 'tray' | 'trayGlass' | 'flask' | 'shaker' | 'needles' | 'can' | 'tongs' | 'magnifier' | 'spoon';
+export type Prop = 'none' | 'vial' | 'vialBlue' | 'vialPink' | 'cocktail' | 'cue' | 'card' | 'book' | 'bookVial' | 'glass' | 'tray' | 'trayGlass' | 'flask' | 'shaker' | 'needles' | 'can' | 'tongs' | 'magnifier' | 'spoon';
 export type Face = 'neutral' | 'smirk' | 'shock' | 'happy' | 'worried' | 'dizzy' | 'sly' | 'relief';
 export type Pose = {arms?: Arms; prop?: Prop; face?: Face; walk?: number; eye?: number; dir?: -1 | 1; phase?: number; sit?: boolean; glow?: number; tint?: string};
 
 export const POISON = '#4fe35a';
 
 // ───────────────────────── props (drawn at a hand) ─────────────────────────
-const vial = (c: C, x: number, y: number, rot = 0, glow = 0.55) => {
+const vial = (c: C, x: number, y: number, rot = 0, glow = 0.55, color = POISON) => {
   c.save(); c.translate(x, y); c.rotate(rot);
-  if (glow > 0) { c.globalAlpha = glow * 0.5; dot(c, 0, -30, 34, POISON); c.globalAlpha = 1; }
-  rrect(c, -13, -52, 26, 42, 8, POISON, 6);
+  if (glow > 0) { c.globalAlpha = glow * 0.5; dot(c, 0, -30, 34, color); c.globalAlpha = 1; }
+  rrect(c, -13, -52, 26, 42, 8, color, 6);
   rrect(c, -6, -66, 12, 16, 3, '#d8f8d0', 5);
   rrect(c, -8, -76, 16, 10, 3, '#8a5a3a', 4);
   c.fillStyle = 'rgba(255,255,255,.6)'; c.fillRect(-7, -46, 5, 24);
   c.restore();
 };
-const glass = (c: C, x: number, y: number, ice = true) => {
+const glass = (c: C, x: number, y: number, ice = true, drink = '#d9902f') => {
   shape(c, () => { c.moveTo(x - 26, y - 70); c.lineTo(x + 26, y - 70); c.lineTo(x + 21, y); c.lineTo(x - 21, y); c.closePath(); }, '#e9f6ff', 6);
-  c.fillStyle = '#d9902f'; c.fillRect(x - 21, y - 44, 42, 40);
+  c.fillStyle = drink; c.fillRect(x - 21, y - 44, 42, 40);
   if (ice) { c.fillStyle = '#ffffff'; c.fillRect(x - 13, y - 52, 16, 14); c.fillRect(x + 2, y - 40, 14, 12); }
 };
 const drawProp = (c: C, prop: Prop, hx: number, hy: number, o: Pose) => {
@@ -45,9 +45,15 @@ const drawProp = (c: C, prop: Prop, hx: number, hy: number, o: Pose) => {
       if (prop === 'bookVial') { rrect(c, hx + 8, hy - 30, 46, 58, 6, '#5a3a22', 4); vial(c, hx + 31, hy + 22, 0, 0.6); }
       break;
     case 'glass': glass(c, hx, hy + 20); break;
+    case 'cocktail': glass(c, hx, hy + 20, false, POISON); dot(c, hx + 18, hy - 50, 9, '#ffd23f'); break;
+    case 'vialBlue': vial(c, hx, hy + 18, o.arms === 'pour' ? -2.4 : 0, 0.55, '#4fa8ff'); break;
+    case 'vialPink': vial(c, hx, hy + 18, o.arms === 'pour' ? -2.4 : 0, 0.55, '#ff6fb8'); break;
+    case 'cue': limb(c, [[hx - 40, hy + 260], [hx + 60, hy - 330]], 9, '#c9a26a'); break;
+    case 'card': rrect(c, hx - 22, hy - 60, 44, 62, 6, '#ffffff', 5); dot(c, hx, hy - 30, 8, '#d6293a'); break;
     case 'tray': case 'trayGlass':
       ell(c, hx, hy - 6, 86, 18, '#d8dce4', 6);
       if (prop === 'trayGlass') glass(c, hx, hy - 12);
+      if (prop === 'tray') { glass(c, hx - 40, hy - 12, false, POISON); glass(c, hx + 36, hy - 12, false); }
       break;
     case 'flask':
       c.save(); c.translate(hx, hy); c.rotate(o.arms === 'pour' ? -2.1 : 0);

@@ -13,6 +13,7 @@ import {loadFont as loadMontserrat} from '@remotion/google-fonts/Montserrat';
 import {CamS, Card, H, Mats, Post, Shot, V, W, camOf, clamp01, easeOut, lerp, makeCam, project, shotCam, smoother, useCanvas, useGradient, vl} from './kit';
 import {BAR_TOP, BUCKET_BAR, BUCKET_COUNTER, CAR_Y, DOC_CUP, Drops, FY, GLASS_BAR, Glass3D, IceBucket, Manor, ROOM_LIGHTS, SHAFT, SkyDome, Vial3D, XL, XR, useManorTex} from './manor';
 import {CAST, Pose, Who, drawDetective, drawPerson} from './manor-toon';
+import {GUESTS, guestAt} from './crowd';
 import {PX_M} from './toon';
 import timing from '../../episodes/poison.timing.json';
 import episode from '../../episodes/poison.json';
@@ -58,11 +59,11 @@ const BEATS: Beat[] = [
   {s: T.late, ev: 15, at: T.late, rate: 0.35, dur: 0.01},
   {s: STARTS[3] - 0.15, ev: 13.2, at: T.handed + 0.1, rate: 0.6},
   {s: STARTS[4], ev: 10.75, at: T.ice4 + 0.05, rate: 0.5},
-  {s: STARTS[5] - 0.05, ev: 8.7, at: T.elevator, rate: 1.0, dur: 0.4},
-  {s: STARTS[6], ev: 7.05, at: T.poured + 0.1, rate: 0.6},
-  {s: STARTS[7], ev: 6.3, at: T.bottle + 0.1, rate: 0.5},
+  {s: STARTS[5] - 0.05, ev: 8.85, at: T.elevator, rate: 1.0, dur: 0.4},
+  {s: STARTS[6], ev: 7.45, at: T.poured + 0.1, rate: 0.6},
+  {s: STARTS[7], ev: 6.95, at: T.bottle + 0.1, rate: 0.5},
   {s: T.gardener7 - 0.15, ev: 4.6, at: T.gardener7 + 0.35, rate: 1.0, dur: 0.4},
-  {s: STARTS[8], ev: 3.0, at: T.niece + 0.15, rate: 0.5},
+  {s: STARTS[8], ev: 3.2, at: T.niece + 0.15, rate: 0.5},
   {s: T.started - 0.2, ev: 0.45, at: T.started + 0.25, rate: 0.4, dur: 0.4},
   {s: STARTS[9] - 0.1, ev: 15.4, at: STARTS[9] + 0.8, rate: 0.0, dur: 0.9},
   {s: STARTS[10] - 0.05, ev: 5.65, at: T.doctors + 0.4, rate: 0.6},
@@ -99,85 +100,87 @@ const track = (p: number, keys: Array<[number, THREE.Vector3]>) => {
   }
   return {at: keys[keys.length - 1][1].clone(), moving: false};
 };
-const N_CHAIR = V(2.9, F3, -1.0);
-const N_DOOR = V(0.42, F3, -0.9);
-const G_PLANT = V(-2.0, F3, -1.3);
-const G_DOOR = V(-0.42, F3, -0.9);
-const G_SHAFT = V(-3.2, F3, -1.3);
-const MAID = V(-3.05, F2, -1.25);
-const CHEF = V(-1.2, F2, -1.3);
-const B_BAR = V(-2.35, F1, -1.2);
-const B_SHAFT = V(-3.22, F1, -1.3);
-const B_HOST = V(3.95, F1, -0.4);
-const HOST = V(3.5, F1, -1.2);
-const DOC = V(1.55, F1, -1.78);
-const AUNT = V(2.75, F2, -1.15);
+const F4 = FY[3];
+const N_CHAIR = V(3.95, F4, -0.95);
+const N_HALL = V(1.7, F4, -0.85);
+const N_DOOR = V(-1.25, F4, -0.8);
+const G_PLANT = V(-3.15, F4, -1.3);
+const G_DOOR = V(-2.05, F4, -0.8);
+const G_SHAFT = V(-4.15, F4, -1.3);
+const MAID = V(-3.95, F2, -1.2);
+const CHEF = V(-2.4, F2, -1.25);
+const B_BAR = V(-3.45, F1, -1.2);
+const B_SHAFT = V(-4.2, F1, -1.3);
+const B_HOST = V(1.42, F1, -0.45);
+const HOST = V(1.0, F1, -1.2);
+const DOC = V(-0.55, F1, -1.8);
+const AUNT = V(4.0, F2, -1.15);
 
-type Actor = {who: Who | 'det'; at: THREE.Vector3; pose: Pose; roll?: number; sink?: number};
+type Actor = {who: Who | 'det' | number; at: THREE.Vector3; pose: Pose; roll?: number};
 type PartyState = {
   actors: Actor[]; carY: number; vialCar: THREE.Vector3 | null; bucket: THREE.Vector3; green: number;
   glass: THREE.Vector3 | null; glassIce: number; cube: THREE.Vector3 | null; drops: null | {from: THREE.Vector3; to: THREE.Vector3; color: string};
   yarn: THREE.Vector3 | null; hostDown: number;
 };
 const carYAt = (p: number) => {
-  if (p < 4.8) return CAR_Y(2);
-  if (p < 6.0) return lerp(CAR_Y(2), CAR_Y(1), smoother((p - 4.8) / 1.2));
-  if (p < 8.2) return CAR_Y(1);
-  if (p < 9.4) return lerp(CAR_Y(1), CAR_Y(0), smoother((p - 8.2) / 1.2));
+  if (p < 4.8) return CAR_Y(3);
+  if (p < 6.6) return lerp(CAR_Y(3), CAR_Y(1), smoother((p - 4.8) / 1.8));
+  if (p < 8.3) return CAR_Y(1);
+  if (p < 9.4) return lerp(CAR_Y(1), CAR_Y(0), smoother((p - 8.3) / 1.1));
   return CAR_Y(0);
 };
 /** world position of a hand drawn at design (hx, hy) on a card standing at `at`, facing `cam` */
 const handPos = (at: THREE.Vector3, cam: THREE.Vector3, hx: number, hy: number, scale = 1) => {
   const yaw = Math.atan2(cam.x - at.x, cam.z - at.z);
   const dx = (hx - 300) * scale * PX_M;
-  const dy = (975 - (975 - (975 - hy) * scale)) * PX_M;
+  const dy = (975 - hy) * scale * PX_M;
   return V(at.x + Math.cos(yaw) * dx, at.y + dy, at.z - Math.sin(yaw) * dx);
 };
 const party = (p: number, cam: THREE.Vector3): PartyState => {
   const A: Actor[] = [];
-  // niece: hollow book -> walks the vial to the doorway -> back to her chair
+  // niece: hollow book -> walks the vial across the crowded music room -> back to her chair
   {
-    const tr = track(p, [[0, N_CHAIR], [0.8, N_CHAIR], [2.5, N_DOOR], [3.2, N_DOOR], [4.8, N_CHAIR]]);
+    const tr = track(p, [[0, N_CHAIR], [0.8, N_CHAIR], [1.6, N_HALL], [2.8, N_DOOR], [3.5, N_DOOR], [4.6, N_HALL], [5.4, N_CHAIR]]);
     let pose: Pose = {arms: 'read', prop: 'book', face: 'neutral', eye: -0.4};
     if (p >= 0.3 && p < 0.8) pose = {arms: 'read', prop: 'bookVial', face: 'sly', eye: -1};
-    else if (p >= 0.8 && p < 2.5) pose = {arms: 'hold', prop: 'vial', face: 'sly', walk: p * 11, eye: -1};
-    else if (p >= 2.5 && p < 3.0) pose = {arms: 'give', dir: -1, prop: 'vial', face: 'sly', eye: -1};
-    else if (p >= 3.0 && p < 3.2) pose = {arms: 'give', dir: -1, face: 'smirk', eye: -1};
-    else if (p >= 3.2 && p < 4.8) pose = {face: 'smirk', walk: p * 11};
-    else if (p >= 4.8) pose = {arms: 'read', prop: 'book', face: 'smirk', eye: -0.4};
+    else if (p >= 0.8 && p < 2.8) pose = {arms: 'hold', prop: 'vial', face: 'happy', walk: p * 11, eye: -1};
+    else if (p >= 2.8 && p < 3.2) pose = {arms: 'give', dir: -1, prop: 'vial', face: 'sly', eye: -1};
+    else if (p >= 3.2 && p < 3.5) pose = {arms: 'give', dir: -1, face: 'smirk', eye: -1};
+    else if (p >= 3.5 && p < 5.4) pose = {face: 'happy', walk: p * 11};
+    else if (p >= 5.4) pose = {arms: 'read', prop: 'book', face: 'smirk', eye: -0.4};
     A.push({who: 'niece', at: tr.at, pose});
   }
   // gardener: waters plants -> takes the vial at the doorway -> drops it in the dumbwaiter
   {
-    const tr = track(p, [[0, G_PLANT], [1.6, G_PLANT], [2.6, G_DOOR], [3.2, G_DOOR], [4.4, G_SHAFT], [4.8, G_SHAFT], [5.8, G_PLANT]]);
+    const tr = track(p, [[0, G_PLANT], [1.9, G_PLANT], [2.8, G_DOOR], [3.4, G_DOOR], [4.3, G_SHAFT], [4.9, G_SHAFT], [5.9, G_PLANT]]);
     let pose: Pose = {arms: 'hold', prop: 'can', face: 'neutral', eye: -0.6};
-    if (p >= 1.6 && p < 2.6) pose = {face: 'neutral', walk: p * 11, eye: 1};
-    else if (p >= 2.6 && p < 3.0) pose = {arms: 'give', dir: 1, face: 'sly', eye: 1};
-    else if (p >= 3.0 && p < 3.2) pose = {arms: 'give', dir: 1, prop: 'vial', face: 'sly', eye: 1};
-    else if (p >= 3.2 && p < 4.4) pose = {arms: 'hold', prop: 'vial', face: 'sly', walk: p * 11, eye: -1};
-    else if (p >= 4.4 && p < 4.6) pose = {arms: 'give', dir: -1, prop: 'vial', face: 'sly', eye: -1};
-    else if (p >= 4.6 && p < 4.8) pose = {arms: 'give', dir: -1, face: 'smirk', eye: -1};
-    else if (p >= 4.8 && p < 5.8) pose = {face: 'smirk', walk: p * 11};
+    if (p >= 1.9 && p < 2.8) pose = {face: 'neutral', walk: p * 11, eye: 1};
+    else if (p >= 2.8 && p < 3.2) pose = {arms: 'give', dir: 1, face: 'sly', eye: 1};
+    else if (p >= 3.2 && p < 3.4) pose = {arms: 'give', dir: 1, prop: 'vial', face: 'sly', eye: 1};
+    else if (p >= 3.4 && p < 4.3) pose = {arms: 'hold', prop: 'vial', face: 'neutral', walk: p * 11, eye: -1};
+    else if (p >= 4.3 && p < 4.6) pose = {arms: 'give', dir: -1, prop: 'vial', face: 'sly', eye: -1};
+    else if (p >= 4.6 && p < 4.9) pose = {arms: 'give', dir: -1, face: 'smirk', eye: -1};
+    else if (p >= 4.9 && p < 5.9) pose = {face: 'smirk', walk: p * 11};
     A.push({who: 'gardener', at: tr.at, pose});
   }
   // maid: takes the vial out of the dumbwaiter, pours it over the ice, sends the bucket down
   {
     let pose: Pose = {face: 'neutral', eye: -1};
-    if (p >= 6.0 && p < 6.3) pose = {arms: 'give', dir: -1, face: 'sly', eye: -1};
-    else if (p >= 6.3 && p < 6.7) pose = {arms: 'hold', prop: 'vial', face: 'sly', eye: 0.6};
-    else if (p >= 6.7 && p < 7.5) pose = {arms: 'pour', prop: 'vial', face: 'sly', eye: 0.4};
-    else if (p >= 7.7 && p < 8.1) pose = {arms: 'give', dir: -1, face: 'sly', eye: -1};
-    else if (p >= 8.1) pose = {face: 'smirk', eye: 1};
+    if (p >= 6.6 && p < 6.9) pose = {arms: 'give', dir: -1, face: 'sly', eye: -1};
+    else if (p >= 6.9 && p < 7.2) pose = {arms: 'hold', prop: 'vial', face: 'sly', eye: 0.6};
+    else if (p >= 7.2 && p < 7.9) pose = {arms: 'pour', prop: 'vial', face: 'sly', eye: -0.4};
+    else if (p >= 7.95 && p < 8.3) pose = {arms: 'give', dir: -1, face: 'sly', eye: -1};
+    else if (p >= 8.3) pose = {face: 'smirk', eye: 1};
     A.push({who: 'maid', at: MAID, pose});
   }
-  // chef: stirs the soup; DECOY: shakes salt loudly right next to the maid
+  // chef: stirs; DECOY — shakes salt loudly right next to the maid
   {
     const shake = p >= 6.4 && p < 7.8;
     A.push({who: 'chef', at: CHEF, pose: shake ? {arms: 'shake', prop: 'shaker', face: 'happy', phase: p} : {arms: 'hold', prop: 'spoon', face: 'happy', phase: p, eye: -0.5}});
   }
   // butler: bucket out of the dumbwaiter -> one ice cube into the glass -> carries it to the host
   {
-    const tr = track(p, [[0, B_BAR], [9.3, B_BAR], [9.7, B_SHAFT], [10.0, B_SHAFT], [10.35, B_BAR], [11.0, B_BAR], [11.7, V(-0.6, F1, -0.85)], [12.1, V(0.6, F1, -0.85)], [12.9, B_HOST]]);
+    const tr = track(p, [[0, B_BAR], [9.35, B_BAR], [9.7, B_SHAFT], [10.0, B_SHAFT], [10.35, B_BAR], [11.0, B_BAR], [11.7, V(-2.0, F1, -0.8)], [12.2, V(-1.4, F1, -0.6)], [12.9, B_HOST]]);
     let pose: Pose = {face: 'neutral', eye: 0.5};
     if (tr.moving && p < 10.4) pose = {face: 'neutral', walk: p * 11, eye: -1};
     if (p >= 9.7 && p < 10.0) pose = {arms: 'give', dir: -1, face: 'neutral', eye: -1};
@@ -204,50 +207,48 @@ const party = (p: number, cam: THREE.Vector3): PartyState => {
     const pour = p >= 5.2 && p < 6.2;
     A.push({who: 'doctor', at: DOC, pose: pour ? {arms: 'pour', prop: 'flask', face: 'sly', eye: 1, sit: true} : {arms: 'hold', prop: 'flask', face: p >= 15 ? 'shock' : 'neutral', eye: 1, sit: true}});
   }
-  // aunt: knits; DECOY — drops her yarn, which rolls away with a bounce
+  // aunt: knits; DECOY — drops her yarn, which bounces away
   {
     const drop = p >= 8.6 && p < 9.8;
     A.push({who: 'aunt', at: AUNT, pose: {arms: 'knit', prop: 'needles', phase: drop ? 0 : p, face: drop ? 'shock' : 'happy', sit: true, eye: drop ? -1 : 0}});
   }
+  // the crowd
+  for (const g of GUESTS) { const r = guestAt(g, p); A.push({who: g.id, at: r.at, pose: r.pose}); }
   // props
   const carY = carYAt(p);
   let vialCar: THREE.Vector3 | null = null;
-  if (p >= 4.6 && p < 6.3) vialCar = V(SHAFT.x, carY + 0.03, SHAFT.z + 0.05);
+  if (p >= 4.6 && p < 6.9) vialCar = V(SHAFT.x, carY + 0.03, SHAFT.z + 0.05);
   let bucket = BUCKET_COUNTER.clone();
-  if (p >= 7.7 && p < 8.1) bucket = vl(BUCKET_COUNTER, V(SHAFT.x, CAR_Y(1) + 0.03, SHAFT.z), smoother((p - 7.7) / 0.4));
-  else if (p >= 8.1 && p < 9.75) bucket = V(SHAFT.x, carY + 0.03, SHAFT.z);
+  if (p >= 7.95 && p < 8.3) bucket = vl(BUCKET_COUNTER, V(SHAFT.x, CAR_Y(1) + 0.03, SHAFT.z), smoother((p - 7.95) / 0.35));
+  else if (p >= 8.3 && p < 9.75) bucket = V(SHAFT.x, carY + 0.03, SHAFT.z);
   else if (p >= 9.75 && p < 10.2) bucket = vl(V(SHAFT.x, CAR_Y(0) + 0.03, SHAFT.z), BUCKET_BAR, smoother((p - 9.75) / 0.45));
   else if (p >= 10.2) bucket = BUCKET_BAR.clone();
-  const green = clamp01((p - 6.9) / 0.5);
+  const green = clamp01((p - 7.3) / 0.5);
   let drops: PartyState['drops'] = null;
-  if (p >= 6.8 && p < 7.45) {
-    const lk = CAST.maid;
-    drops = {from: handPos(MAID, cam, 470, 330, lk.scale ?? 1), to: BUCKET_COUNTER.clone().setY(BUCKET_COUNTER.y + 0.24), color: GRN};
-  } else if (p >= 5.3 && p < 6.15) {
-    drops = {from: handPos(DOC, cam, 440, 260 + 150, 1), to: DOC_CUP.clone().setY(DOC_CUP.y + 0.08), color: GRN};
-  }
+  if (p >= 7.3 && p < 7.85) drops = {from: handPos(MAID, cam, 470, 330), to: BUCKET_COUNTER.clone().setY(BUCKET_COUNTER.y + 0.24), color: GRN};
+  else if (p >= 5.3 && p < 6.15) drops = {from: handPos(DOC, cam, 440, 260 + 150), to: DOC_CUP.clone().setY(DOC_CUP.y + 0.08), color: GRN};
   let cube: THREE.Vector3 | null = null;
   if (p >= 10.55 && p < 10.9) { const k = (p - 10.55) / 0.35; cube = vl(BUCKET_BAR.clone().setY(BAR_TOP + 0.25), GLASS_BAR.clone().setY(BAR_TOP + 0.14), k); cube.y += Math.sin(k * Math.PI) * 0.18; }
   const glass = p < 11.0 ? GLASS_BAR.clone() : null;
   let yarn: THREE.Vector3 | null = null;
-  if (p >= 8.6) { const k = clamp01((p - 8.6) / 1.2); yarn = V(lerp(2.6, 1.0, easeOut(k)), F2 + 0.09 + Math.abs(Math.sin(k * 9)) * (1 - k) * 0.4, lerp(-0.95, -0.25, k)); }
+  if (p >= 8.6) { const k = clamp01((p - 8.6) / 1.2); yarn = V(lerp(3.85, 2.4, easeOut(k)), F2 + 0.09 + Math.abs(Math.sin(k * 9)) * (1 - k) * 0.4, lerp(-0.95, -0.3, k)); }
   return {actors: A, carY, vialCar, bucket, green, glass, glassIce: p >= 10.9 ? 1 : 0, cube, drops, yarn, hostDown};
 };
 
 // ───────────────────────── the detective ─────────────────────────
 type DetSpot = {s: number; at: THREE.Vector3; arms: 'magnifier' | 'point' | 'tip' | 'down'; dir?: -1 | 1};
 const DET: DetSpot[] = [
-  {s: T.det - 0.15, at: V(2.0, F1, 0.4), arms: 'magnifier'},
-  {s: STARTS[3] - 0.15, at: V(2.15, F1, 0.45), arms: 'point', dir: 1},
-  {s: STARTS[4], at: V(-1.05, F1, 0.35), arms: 'magnifier'},
-  {s: STARTS[6], at: V(-0.55, F2, 0.4), arms: 'point', dir: -1},
-  {s: T.gardener7 - 0.15, at: V(-1.25, F3, 0.4), arms: 'point', dir: -1},
-  {s: STARTS[8], at: V(-1.65, F3, 0.45), arms: 'magnifier'},
-  {s: T.started - 0.2, at: V(1.55, F3, 0.4), arms: 'point', dir: 1},
-  {s: STARTS[9] - 0.1, at: V(XR - 1.3, F1, 2.4), arms: 'tip'},
-  {s: STARTS[10] - 0.05, at: V(0.55, F1, 0.4), arms: 'point', dir: 1},
-  {s: T.chef - 0.15, at: V(-0.45, F2, 0.4), arms: 'point', dir: -1},
-  {s: STARTS[11] - 0.1, at: V(2.05, F1, 0.45), arms: 'tip'},
+  {s: T.det - 0.15, at: V(-0.75, F1, 0.4), arms: 'magnifier'},
+  {s: STARTS[3] - 0.15, at: V(0.05, F1, 0.45), arms: 'point', dir: 1},
+  {s: STARTS[4], at: V(-2.2, F1, 0.4), arms: 'magnifier'},
+  {s: STARTS[6], at: V(-1.45, F2, 0.45), arms: 'point', dir: -1},
+  {s: T.gardener7 - 0.15, at: V(-2.0, F4, 0.45), arms: 'point', dir: -1},
+  {s: STARTS[8], at: V(-0.35, F4, 0.45), arms: 'magnifier'},
+  {s: T.started - 0.2, at: V(2.55, F4, 0.45), arms: 'point', dir: 1},
+  {s: STARTS[9] - 0.1, at: V(XR - 1.2, F1, 2.5), arms: 'tip'},
+  {s: STARTS[10] - 0.05, at: V(-1.45, F1, 0.45), arms: 'point', dir: 1},
+  {s: T.chef - 0.15, at: V(-1.35, F2, 0.45), arms: 'point', dir: -1},
+  {s: STARTS[11] - 0.1, at: V(0.0, F1, 0.45), arms: 'tip'},
 ];
 const detAt = (s: number): DetSpot | null => {
   let cur: DetSpot | null = null;
@@ -257,30 +258,30 @@ const detAt = (s: number): DetSpot | null => {
 
 // ───────────────────────── camera ─────────────────────────
 const C = camOf;
-const CENTER = V(0, 4.75, -0.6);
 const orbit = (yaw: number, dist: number, height: number, look: THREE.Vector3, fov: number): CamS =>
-  C(V(look.x + Math.sin(yaw) * dist, height, look.z + Math.cos(yaw) * dist), look, fov, look.clone(), 1.2);
-const WIDE = (s: number) => orbit(Math.sin(s * 0.33) * 0.045, 25, 8.2, V(0, 5.55, -0.6), 40);
+  C(V(look.x + Math.sin(yaw) * dist, height, look.z + Math.cos(yaw) * dist), look, fov, look.clone(), 1.0);
+const WIDE_LOOK = V(0, 7.15, -0.6);
+const WIDE = (s: number) => orbit(Math.sin(s * 0.33) * 0.04, 29.5, 10.0, WIDE_LOOK, 40);
 /** a room close-up: x = what to centre, f = floor, z = how close */
 const room = (x: number, f: number, dist = 7.0, dx = 0.35, fov = 36, lookZ = -1.0): CamS =>
   C(V(x + dx, FY[f] + 2.45, dist), V(x, FY[f] + 1.85, lookZ), fov, V(x, FY[f] + 1.0, -1.0), 3.5);
 const SHOTS: Shot[] = [
-  {t: 0, cut: true, cam: (s) => { const k = smoother(s / Math.max(1, T.who - 0.1)); return orbit(lerp(-0.62, 0, k), lerp(17, 25, k), lerp(11.5, 8.2, k), vl(V(1.6, 3.6, -0.6), V(0, 5.55, -0.6), k), 40); }},
+  {t: 0, cut: true, cam: (s) => { const k = smoother(s / Math.max(1, T.who - 0.1)); return orbit(lerp(-0.62, 0, k), lerp(21, 29.5, k), lerp(15, 10.0, k), vl(V(2.0, 5.0, -0.6), WIDE_LOOK, k), 40); }},
   {t: T.who - 0.1, dur: 0.3, ease: 'smooth', cam: WIDE},
-  {t: T.late - 0.05, dur: 0.45, ease: 'out', cam: room(2.9, 0, 6.6)},
-  {t: STARTS[3] - 0.15, dur: 0.4, ease: 'out', cam: room(3.1, 0, 6.0, 0.3)},
-  {t: STARTS[4] - 0.02, dur: 0.45, ease: 'out', cam: room(-2.3, 0, 6.4, 0.3)},
-  {t: T.ice4 - 0.1, dur: 0.35, ease: 'out', cam: C(V(-1.25, 1.5, 1.0), V(-1.95, 1.2, -1.7), 34, GLASS_BAR, 6)},
-  {t: STARTS[5] - 0.05, dur: 0.35, ease: 'out', cam: C(V(-2.3, 3.2, 13), V(-2.6, 3.2, -1.2), 36, V(SHAFT.x, 2.0, SHAFT.z), 1.5)},
-  {t: STARTS[6] - 0.02, dur: 0.45, ease: 'out', cam: room(-2.2, 1, 6.4, 0.3)},
-  {t: STARTS[7] - 0.02, dur: 0.3, ease: 'out', cam: room(-2.9, 1, 6.2, 0.4)},
-  {t: T.gardener7 - 0.15, dur: 0.45, ease: 'out', cam: room(-2.2, 2, 6.4, 0.3)},
-  {t: STARTS[8] - 0.02, dur: 0.45, ease: 'out', cam: room(0, 2, 6.2, 0.2)},
-  {t: T.started - 0.2, dur: 0.4, ease: 'out', cam: room(2.7, 2, 6.4, 0.3)},
+  {t: T.late - 0.05, dur: 0.45, ease: 'out', cam: room(0.4, 0, 6.6)},
+  {t: STARTS[3] - 0.15, dur: 0.4, ease: 'out', cam: room(0.9, 0, 6.0, 0.3)},
+  {t: STARTS[4] - 0.02, dur: 0.45, ease: 'out', cam: room(-3.3, 0, 6.4, 0.3)},
+  {t: T.ice4 - 0.1, dur: 0.35, ease: 'out', cam: C(V(-2.35, 1.5, 1.0), V(-3.05, 1.2, -1.7), 34, GLASS_BAR, 6)},
+  {t: STARTS[5] - 0.05, dur: 0.35, ease: 'out', cam: C(V(-3.3, 3.2, 13), V(-3.6, 3.2, -1.2), 36, V(SHAFT.x, 2.0, SHAFT.z), 1.5)},
+  {t: STARTS[6] - 0.02, dur: 0.45, ease: 'out', cam: room(-3.2, 1, 6.4, 0.3)},
+  {t: STARTS[7] - 0.02, dur: 0.3, ease: 'out', cam: room(-4.0, 1, 6.2, 0.4)},
+  {t: T.gardener7 - 0.15, dur: 0.45, ease: 'out', cam: room(-3.3, 3, 6.4, 0.3)},
+  {t: STARTS[8] - 0.02, dur: 0.45, ease: 'out', cam: room(-1.65, 3, 6.2, 0.2)},
+  {t: T.started - 0.2, dur: 0.4, ease: 'out', cam: room(3.8, 3, 6.4, 0.3)},
   {t: STARTS[9] - 0.12, dur: 0.6, ease: 'smooth', cam: WIDE},
-  {t: STARTS[10] - 0.05, dur: 0.45, ease: 'out', cam: room(1.5, 0, 6.2, 0.3)},
-  {t: T.chef - 0.15, dur: 0.45, ease: 'out', cam: room(-1.6, 1, 6.2, 0.3)},
-  {t: STARTS[11] - 0.1, dur: 0.45, ease: 'out', cam: room(3.05, 0, 6.6, 0.3)},
+  {t: STARTS[10] - 0.05, dur: 0.45, ease: 'out', cam: room(-0.45, 0, 6.2, 0.3)},
+  {t: T.chef - 0.15, dur: 0.45, ease: 'out', cam: room(-2.6, 1, 6.2, 0.3)},
+  {t: STARTS[11] - 0.1, dur: 0.45, ease: 'out', cam: room(1.0, 0, 6.6, 0.3)},
   {t: T.didnt + 0.3, dur: 1.4, ease: 'smooth', cam: WIDE},
 ];
 
@@ -288,9 +289,18 @@ const SHOTS: Shot[] = [
 const MatsCtx = React.createContext<Mats | null>(null);
 const ActorCard: React.FC<{a: Actor; camPos: THREE.Vector3; tint: THREE.Color; glow: number}> = ({a, camPos, tint, glow}) => {
   const cv = useCanvas(600, 1000);
-  if (a.who === 'det') drawDetective(cv.ctx, {arms: a.pose.arms as 'magnifier', dir: a.pose.dir});
-  else drawPerson(cv.ctx, CAST[a.who], {...a.pose, glow, tint: '#ffd23f'});
-  cv.t.needsUpdate = true;
+  const last = React.useRef('');
+  const ps = a.pose;
+  const wq = ps.walk === undefined ? undefined : Math.round(ps.walk / (Math.PI / 3)) * (Math.PI / 3);
+  const pq = ps.phase === undefined ? undefined : Math.round(ps.phase * 30) / 30;
+  const key = JSON.stringify([a.who, ps.arms, ps.prop, ps.face, ps.dir, ps.sit, Math.round((ps.eye ?? 0) * 2), wq === undefined ? -1 : Math.round(wq / (Math.PI / 3)) % 6, pq ?? -1, Math.round(glow * 20)]);
+  if (key !== last.current) {
+    const pose = {...ps, walk: wq, phase: pq};
+    if (a.who === 'det') drawDetective(cv.ctx, {arms: pose.arms as 'magnifier', dir: pose.dir});
+    else drawPerson(cv.ctx, typeof a.who === 'number' ? GUESTS[a.who].look : CAST[a.who], {...pose, glow, tint: '#ffd23f'});
+    cv.t.needsUpdate = true;
+    last.current = key;
+  }
   return (
     <>
       <mesh ref={(o: THREE.Object3D | null) => { if (o) o.layers.set(1); }} position={[a.at.x, a.at.y + 0.016, a.at.z]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.3, 0.15, 1]}>
@@ -300,7 +310,6 @@ const ActorCard: React.FC<{a: Actor; camPos: THREE.Vector3; tint: THREE.Color; g
     </>
   );
 };
-const ORDER: Array<Who> = ['niece', 'gardener', 'maid', 'chef', 'butler', 'host', 'doctor', 'aunt'];
 const Scene: React.FC<{s: number; c: CamS; st: PartyState; glow: Partial<Record<Who, number>>; det: DetSpot | null}> = ({s, c, st, glow, det}) => {
   const {camera, scene} = useThree();
   const cam = camera as THREE.PerspectiveCamera;
@@ -323,10 +332,9 @@ const Scene: React.FC<{s: number; c: CamS; st: PartyState; glow: Partial<Record<
   scene.background = new THREE.Color('#2a2350');
   scene.fog = null;
   const tint = new THREE.Color('#fff6ea');
-  const actors = ORDER.map((w) => st.actors.find((a) => a.who === w)!);
   return (
     <MatsCtx.Provider value={mats}>
-      <SkyDome top="#1d2150" bottom="#7a4a8a" />
+      <SkyDome top="#1d2150" bottom="#7a4a8a" at={c.pos} />
       <hemisphereLight args={['#f4e8ff', '#3a2a3a', 1.05]} />
       <directionalLight position={[6, 14, 12]} color="#fff0dc" intensity={1.6}
         castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} shadow-camera-left={-8} shadow-camera-right={8} shadow-camera-top={12} shadow-camera-bottom={-4} shadow-bias={-0.0008} />
@@ -338,7 +346,7 @@ const Scene: React.FC<{s: number; c: CamS; st: PartyState; glow: Partial<Record<
       {st.cube ? <mesh position={st.cube}><boxGeometry args={[0.06, 0.06, 0.06]} /><meshToonMaterial color="#b8f8b8" emissive="#4fe35a" emissiveIntensity={0.4} /></mesh> : null}
       {st.vialCar ? <Vial3D p={st.vialCar} /> : null}
       {st.drops ? <Drops from={st.drops.from} to={st.drops.to} t={s} color={st.drops.color} /> : null}
-      {actors.map((a) => <ActorCard key={a.who} a={a} camPos={c.pos} tint={tint} glow={glow[a.who as Who] ?? 0} />)}
+      {st.actors.map((a) => <ActorCard key={String(a.who)} a={a} camPos={c.pos} tint={tint} glow={typeof a.who === 'string' ? glow[a.who as Who] ?? 0 : 0} />)}
       {det ? <ActorCard a={{who: 'det', at: det.at, pose: {arms: det.arms as never, dir: det.dir}}} camPos={c.pos} tint={tint} glow={0} /> : null}
       <Post focus={c.focus.distanceTo(c.pos)} coc={c.coc} />
     </MatsCtx.Provider>
@@ -411,7 +419,7 @@ export const Poison: React.FC = () => {
     if (ok(q)) ov.push(<Puff key={`puff${det.s}`} x={q.x} y={q.y + 60} k={k} />);
   }
   if (s >= T.det && s < STARTS[3] - 0.15) {
-    const q = at(V(2.0, F1 + 2.15, 0.4));
+    const q = at(V(-0.75, F1 + 2.15, 0.4));
     if (ok(q)) ov.push(<Tag key="det" x={Math.min(820, Math.max(260, q.x))} y={q.y} k={pop(frame, T.det, fps)} bg={PAPER} fg={OL} size={40}>THE DETECTIVE</Tag>);
   }
   // butler
@@ -439,8 +447,8 @@ export const Poison: React.FC = () => {
   if (s >= T.started && s < STARTS[9] - 0.12) ov.push(<Tag key="boss" x={540} y={1420} k={pop(frame, T.started, fps)} bg={RED} fg="#fff" size={56} rot={-4}>SHE STARTED IT</Tag>);
   // the map: the whole chain on the diorama
   if (s >= T.three && s < STARTS[10] - 0.05) {
-    const pts = [V(2.9, F3 + 1.1, -1.0), V(0.0, F3 + 1.1, -0.9), V(SHAFT.x, F3 + 1.0, SHAFT.z), V(SHAFT.x, F2 + 1.0, SHAFT.z), V(-3.05, F2 + 1.1, -1.25), V(SHAFT.x, F2 + 0.9, SHAFT.z),
-      V(SHAFT.x, F1 + 1.0, SHAFT.z), V(-2.3, F1 + 1.1, -1.5), V(0.0, F1 + 1.1, -0.85), V(3.4, F1 + 1.0, -1.2)].map(at);
+    const pts = [V(3.95, F4 + 1.1, -0.95), V(1.7, F4 + 1.1, -0.85), V(-1.7, F4 + 1.1, -0.8), V(SHAFT.x, F4 + 1.0, SHAFT.z), V(SHAFT.x, F2 + 1.0, SHAFT.z), V(-3.95, F2 + 1.1, -1.2), V(SHAFT.x, F2 + 0.9, SHAFT.z),
+      V(SHAFT.x, F1 + 1.0, SHAFT.z), V(-3.3, F1 + 1.1, -1.5), V(-1.7, F1 + 1.1, -0.8), V(1.0, F1 + 1.0, -1.2)].map(at);
     const d = pts.map((q, i) => `${i ? 'L' : 'M'}${q.x.toFixed(1)} ${q.y.toFixed(1)}`).join(' ');
     const k = clamp01((s - T.three - 0.6) / 1.6);
     ov.push(
@@ -492,6 +500,7 @@ export const Poison: React.FC = () => {
     [T.rich, 'sfx/pop.wav', 0.3], [T.who, 'sfx/tick.wav', 0.3],
     ...[0, 0.13, 0.26, 0.4, 0.55].map((k) => [sp(5.3 + k), 'sfx/pop.wav', 0.32] as [number, string, number]), // doctor: glug glug
     ...Array.from({length: 6}).map((_, k) => [sp(6.45 + k * 0.22), 'sfx/tick.wav', 0.4] as [number, string, number]), // chef: shake shake
+    [sp(1.15), 'sfx/crack.wav', 0.35], [sp(9.75), 'sfx/crack.wav', 0.3], [sp(2.35), 'sfx/pop.wav', 0.3], [sp(2.6), 'sfx/pop.wav', 0.25], [sp(2.85), 'sfx/pop.wav', 0.2], [sp(11.6), 'sfx/clank.wav', 0.25],
     [sp(8.62), 'sfx/pop.wav', 0.4], [sp(8.95), 'sfx/pop.wav', 0.28], [sp(9.25), 'sfx/pop.wav', 0.2], // yarn bounces
     [T.late - 0.02, 'sfx/boom.wav', 0.5], [T.late, 'sfx/slam.wav', 0.45],
     [T.det - 0.15, 'sfx/whoosh.wav', 0.35], [T.det, 'sfx/shine.wav', 0.3],
